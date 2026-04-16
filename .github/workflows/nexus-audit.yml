@@ -54,7 +54,7 @@ jobs:
           path: |
             **/deps
             **/_build
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-mix-${{ hashFiles('nexus/mix.lock', 'nexus_web/mix.lock', 'nexus_shared/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-mix-
 
