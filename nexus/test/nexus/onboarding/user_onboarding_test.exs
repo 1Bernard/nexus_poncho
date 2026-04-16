@@ -14,7 +14,6 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
   alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Identity.Projections.User
   alias Nexus.Repo
-  import Ecto.Query
 
   # Global setup is handled in test_helper.exs for sovereign stability.
 

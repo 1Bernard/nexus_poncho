@@ -51,7 +51,7 @@ defmodule Nexus.MixProject do
       {:bandit, "~> 1.6"},
       {:plug_cowboy, "~> 2.7"},
       {:broadway_rabbitmq, "~> 0.7"},
-      {:cabbage, "~> 0.4.0", only: :test},
+      {:cabbage, path: "../vendor/cabbage", only: :test},
       {:gherkin, "~> 1.6", only: :test, override: true},
       {:wax_, "~> 0.7.0"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},

@@ -1,9 +1,8 @@
 defmodule Nexus.Identity.BiometricEnrollmentTest do
   use Nexus.DataCase
-  import Commanded.Assertions.EventAssertions
-  alias Nexus.Identity.AuthChallengeStore
-  alias Nexus.Identity.Commands.EnrollBiometric
+  alias Nexus.Identity.Commands.{EnrollBiometric, RegisterUser}
   alias Nexus.Identity.Projections.User, as: UserProjection
+  alias Nexus.Identity.WebAuthn.AuthChallengeStore
   alias Nexus.Repo
 
   @moduletag :no_sandbox
@@ -29,7 +28,7 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
       email = "biometric_#{Ecto.UUID.generate()}@nexus.com"
 
       # 1. Dispatch RegisterUser (simulating invitation)
-      :ok = Nexus.App.dispatch(%Nexus.Identity.Commands.RegisterUser{
+      :ok = Nexus.App.dispatch(%RegisterUser{
         user_id: user_id,
         org_id: Ecto.UUID.generate(),
         email: email,
