@@ -1,0 +1,28 @@
+# Lefthook: The Elite Solo Guardrails
+# 
+# This file automates the "Automated Peer Review" process for solo developers.
+# It ensures that every commit is formatted and passes basic quality checks
+# before it ever reaches the "Reviewer" phase.
+
+pre-commit:
+  parallel: true
+  commands:
+    nexus-format:
+      glob: "nexus/lib/**/*.{ex,exs}"
+      run: docker compose run --rm node1 sh -c "cd nexus && mix format --check-formatted"
+    
+    web-format:
+      glob: "nexus_web/lib/**/*.{ex,exs,heex}"
+      run: docker compose run --rm web sh -c "cd nexus_web && mix format --check-formatted"
+
+commit-msg:
+  commands:
+    conventional-commit:
+      run: |
+        # Basic regex for conventional commits: type(scope): description
+        COMMIT_MSG=$(cat {1})
+        if ! echo "$COMMIT_MSG" | grep -lE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(.+\)!?: .+" > /dev/null; then
+          echo "❌ ELITE ERROR: Commit message does not follow Conventional Commits standard."
+          echo "Format: type(scope): description (e.g., feat(identity): implement RegisterUser)"
+          exit 1
+        fi

@@ -1,0 +1,10 @@
+%Sobelow{
+  version: "~> 0.13",
+  # Checks to skip — add "Module.Check" strings for intentional false positives.
+  skip: [],
+  # Exit on findings at this severity or above: :high, :medium, :low
+  exit: :high,
+  format: :txt,
+  quiet: false,
+  verbose: false
+}

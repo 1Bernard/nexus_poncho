@@ -1,0 +1,374 @@
+services:
+  # 1. Database Layer (The Immutable Truth)
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    environment:
+      POSTGRES_DB: ledger_dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - back_net  # Worker nodes access postgres via back_net
+      - db_net    # Web gateway accesses postgres via db_net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "ledger_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # 2. Local Cloud (MiniStack - Free LocalStack Alternative)
+  ministack:
+    image: nahuelnucera/ministack
+    ports:
+      - "4566:4566"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - mid_net
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - mid_net
+
+  # 3. Observability & Security (The Elite Standard)
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    networks:
+      - mid_net
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      # Grafana 12 deprecates org_role=Admin for anonymous — use admin login instead.
+      # Default credentials: admin / admin (change on first login prompt).
+      GF_SECURITY_ADMIN_USER: "admin"
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - ./data/grafana:/var/lib/grafana   # persist SQLite DB + PromEx-uploaded dashboards
+    networks:
+      - mid_net
+    depends_on:
+      - prometheus
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    environment:
+      # Allow up to 2 seconds of clock skew between distributed nodes.
+      # This prevents "Invalid Parent" warnings when async worker spans
+      # arrive slightly before Jaeger has indexed the parent span.
+      QUERY_MAX_CLOCK_SKEW_ADJUSTMENT: 2s
+    command:
+      - "--query.max-clock-skew-adjustment=2s"
+    networks:
+      - mid_net
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - ./infra/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - ./data/loki:/loki   # persist chunks and index across restarts
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    networks:
+      - mid_net
+
+  vault:
+    image: hashicorp/vault:latest
+    cap_add:
+      - IPC_LOCK
+    environment:
+      # Dev mode: in-memory storage, pre-unsealed, token matches VAULT_TOKEN in .env.
+      # Do NOT use server -config= mode in development — the latest vault image binds
+      # port 8200 before the config listener initializes, causing "address already in use".
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN}
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+      VAULT_API_ADDR: "http://vault:8200"
+    ports:
+      - "8201:8200"
+    command: server -dev
+    networks:
+      - mid_net
+    healthcheck:
+      test: ["CMD-SHELL", "VAULT_ADDR=http://127.0.0.1:8200 vault status"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  # One-shot init container: populates Vault KV with dev secrets from .env.
+  # Runs on every stack boot (Vault dev mode resets to empty on restart).
+  # app nodes depend on this completing before they start, ensuring secrets
+  # are present when runtime.exs fetches them.
+  vault-init:
+    image: hashicorp/vault:latest
+    environment:
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      DB_PASS: ${DB_PASS}
+      EVENTSTORE_PASS: ${EVENTSTORE_PASS}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      ERL_COOKIE: ${ERL_COOKIE}
+      WEB_ERL_COOKIE: ${WEB_ERL_COOKIE}
+    command: ["sh", "-c", "echo 'Waiting for Vault...' && until vault status > /dev/null 2>&1; do sleep 1; done && vault kv put secret/nexus db_pass=$$DB_PASS eventstore_pass=$$EVENTSTORE_PASS rabbitmq_pass=$$RABBITMQ_PASS secret_key_base=$$SECRET_KEY_BASE erl_cookie=$$ERL_COOKIE web_erl_cookie=$$WEB_ERL_COOKIE && echo 'Vault dev secrets initialized.'"]
+    networks:
+      - mid_net
+    depends_on:
+      vault:
+        condition: service_healthy
+    restart: "no"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: nexus-rabbitmq
+    environment:
+      # Sync broker credentials with app credentials from .env.
+      # If you change RABBITMQ_USER/PASS in .env, the broker changes too.
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "5673:5672"   # AMQP (Conflict resolution mapping)
+      - "15673:15672" # Management UI (Conflict resolution mapping)
+    networks:
+      - mid_net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # 4. Networking & Resilience
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nexus_web/priv/static:/var/www/static:ro
+    ports:
+      - "80:80"
+    networks:
+      - front_net
+    depends_on:
+      - haproxy
+
+  haproxy:
+    image: haproxy:latest
+    volumes:
+      - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "8404:8404" # Stats
+      - "4000:80" # Load Balanced Apps
+    networks:
+      - front_net
+
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:latest
+    ports:
+      - "8474:8474"
+    networks:
+      - back_net
+
+  # 5. Application Cluster (The Distributed Engine)
+  node1:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    hostname: node1.nexus
+    environment:
+      NODE_NAME: node1
+      NODE_BASENAME: nexus
+      START_METRICS_SERVER: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_SERVICE_NAME: node1
+
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_HOSTNAME: postgres
+      DB_PORT: 5432
+      DB_NAME: ledger_dev
+      EVENTSTORE_USER: ${EVENTSTORE_USER}
+      EVENTSTORE_PASS: ${EVENTSTORE_PASS}
+      EVENTSTORE_HOSTNAME: postgres
+      EVENTSTORE_PORT: 5432
+      EVENTSTORE_NAME: ledger_dev
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      LOKI_URL: "http://loki:3100"
+      START_PROJECTIONS: "true"
+      START_IDENTITY_PROJECTIONS: "true"
+      START_ORGANIZATION_PROJECTIONS: "true"
+      START_COMPLIANCE_PROJECTIONS: "false"
+      START_ACCOUNTING_PROJECTIONS: "false"
+      START_TREASURY_PROJECTIONS: "false"
+      START_MESSAGING_PROJECTIONS: "false"
+      START_ONBOARDING_PM: "true"
+      ERL_COOKIE: ${ERL_COOKIE}
+    tty: true
+    stdin_open: true
+    networks:
+      mid_net:    # rabbitmq, jaeger, observability
+      back_net:   # postgres + node1↔node2 Erlang clustering
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      vault-init:
+        condition: service_completed_successfully
+    command: ["sh", "-c", "cd nexus && elixir --name nexus@node1.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
+
+  node2:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    hostname: node2.nexus
+    environment:
+      NODE_NAME: node2
+      NODE_BASENAME: nexus
+      START_METRICS_SERVER: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_SERVICE_NAME: node2
+
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_HOSTNAME: postgres
+      DB_PORT: 5432
+      DB_NAME: ledger_dev
+      EVENTSTORE_USER: ${EVENTSTORE_USER}
+      EVENTSTORE_PASS: ${EVENTSTORE_PASS}
+      EVENTSTORE_HOSTNAME: postgres
+      EVENTSTORE_PORT: 5432
+      EVENTSTORE_NAME: ledger_dev
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      LOKI_URL: "http://loki:3100"
+      START_PROJECTIONS: "true"
+      START_IDENTITY_PROJECTIONS: "false"
+      START_ORGANIZATION_PROJECTIONS: "false"
+      START_COMPLIANCE_PROJECTIONS: "true"
+      START_ACCOUNTING_PROJECTIONS: "true"
+      START_TREASURY_PROJECTIONS: "true"
+      START_MESSAGING_PROJECTIONS: "true"
+      START_ONBOARDING_PM: "false"
+      ERL_COOKIE: ${ERL_COOKIE}
+    tty: true
+    stdin_open: true
+    networks:
+      mid_net:
+      back_net:
+    depends_on:
+      node1:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      vault-init:
+        condition: service_completed_successfully
+    command: ["sh", "-c", "cd nexus && elixir --name nexus@node2.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+    hostname: web.nexus
+    environment:
+      NODE_NAME: web
+      NODE_BASENAME: nexus
+      # Security: web uses a separate cookie — even if compromised, cannot connect to workers.
+      # Workers share ERL_COOKIE among themselves for Horde clustering.
+      ERL_COOKIE: ${WEB_ERL_COOKIE}
+      STANDALONE_GATEWAY: "true"
+      START_METRICS_SERVER: "true"
+      START_PROJECTIONS: "false"
+      START_IDENTITY_PROJECTIONS: "false"
+      START_ORGANIZATION_PROJECTIONS: "false"
+      START_COMPLIANCE_PROJECTIONS: "false"
+      START_ACCOUNTING_PROJECTIONS: "false"
+      START_TREASURY_PROJECTIONS: "false"
+      START_MESSAGING_PROJECTIONS: "false"
+      START_ONBOARDING_PM: "false"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_SERVICE_NAME: web
+
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_HOSTNAME: postgres
+      DB_PORT: 5432
+      DB_NAME: ledger_dev
+      EVENTSTORE_USER: ${EVENTSTORE_USER}
+      EVENTSTORE_PASS: ${EVENTSTORE_PASS}
+      EVENTSTORE_HOSTNAME: postgres
+      EVENTSTORE_PORT: 5432
+      EVENTSTORE_NAME: ledger_dev
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      LOKI_URL: "http://loki:3100"
+    tty: true
+    stdin_open: true
+    ports:
+      - "4001:4000"
+    networks:
+      front_net:  # nginx/haproxy public facing
+      mid_net:    # rabbitmq, jaeger, observability
+      db_net:     # postgres access (command dispatch + projection reads)
+    depends_on:
+      node1:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      vault-init:
+        condition: service_completed_successfully
+    command: ["sh", "-c", "cd nexus_web && elixir --name nexus@web.nexus --cookie ${WEB_ERL_COOKIE} -S mix phx.server"]
+
+networks:
+  front_net:  # Public-facing tier (nginx, haproxy, web)
+  mid_net:    # Observability + messaging (jaeger, grafana, rabbitmq)
+  back_net:   # Worker cluster tier (node1, node2, postgres)
+  db_net:     # Database access for web gateway (postgres only)
+
+volumes:
+  postgres_data:
+  eventstore_data:

@@ -1,0 +1,145 @@
+# Nexus: The Sovereign Remote Auditor
+#
+# This workflow serves as the "Global Verification Gate" for the Nexus platform.
+# It enforces "Elite" Git Sovereignty and executes high-fidelity domain audits
+# (Soul and Face) to ensure the Immutable Truth of the main branch is never compromised.
+
+name: Nexus Audit (Elite Legacy Enabled)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  audit:
+    name: Nexus Audit (Elite Legacy Enabled)
+    runs-on: ubuntu-latest
+
+    env:
+      MIX_ENV: test
+      # Elite Secret Fallbacks: Safe defaults for Public PRs, Secure for Prod.
+      # DB_PASS / EVENTSTORE_PASS must match the password set in infra/postgres/init.sql
+      # (CREATE USER ledger WITH PASSWORD 'ledger_password'). Change both together.
+      DB_USER: ${{ secrets.DB_USER || vars.DB_USER || 'ledger' }}
+      DB_PASS: ${{ secrets.DB_PASS || vars.DB_PASS || 'ledger_password' }}
+      DB_NAME: ${{ vars.DB_NAME || 'ledger_dev' }}
+      POSTGRES_PASSWORD: ${{ secrets.DB_PASS || vars.DB_PASS || 'ledger_password' }}
+      EVENTSTORE_USER: ${{ secrets.EVENTSTORE_USER || vars.EVENTSTORE_USER || 'ledger' }}
+      EVENTSTORE_PASS: ${{ secrets.EVENTSTORE_PASS || vars.EVENTSTORE_PASS || 'ledger_password' }}
+      RABBITMQ_USER: ${{ secrets.RABBITMQ_USER || vars.RABBITMQ_USER || 'guest' }}
+      RABBITMQ_PASS: ${{ secrets.RABBITMQ_PASS || vars.RABBITMQ_PASS || 'guest' }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN || vars.VAULT_TOKEN || 'ci_token' }}
+      ERL_COOKIE: ${{ secrets.ERL_COOKIE || vars.ERL_COOKIE || 'ci_cookie' }}
+      WEB_ERL_COOKIE: ${{ secrets.WEB_ERL_COOKIE || vars.WEB_ERL_COOKIE || 'ci_web_cookie' }}
+      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE || vars.SECRET_KEY_BASE || 'ci_secret_key_base_64_chars_minimum_for_phoenix_security_ok' }}
+      # Fortress Architecture Standards
+      STANDALONE_GATEWAY: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4318"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for commit compliance check
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Elixir Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/deps
+            **/_build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Build Global Stack
+        run: docker compose build
+
+      - name: Compliance Audit (Git Sovereignty)
+        run: |
+          # Use the same regex as lefthook.yml
+          REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(.+\)!?: .+"
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Checking commit message: $COMMIT_MSG"
+          if [[ ! $COMMIT_MSG =~ $REGEX ]]; then
+            echo "❌ ELITE ERROR: Commit message does not follow Conventional Commits standard with mandatory scope."
+            echo "Format: type(scope): description (e.g., feat(identity): implement RegisterUser)"
+            exit 1
+          fi
+          echo "✅ Commit compliance verified."
+
+      - name: Boot Infrastructure (Sovereign Stack)
+        run: |
+          # Standardized stack boot including RabbitMQ for command propagation and Vault for secrets
+          docker compose up -d postgres redis jaeger rabbitmq vault
+
+          echo "Waiting for TimescaleDB (Truth Pool)..."
+          until docker compose exec -T postgres pg_isready -U $DB_USER; do
+            sleep 1
+          done
+
+          echo "Waiting for RabbitMQ (Message Bus)..."
+          until docker compose exec -T rabbitmq rabbitmqctl await_startup; do
+            sleep 1
+          done
+
+          echo "Infrastructure is ELITE/READY."
+
+      - name: Fetch Dependencies
+        run: |
+          # Download and compile all dependencies before running any mix commands.
+          # The cache restores deps/_build on subsequent runs; this step is a no-op then.
+          docker compose run --rm node1 sh -c "cd nexus_shared && mix deps.get"
+          docker compose run --rm node1 sh -c "cd nexus && mix deps.get"
+          docker compose run --rm web sh -c "cd nexus_web && mix deps.get"
+
+      - name: Sovereign Storage Initialization
+        run: |
+          # init.sql (run by Docker at postgres container start) creates ledger_dev,
+          # ledger_test, eventstore_test databases and the event_store schema.
+          # We only need to run event_store.init (schema bootstrap) — not event_store.create
+          # (the ledger user lacks CREATEDB privilege; databases are pre-created by init.sql).
+          # MIX_ENV=test ensures this targets the test event store (eventstore_test).
+          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix event_store.init"
+          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix ecto.create --quiet && mix ecto.migrate --quiet"
+
+      - name: Static Security Audit (Sobelow)
+        run: |
+          docker compose run --rm node1 sh -c "cd nexus && mix sobelow --config"
+          docker compose run --rm web sh -c "cd nexus_web && mix sobelow --config"
+
+      - name: Consistency Audit (Credo)
+        run: |
+          docker compose run --rm node1 sh -c "cd nexus && mix credo --strict"
+          docker compose run --rm web sh -c "cd nexus_web && mix credo --strict"
+
+      - name: Soul Audit (Ledger & Domain)
+        run: |
+          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix compile --warnings-as-errors && mix test --warnings-as-errors"
+
+      - name: Business Logic Audit (Feature Tests)
+        run: |
+          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix test.features"
+
+      - name: Face Audit (Isolated Gateway)
+        run: |
+          # Enforce STANDALONE_GATEWAY during the face audit to ensure production parity
+          docker compose run -e STANDALONE_GATEWAY=true -e MIX_ENV=test --rm web sh -c "cd nexus_web && mix compile --warnings-as-errors && mix test --warnings-as-errors"
+
+      - name: "Total Recall: Dump Logs on Failure"
+        if: failure()
+        run: |
+          echo "Dumping Master Service Logs..."
+          docker compose logs postgres rabbitmq jaeger node1 node2 web
+          echo "Checking for application-specific audit logs..."
+          docker compose exec -T node1 ls -R /app/nexus/priv/log || echo "No app logs found."
+
+      - name: Shutdown Cluster
+        if: always()
+        run: docker compose down

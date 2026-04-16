@@ -1,0 +1,41 @@
+# 🕵️ Agent Metadata
+.agent/
+.gemini/
+
+# 🧪 Elixir & Phoenix
+**/_build/
+**/deps/
+**/cover/
+**/doc/
+**/.elixir_ls/
+**/erl_crash.dump
+**/*.ez
+**/*.tar
+
+# 🌐 Web & Assets
+**/node_modules/
+**/.parcel-cache/
+**/npm-debug.log
+
+# 🏗 Infrastructure & Docker
+.env
+.env.local
+data/
+
+# 🧠 Erlang Runtime Artifacts
+Mnesia.*/
+**/Mnesia.*/
+
+# 🔬 Scratch & Debug Artifacts
+**/scratch/
+**/test_debug.log
+**/test_log.txt
+**/test_output.log
+
+# 🍏 OS & IDE (extended)
+**/.!*
+
+# 🍏 OS & IDE
+.DS_Store
+.vscode/
+.idea/

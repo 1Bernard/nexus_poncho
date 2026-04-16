@@ -1,0 +1,19 @@
+FROM elixir:1.19-alpine
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    npm \
+    git \
+    postgresql-client \
+    inotify-tools \
+    curl
+
+# Install Hex and Rebar
+RUN mix local.hex --force && \
+    mix local.rebar --force
+
+WORKDIR /app
+
+# The default command is to just keep the container running
+CMD ["sleep", "infinity"]

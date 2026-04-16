@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'nexus'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['web:4003']
+        labels:
+          role: 'web'
+      - targets: ['node1:4000', 'node2:4000']
+        labels:
+          role: 'worker'
+
