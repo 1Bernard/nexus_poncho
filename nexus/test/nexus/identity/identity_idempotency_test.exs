@@ -6,8 +6,8 @@ defmodule Nexus.Identity.IdentityIdempotencyTest do
   use Nexus.DataCase
 
   alias Nexus.Identity.Commands.RegisterUser
-  alias Nexus.Identity.Projections.User
   alias Nexus.Identity.Idempotency.IdempotencyKey
+  alias Nexus.Identity.Projections.User
 
   @tag :idempotency
   test "RegisterUser is deterministic and idempotent" do

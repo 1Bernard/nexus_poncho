@@ -11,12 +11,13 @@ defmodule Nexus.Compliance.Projectors.ScreeningProjector do
   alias Ecto.Multi
   alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
   alias Nexus.Compliance.Projections.Screening
+  alias Nexus.Shared.Tracing
 
   project(%PEPCheckInitiated{} = event, metadata, fn multi ->
     multi
     |> Multi.run(:insert_screening, fn repo, _ ->
       require OpenTelemetry.Tracer
-      Nexus.Shared.Tracing.extract_and_set_context(metadata)
+      Tracing.extract_and_set_context(metadata)
 
       OpenTelemetry.Tracer.with_span "Projector.Compliance.PEPCheckInitiated" do
         repo.insert(
@@ -38,7 +39,7 @@ defmodule Nexus.Compliance.Projectors.ScreeningProjector do
     multi
     |> Multi.run(:update_screening, fn repo, _ ->
       require OpenTelemetry.Tracer
-      Nexus.Shared.Tracing.extract_and_set_context(metadata)
+      Tracing.extract_and_set_context(metadata)
 
       OpenTelemetry.Tracer.with_span "Projector.Compliance.PEPCheckCompleted" do
         {count, _} =

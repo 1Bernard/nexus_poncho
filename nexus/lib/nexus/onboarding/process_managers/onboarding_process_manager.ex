@@ -9,10 +9,10 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
     application: Nexus.App,
     name: __MODULE__
 
-  alias Nexus.Identity.Events.{UserRegistered, BiometricEnrolled}
-  alias Nexus.Identity.Commands.ActivateUser
   alias Nexus.Compliance.Commands.PerformPEPCheck
   alias Nexus.Compliance.Events.PEPCheckCompleted
+  alias Nexus.Identity.Commands.ActivateUser
+  alias Nexus.Identity.Events.{BiometricEnrolled, UserRegistered}
 
   require Logger
   require OpenTelemetry.Tracer

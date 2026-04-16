@@ -10,9 +10,9 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
   @moduletag :feature
   @moduletag :no_sandbox
 
+  alias Nexus.Compliance.Projections.Screening
   alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Identity.Projections.User
-  alias Nexus.Compliance.Projections.Screening
   alias Nexus.Repo
   import Ecto.Query
 
@@ -65,7 +65,7 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
     end)
 
     # Verify event details
-    assert_receive_event(Nexus.App, Nexus.Compliance.Events.PEPCheckInitiated, fn event -> 
+    assert_receive_event(Nexus.App, Nexus.Compliance.Events.PEPCheckInitiated, fn event ->
       event.user_id == user_id && event.name == "Elite User"
     end)
 
@@ -84,7 +84,7 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
     user_id = state.cmd.user_id
 
     # Already asserted PEPCheckInitiated in the previous step to avoid race conditions.
-    
+
     # Wait for Compliance Read Model (Initiated by ProcessManager)
     screening =
       wait_until(fn ->
@@ -94,7 +94,7 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
         end
       end)
 
-    # In high-performance test environments, the status might already be "clean" 
+    # In high-performance test environments, the status might already be "clean"
     # if the PEPWorker processed the event immediately.
     assert screening.status in ["pending", "clean"]
     {:ok, Map.put(state, :screening_id, screening.id)}

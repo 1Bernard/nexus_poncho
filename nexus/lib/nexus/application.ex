@@ -48,7 +48,8 @@ defmodule Nexus.Application do
     domain_partitions = [
       {:start_identity_projections, [Nexus.Identity.Projectors.UserProjector]},
       {:start_organization_projections, [Nexus.Organization.Projectors.TenantProjector]},
-      {:start_compliance_projections, [Nexus.Compliance.Projectors.ScreeningProjector, Nexus.Compliance.Workers.PEPWorker]},
+      {:start_compliance_projections,
+       [Nexus.Compliance.Projectors.ScreeningProjector, Nexus.Compliance.Workers.PEPWorker]},
       {:start_accounting_projections, [Nexus.Accounting.Projectors.AccountProjector]},
       {:start_treasury_projections, [Nexus.Treasury.Projectors.VaultProjector]},
       {:start_messaging_projections, [Nexus.Messaging.Producers.EmailDispatcher, Nexus.Messaging.Workers.EmailWorker]},

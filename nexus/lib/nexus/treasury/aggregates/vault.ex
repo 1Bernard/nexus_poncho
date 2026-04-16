@@ -21,8 +21,8 @@ defmodule Nexus.Treasury.Aggregates.Vault do
   ]
 
   alias __MODULE__, as: Vault
-  alias Nexus.Treasury.Commands.{RegisterVault, CreditVault}
-  alias Nexus.Treasury.Events.{VaultRegistered, VaultCredited}
+  alias Nexus.Treasury.Commands.{CreditVault, RegisterVault}
+  alias Nexus.Treasury.Events.{VaultCredited, VaultRegistered}
 
   # --- Command Handlers ---
 

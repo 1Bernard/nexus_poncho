@@ -14,10 +14,11 @@ defmodule Nexus.Accounting.Projectors.AccountProjector do
   alias Nexus.Accounting.Events.AccountOpened
   alias Nexus.Accounting.Idempotency.IdempotencyKey
   alias Nexus.Accounting.Projections.Account
+  alias Nexus.Shared.Tracing
 
   project(%AccountOpened{} = event, metadata, fn multi ->
     require OpenTelemetry.Tracer
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "Projector.Accounting.AccountOpened" do
       multi

@@ -13,11 +13,11 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
       user_id = Ecto.UUID.generate()
       # Wax requires a map (struct), so we test with a map here
       challenge = %{bytes: <<1, 2, 3, 4>>, origin: "http://localhost", rp_id: "localhost"}
-      
+
       # Ensure Mnesia is happy in this test process context
       assert :ok = AuthChallengeStore.put(user_id, challenge)
       assert ^challenge = AuthChallengeStore.get(user_id)
-      
+
       AuthChallengeStore.delete(user_id)
       assert nil == AuthChallengeStore.get(user_id)
     end
@@ -48,7 +48,8 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
       # 2. Dispatch EnrollBiometric
       credential_id = "cred_#{Ecto.UUID.generate()}"
       cose_key = "key_#{Ecto.UUID.generate()}"
-      org_id = Ecto.UUID.generate() # We need to use the SAME org_id as RegisterUser if we want to be realistic, but TenantGate just checks presence
+      # TenantGate only checks presence, so any org_id is acceptable here.
+      org_id = Ecto.UUID.generate()
 
       :ok = Nexus.App.dispatch(%EnrollBiometric{
         user_id: user_id,
@@ -60,7 +61,7 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
       # 3. Verify read model updates
       wait_until(fn ->
         case Repo.get(UserProjection, user_id) do
-          %{status: status, credential_id: ^credential_id, cose_key: ^cose_key} = u 
+          %{status: status, credential_id: ^credential_id, cose_key: ^cose_key} = u
             when status in ["registered", "active"] -> {:ok, u}
           u -> {:error, "Still waiting for biometric projection: #{inspect(u && u.status)}"}
         end
@@ -71,10 +72,10 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
   defp wait_until(fun, retries \\ 20) do
     case fun.() do
       {:ok, val} -> val
-      {:error, _} when retries > 0 -> 
+      {:error, _} when retries > 0 ->
         Process.sleep(200)
         wait_until(fun, retries - 1)
-      {:error, reason} -> 
+      {:error, reason} ->
         flunk(reason)
     end
   end

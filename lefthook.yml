@@ -9,11 +9,20 @@ pre-commit:
   commands:
     nexus-format:
       glob: "nexus/lib/**/*.{ex,exs}"
-      run: docker compose run --rm node1 sh -c "cd nexus && mix format --check-formatted"
-    
+      run: docker compose run --no-deps --rm node1 sh -c "cd nexus && mix format --check-formatted"
+
     web-format:
       glob: "nexus_web/lib/**/*.{ex,exs,heex}"
-      run: docker compose run --rm web sh -c "cd nexus_web && mix format --check-formatted"
+      run: docker compose run --no-deps --rm web sh -c "cd nexus_web && mix format --check-formatted"
+
+pre-push:
+  parallel: true
+  commands:
+    nexus-credo:
+      run: docker compose run --no-deps --rm node1 sh -c "cd nexus && mix credo --strict"
+
+    web-credo:
+      run: docker compose run --no-deps --rm web sh -c "cd nexus_web && mix credo --strict"
 
 commit-msg:
   commands:

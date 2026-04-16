@@ -58,4 +58,3 @@ defmodule Nexus.Shared.Middleware.OpenTelemetry do
     pipeline
   end
 end
-

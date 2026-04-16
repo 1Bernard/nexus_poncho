@@ -17,8 +17,8 @@ defmodule Nexus.Identity.Aggregates.User do
   ]
 
   alias __MODULE__, as: User
-  alias Nexus.Identity.Commands.{RegisterUser, ActivateUser, EnrollBiometric}
-  alias Nexus.Identity.Events.{UserRegistered, UserActivated, BiometricEnrolled}
+  alias Nexus.Identity.Commands.{ActivateUser, EnrollBiometric, RegisterUser}
+  alias Nexus.Identity.Events.{BiometricEnrolled, UserActivated, UserRegistered}
 
   # --- Command Handlers ---
 

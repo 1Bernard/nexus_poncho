@@ -8,7 +8,7 @@ defmodule Nexus.Identity.WebAuthn.BiometricInvitation do
 
   @salt "biometric_invitation"
   # 24 hours
-  @max_age 86400
+  @max_age 86_400
 
   @doc """
   Generates a secure token for a user invitation.
