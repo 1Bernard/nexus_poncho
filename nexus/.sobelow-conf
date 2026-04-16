@@ -1,4 +1,4 @@
-%Sobelow{
+[
   version: "~> 0.13",
   # Checks to skip — add "Module.Check" strings for intentional false positives.
   skip: [],
@@ -7,4 +7,4 @@
   format: :txt,
   quiet: false,
   verbose: false
-}
+]
