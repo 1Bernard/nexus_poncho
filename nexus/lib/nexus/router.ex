@@ -8,7 +8,7 @@ defmodule Nexus.Router do
   middleware(Nexus.Shared.Middleware.CorrelationId)
   middleware(Nexus.Shared.Middleware.Idempotency)
   middleware(Nexus.Shared.Middleware.TenantGate)
-  
+
   @doc """
   Ensure all events carry the traceparent from the command metadata.
   """
@@ -20,13 +20,13 @@ defmodule Nexus.Router do
   alias Nexus.Accounting.Commands.OpenAccount
 
   alias Nexus.Treasury.Aggregates.Vault
-  alias Nexus.Treasury.Commands.{RegisterVault, CreditVault}
+  alias Nexus.Treasury.Commands.{CreditVault, RegisterVault}
 
   alias Nexus.Identity.Aggregates.User
-  alias Nexus.Identity.Commands.{RegisterUser, ActivateUser, EnrollBiometric}
+  alias Nexus.Identity.Commands.{ActivateUser, EnrollBiometric, RegisterUser}
 
   alias Nexus.Compliance.Aggregates.Screening
-  alias Nexus.Compliance.Commands.{PerformPEPCheck, CompletePEPCheck}
+  alias Nexus.Compliance.Commands.{CompletePEPCheck, PerformPEPCheck}
 
   # ==================== ACCOUNTING ====================
 

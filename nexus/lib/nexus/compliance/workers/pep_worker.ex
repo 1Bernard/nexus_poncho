@@ -10,8 +10,8 @@ defmodule Nexus.Compliance.Workers.PEPWorker do
     consistency: :strong
 
   require Logger
-  alias Nexus.Compliance.Events.{PEPCheckInitiated}
   alias Nexus.Compliance.Commands.CompletePEPCheck
+  alias Nexus.Compliance.Events.PEPCheckInitiated
 
   @doc """
   Handles the initiation of a PEP check by performing external screenings.

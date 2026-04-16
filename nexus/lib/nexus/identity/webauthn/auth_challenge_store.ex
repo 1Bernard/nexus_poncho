@@ -27,10 +27,10 @@ defmodule Nexus.Identity.WebAuthn.AuthChallengeStore do
     end
 
     expiry = System.system_time(:millisecond) + @ttl
-    
+
     case :mnesia.transaction(fn -> :mnesia.write({@table, id, challenge, expiry}) end) do
       {:atomic, :ok} -> :ok
-      {:aborted, reason} -> 
+      {:aborted, reason} ->
         Logger.error("Failed to store auth challenge in Mnesia: #{inspect(reason)}")
         {:error, reason}
     end
@@ -74,10 +74,10 @@ defmodule Nexus.Identity.WebAuthn.AuthChallengeStore do
   """
   def prune_expired do
     now = System.system_time(:millisecond)
-    
+
     # Using a match spec for efficiency
     match_spec = [{{@table, :"$1", :"$2", :"$3"}, [{:<, :"$3", now}], [:"$1"]}]
-    
+
     case :mnesia.transaction(fn -> :mnesia.select(@table, match_spec) end) do
       {:atomic, expired_ids} ->
         Enum.each(expired_ids, &delete/1)

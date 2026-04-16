@@ -11,7 +11,7 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   @impl true
   def register_begin(user_id, email, opts \\ []) do
     origin = opts[:origin] || origin()
-    
+
     challenge = Wax.new_registration_challenge(
       user_id: user_id,
       user_name: email,
@@ -69,7 +69,7 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   @impl true
   def authenticate_challenge(user_credentials) do
     origin = origin()
-    
+
     challenge = Wax.new_authentication_challenge(
       rp_id: rp_id(origin),
       origin: origin,
@@ -78,7 +78,7 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
     # Since authentication might not have a user_id yet (if using discovery),
     # we use the challenge itself as the lookup key.
     challenge_id = Base.encode64(challenge.bytes)
-    
+
     case AuthChallengeStore.put(challenge_id, challenge) do
       :ok -> {:ok, challenge}
       {:error, reason} -> {:error, reason}
@@ -117,16 +117,16 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
 
   defp origin do
     default_origin = Application.get_env(:nexus, :web_host, "http://localhost:4000")
-    
+
     # Elite Standard: Support both HAProxy gateway (4000) and direct web node (4001)
     # during development to prevent :origin_mismatch errors.
     [String.trim_trailing(default_origin, "/"), "http://localhost:4001"]
   end
-  
+
   defp rp_id(origin) when is_list(origin) do
     rp_id(List.first(origin))
   end
-  
+
   defp rp_id(origin) when is_binary(origin) do
     # Trim trailing slash if accidentally passed from dynamic origin detection
     origin = String.trim_trailing(origin, "/")

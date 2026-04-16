@@ -23,11 +23,12 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     name: "Identity.UserProjector"
 
   alias Ecto.Multi
-  require Logger
-  alias Nexus.Identity.Events.{UserRegistered, UserActivated, BiometricEnrolled}
   alias Nexus.Identity.Audit.AuditLog
+  alias Nexus.Identity.Events.{BiometricEnrolled, UserActivated, UserRegistered}
   alias Nexus.Identity.Idempotency.IdempotencyKey
   alias Nexus.Identity.Projections.User
+
+  require Logger
 
   project(%UserRegistered{} = event, metadata, fn multi ->
     status = if event.credential_id, do: "registered", else: "invited"

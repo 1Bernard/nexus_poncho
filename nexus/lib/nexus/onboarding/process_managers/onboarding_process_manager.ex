@@ -79,7 +79,7 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
 
     OpenTelemetry.Tracer.with_span "ProcessManager.BiometricEnrolled" do
       Logger.info("[OnboardingPM] Biometric anchored for #{event.user_id}")
-      
+
       maybe_activate(%{state | biometric_status: :completed}, state.org_id)
     end
   end

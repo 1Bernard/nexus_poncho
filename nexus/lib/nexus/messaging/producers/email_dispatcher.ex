@@ -48,7 +48,7 @@ defmodule Nexus.Messaging.Producers.EmailDispatcher do
     require OpenTelemetry.Tracer
     OpenTelemetry.Tracer.with_span "Messaging.EmailDispatcher.dispatch" do
       Logger.info("[Messaging] Dispatching welcome email task for user: #{event.user_id}")
-      
+
       payload = %{
         user_id: event.user_id,
         org_id: event.org_id,

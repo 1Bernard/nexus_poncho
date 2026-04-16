@@ -9,7 +9,7 @@ defmodule Nexus.Compliance.Projectors.ScreeningProjector do
 
   import Ecto.Query
   alias Ecto.Multi
-  alias Nexus.Compliance.Events.{PEPCheckInitiated, PEPCheckCompleted}
+  alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
   alias Nexus.Compliance.Projections.Screening
 
   project(%PEPCheckInitiated{} = event, metadata, fn multi ->

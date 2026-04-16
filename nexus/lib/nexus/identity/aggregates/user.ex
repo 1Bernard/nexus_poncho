@@ -47,7 +47,7 @@ defmodule Nexus.Identity.Aggregates.User do
     }
   end
 
-  def execute(%User{status: status}, %ActivateUser{} = command) 
+  def execute(%User{status: status}, %ActivateUser{} = command)
     when status in ["registered", "invited"] do
     %UserActivated{
       user_id: command.user_id,
@@ -55,7 +55,7 @@ defmodule Nexus.Identity.Aggregates.User do
       status: "active"
     }
   end
-  
+
   # Catch-all for unhandled commands
   def execute(%User{} = state, command) do
     IO.puts("[UserAggregate] Unhandled command #{inspect(command.__struct__)} in status #{state.status}")

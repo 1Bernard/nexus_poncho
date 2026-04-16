@@ -1,6 +1,6 @@
 defmodule Nexus.Telemetry.CommandTelemetry do
   @moduledoc """
-  Implements the Commanded.Registration behaviour for injecting 
+  Implements the Commanded.Registration behaviour for injecting
   OpenTelemetry context into command metadata.
   """
 

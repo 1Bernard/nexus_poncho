@@ -1,6 +1,6 @@
 defmodule Nexus.Compliance.Commands.CompletePEPCheck do
   @moduledoc """
-  Command to finalize a PEP screening. 
+  Command to finalize a PEP screening.
   Requires biometric proof for "clean" status.
   """
 

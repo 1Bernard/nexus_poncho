@@ -2,13 +2,13 @@ defmodule Nexus.Identity.WebAuthn.BiometricInvitation do
   @moduledoc """
   Secure token generation and verification for biometric enrollment invitations.
   Uses Plug.Crypto for signed, time-limited magic links.
-  
+
   Standard: Sovereign Identity Sovereignty (Decoupled from Web layer).
   """
 
   @salt "biometric_invitation"
   # 24 hours
-  @max_age 86400 
+  @max_age 86400
 
   @doc """
   Generates a secure token for a user invitation.

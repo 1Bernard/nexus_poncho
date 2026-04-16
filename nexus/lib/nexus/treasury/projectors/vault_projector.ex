@@ -9,12 +9,12 @@ defmodule Nexus.Treasury.Projectors.VaultProjector do
     repo: Nexus.Repo,
     name: "Treasury.VaultProjector"
 
-  alias Ecto.Multi
   alias Decimal
-  alias Nexus.Treasury.Events.{VaultRegistered, VaultCredited}
-  alias Nexus.Treasury.Projections.Vault
+  alias Ecto.Multi
   alias Nexus.Treasury.Audit.AuditLog
+  alias Nexus.Treasury.Events.{VaultCredited, VaultRegistered}
   alias Nexus.Treasury.Idempotency.IdempotencyKey
+  alias Nexus.Treasury.Projections.Vault
 
   project(%VaultRegistered{} = event, metadata, fn multi ->
     require OpenTelemetry.Tracer

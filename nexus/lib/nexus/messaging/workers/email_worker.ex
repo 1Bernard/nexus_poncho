@@ -36,11 +36,11 @@ defmodule Nexus.Messaging.Workers.EmailWorker do
   @impl true
   def handle_message(_processor, %Message{data: data, metadata: metadata} = message, _context) do
     require OpenTelemetry.Tracer
-    
+
     # Extract the OTel context from RabbitMQ headers to continue the trace
     headers = Map.get(metadata, :headers, [])
     Nexus.Shared.Tracing.extract_from_headers(headers)
-    
+
     OpenTelemetry.Tracer.with_span "Messaging.EmailWorker.process_email" do
       Logger.info("[Messaging] Processing Email Task: #{inspect(data)}")
 

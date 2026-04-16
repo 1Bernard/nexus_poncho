@@ -15,8 +15,8 @@ defmodule Nexus.Compliance.Aggregates.Screening do
   ]
 
   alias __MODULE__, as: Screening
-  alias Nexus.Compliance.Commands.{PerformPEPCheck, CompletePEPCheck}
-  alias Nexus.Compliance.Events.{PEPCheckInitiated, PEPCheckCompleted}
+  alias Nexus.Compliance.Commands.{CompletePEPCheck, PerformPEPCheck}
+  alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
 
   # --- Command Handlers ---
 

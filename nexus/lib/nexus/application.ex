@@ -20,8 +20,8 @@ defmodule Nexus.Application do
           Nexus.App,
           Nexus.Telemetry.Heartbeat,
           # Periodically prune expired challenges
-          {Task, fn -> 
-            Stream.interval(:timer.minutes(5)) 
+          {Task, fn ->
+            Stream.interval(:timer.minutes(5))
             |> Enum.each(fn _ -> Nexus.Identity.WebAuthn.AuthChallengeStore.prune_expired() end)
           end}
         ]
@@ -37,8 +37,8 @@ defmodule Nexus.Application do
           Nexus.App,
           Nexus.Telemetry.Heartbeat,
           # Periodically prune expired challenges
-          {Task, fn -> 
-            Stream.interval(:timer.minutes(5)) 
+          {Task, fn ->
+            Stream.interval(:timer.minutes(5))
             |> Enum.each(fn _ -> Nexus.Identity.WebAuthn.AuthChallengeStore.prune_expired() end)
           end}
         ]
@@ -91,7 +91,7 @@ defmodule Nexus.Application do
     case :mnesia.create_table(:auth_challenges, table_opts) do
       {:atomic, :ok} -> :ok
       {:aborted, {:already_exists, :auth_challenges}} -> :ok
-      {:aborted, reason} -> 
+      {:aborted, reason} ->
         require Logger
         Logger.error("Failed to initialize Mnesia table: #{inspect(reason)}")
         {:error, reason}
