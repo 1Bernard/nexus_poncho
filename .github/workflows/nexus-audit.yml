@@ -76,8 +76,11 @@ jobs:
 
       - name: Boot Infrastructure (Sovereign Stack)
         run: |
-          # Standardized stack boot including RabbitMQ for command propagation and Vault for secrets
-          docker compose up -d postgres redis jaeger rabbitmq vault
+          # Only start the services tests actually need: postgres (DB + EventStore),
+          # and rabbitmq (AMQP bus). Vault and vault-init are NOT started in CI because
+          # runtime.exs wraps the entire Vault fetch in `if config_env() != :test do`,
+          # so MIX_ENV=test skips Vault completely — secrets come from env vars directly.
+          docker compose up -d postgres rabbitmq
 
           echo "Waiting for TimescaleDB (Truth Pool)..."
           until docker compose exec -T postgres pg_isready -U $DB_USER; do
@@ -93,50 +96,48 @@ jobs:
 
       - name: Fetch Dependencies
         run: |
-          # Download and compile all dependencies before running any mix commands.
-          # The cache restores deps/_build on subsequent runs; this step is a no-op then.
-          docker compose run --rm node1 sh -c "cd nexus_shared && mix deps.get"
-          docker compose run --rm node1 sh -c "cd nexus && mix deps.get"
-          docker compose run --rm web sh -c "cd nexus_web && mix deps.get"
+          # --no-deps bypasses the node1/web depends_on chain (vault-init → vault).
+          # Vault is not needed in MIX_ENV=test; postgres + rabbitmq are already up.
+          docker compose run --no-deps --rm node1 sh -c "cd nexus_shared && mix deps.get"
+          docker compose run --no-deps --rm node1 sh -c "cd nexus && mix deps.get"
+          docker compose run --no-deps --rm web sh -c "cd nexus_web && mix deps.get"
 
       - name: Sovereign Storage Initialization
         run: |
-          # init.sql (run by Docker at postgres container start) creates ledger_dev,
-          # ledger_test, eventstore_test databases and the event_store schema.
-          # We only need to run event_store.init (schema bootstrap) — not event_store.create
-          # (the ledger user lacks CREATEDB privilege; databases are pre-created by init.sql).
-          # MIX_ENV=test ensures this targets the test event store (eventstore_test).
-          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix event_store.init"
-          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix ecto.create --quiet && mix ecto.migrate --quiet"
+          # init.sql pre-creates ledger_test and eventstore_test with the event_store schema.
+          # event_store.init bootstraps the schema tables. MIX_ENV=test targets eventstore_test.
+          # ecto.create + ecto.migrate set up the ledger_test projection tables.
+          docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix event_store.init"
+          docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix ecto.create --quiet && mix ecto.migrate --quiet"
 
       - name: Static Security Audit (Sobelow)
         run: |
-          docker compose run --rm node1 sh -c "cd nexus && mix sobelow --config"
-          docker compose run --rm web sh -c "cd nexus_web && mix sobelow --config"
+          docker compose run --no-deps --rm node1 sh -c "cd nexus && mix sobelow --config"
+          docker compose run --no-deps --rm web sh -c "cd nexus_web && mix sobelow --config"
 
       - name: Consistency Audit (Credo)
         run: |
-          docker compose run --rm node1 sh -c "cd nexus && mix credo --strict"
-          docker compose run --rm web sh -c "cd nexus_web && mix credo --strict"
+          docker compose run --no-deps --rm node1 sh -c "cd nexus && mix credo --strict"
+          docker compose run --no-deps --rm web sh -c "cd nexus_web && mix credo --strict"
 
       - name: Soul Audit (Ledger & Domain)
         run: |
-          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix compile --warnings-as-errors && mix test --warnings-as-errors"
+          docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix compile --warnings-as-errors && mix test --warnings-as-errors"
 
       - name: Business Logic Audit (Feature Tests)
         run: |
-          docker compose run -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix test.features"
+          docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix test.features"
 
       - name: Face Audit (Isolated Gateway)
         run: |
           # Enforce STANDALONE_GATEWAY during the face audit to ensure production parity
-          docker compose run -e STANDALONE_GATEWAY=true -e MIX_ENV=test --rm web sh -c "cd nexus_web && mix compile --warnings-as-errors && mix test --warnings-as-errors"
+          docker compose run --no-deps -e STANDALONE_GATEWAY=true -e MIX_ENV=test --rm web sh -c "cd nexus_web && mix compile --warnings-as-errors && mix test --warnings-as-errors"
 
       - name: "Total Recall: Dump Logs on Failure"
         if: failure()
         run: |
           echo "Dumping Master Service Logs..."
-          docker compose logs postgres rabbitmq jaeger node1 node2 web
+          docker compose logs postgres rabbitmq vault node1 node2 web
           echo "Checking for application-specific audit logs..."
           docker compose exec -T node1 ls -R /app/nexus/priv/log || echo "No app logs found."
 
