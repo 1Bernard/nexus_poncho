@@ -37,12 +37,12 @@ defmodule NexusWeb.Identity.OnboardingLive do
 
       {:error, reason} ->
         Logger.warning("[OnboardingUI] Handshake failed: #{inspect(reason)}")
-
-        {:ok,
-         socket
-         |> put_flash(:error, "Invalid or expired invitation link.")
-         |> push_navigate(to: "/register")}
+        {:ok, redirect(socket, to: "/")}
     end
+  end
+
+  def mount(_params, _session, socket) do
+    {:ok, redirect(socket, to: "/")}
   end
 
   @impl true
@@ -65,7 +65,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
           <.header>
             Secure Enrollment
             <:subtitle>
-              Anchoring identity to <span class="font-mono text-xs font-bold text-indigo-500">SecureFlow ID</span> hardware
+              Securely anchoring your biometric identity to <span class="font-mono text-xs font-bold text-indigo-500">SecureFlow ID</span>
             </:subtitle>
           </.header>
 
@@ -139,9 +139,9 @@ defmodule NexusWeb.Identity.OnboardingLive do
                 @status == :idle && "text-zinc-900 dark:text-zinc-100"
               ]}>
                 <%= case @status do %>
-                  <% :idle -> %> Start Identity Handshake
+                  <% :idle -> %> Scan Biometric
                   <% :scanning -> %> Hardware Handshake in Progress...
-                  <% :complete -> %> Neural Profile Anchored
+                  <% :complete -> %> Neural profile secured
                   <% :error -> %> Handshake Aborted
                 <% end %>
               </h3>
@@ -150,7 +150,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
                 <%= case @status do %>
                   <% :idle -> %> Please prepare your biometric authenticator (TouchID, FaceID, or YubiKey).
                   <% :scanning -> %> Holding secure tunnel to authenticator. Please provide biometric verification.
-                  <% :complete -> %> Your identity has been successfully bound to this device.
+                  <% :complete -> %> Biometric vault synchronized.
                   <% :error -> %> {@error}
                 <% end %>
               </p>
@@ -179,6 +179,14 @@ defmodule NexusWeb.Identity.OnboardingLive do
       </div>
     </div>
     """
+  end
+
+  @impl true
+  def handle_event("verify_identity", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:status, :complete)
+     |> assign(:progress, 100)}
   end
 
   @impl true
