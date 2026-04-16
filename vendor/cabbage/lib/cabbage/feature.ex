@@ -236,7 +236,7 @@ defmodule Cabbage.Feature do
               __ENV__.file,
               :scenario,
               scenario.name,
-              tags,
+              [],
               []
             )
 
