@@ -4,7 +4,7 @@
   skip: [],
   # Exit on findings at this severity or above: :high, :medium, :low
   exit: :high,
-  format: :txt,
+  format: "txt",
   quiet: false,
   verbose: false
 ]
