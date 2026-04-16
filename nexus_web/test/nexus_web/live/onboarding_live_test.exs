@@ -3,7 +3,7 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
   import Phoenix.LiveViewTest
   import Nexus.Identity.Fixtures
 
-  alias Nexus.Identity.BiometricInvitation
+  alias Nexus.Identity.WebAuthn.BiometricInvitation
 
   describe "Biometric Onboarding" do
     test "redirects if token is missing", %{conn: conn} do
