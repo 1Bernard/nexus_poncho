@@ -13,6 +13,7 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
   alias Nexus.Compliance.Events.PEPCheckCompleted
   alias Nexus.Identity.Commands.ActivateUser
   alias Nexus.Identity.Events.{BiometricEnrolled, UserRegistered}
+  alias Nexus.Shared.Tracing
 
   require Logger
   require OpenTelemetry.Tracer
@@ -40,7 +41,7 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
 
   # Initial Registration
   def handle(%__MODULE__{}, %UserRegistered{} = event, metadata) do
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "ProcessManager.RegistrationHandled" do
       Logger.info("[OnboardingPM] Handling registration for #{event.user_id}")
@@ -59,7 +60,7 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
 
   # PEP Check Completed
   def handle(%__MODULE__{} = state, %PEPCheckCompleted{} = event, metadata) do
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "ProcessManager.PEPCompleted" do
       Logger.info("[OnboardingPM] PEP Check completed for #{event.user_id} with status: #{event.status}")
@@ -75,7 +76,7 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
 
   # Biometric Enrolled (from magic link or mobile anchor)
   def handle(%__MODULE__{} = state, %BiometricEnrolled{} = event, metadata) do
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "ProcessManager.BiometricEnrolled" do
       Logger.info("[OnboardingPM] Biometric anchored for #{event.user_id}")

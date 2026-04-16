@@ -11,6 +11,7 @@ defmodule Nexus.Treasury.Projectors.VaultProjector do
 
   alias Decimal
   alias Ecto.Multi
+  alias Nexus.Shared.Tracing
   alias Nexus.Treasury.Audit.AuditLog
   alias Nexus.Treasury.Events.{VaultCredited, VaultRegistered}
   alias Nexus.Treasury.Idempotency.IdempotencyKey
@@ -18,7 +19,7 @@ defmodule Nexus.Treasury.Projectors.VaultProjector do
 
   project(%VaultRegistered{} = event, metadata, fn multi ->
     require OpenTelemetry.Tracer
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "Projector.Treasury.VaultRegistered" do
       multi
@@ -48,7 +49,7 @@ defmodule Nexus.Treasury.Projectors.VaultProjector do
 
   project(%VaultCredited{} = event, metadata, fn multi ->
     require OpenTelemetry.Tracer
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "Projector.Treasury.VaultCredited" do
       multi

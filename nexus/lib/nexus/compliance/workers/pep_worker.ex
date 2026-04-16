@@ -12,6 +12,7 @@ defmodule Nexus.Compliance.Workers.PEPWorker do
   require Logger
   alias Nexus.Compliance.Commands.CompletePEPCheck
   alias Nexus.Compliance.Events.PEPCheckInitiated
+  alias Nexus.Shared.Tracing
 
   @doc """
   Handles the initiation of a PEP check by performing external screenings.
@@ -20,7 +21,7 @@ defmodule Nexus.Compliance.Workers.PEPWorker do
     # Elite Standard: Chain of Custody
     # Extract the incoming trace context to ensure the worker process is part of the lineage.
     require OpenTelemetry.Tracer
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "Worker.Compliance.PEPWorker" do
       Logger.info(

@@ -13,10 +13,11 @@ defmodule Nexus.Organization.Projectors.TenantProjector do
   alias Nexus.Organization.Audit.AuditLog
   alias Nexus.Organization.Events.TenantProvisioned
   alias Nexus.Organization.Idempotency.IdempotencyKey
+  alias Nexus.Shared.Tracing
 
   project(%TenantProvisioned{} = event, metadata, fn multi ->
     require OpenTelemetry.Tracer
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "Projector.Organization.TenantProvisioned" do
       multi

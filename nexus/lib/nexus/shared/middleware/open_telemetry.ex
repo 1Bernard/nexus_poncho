@@ -9,6 +9,7 @@ defmodule Nexus.Shared.Middleware.OpenTelemetry do
   @behaviour Commanded.Middleware
 
   alias Commanded.Middleware.Pipeline
+  alias Nexus.Shared.Tracing
   import Pipeline
 
   @doc """
@@ -20,7 +21,7 @@ defmodule Nexus.Shared.Middleware.OpenTelemetry do
 
     # Step 1: Link to Parent Context (if exists)
     # We extract and set the parent context so THIS span is a child of the predecessor.
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     # Step 2: Start Local Execution Span
     # We determine the name based on whether we have a traceparent (Aggregate side) or not (Web side)
@@ -33,7 +34,7 @@ defmodule Nexus.Shared.Middleware.OpenTelemetry do
 
     # Step 3: Inject Current Span as Parent for the NEXT hop
     # This ensures that events or subsequent commands are children of THIS execution.
-    metadata = Nexus.Shared.Tracing.inject_context(metadata)
+    metadata = Tracing.inject_context(metadata)
 
     pipeline
     |> assign(:otel_span, span)

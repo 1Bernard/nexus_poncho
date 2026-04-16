@@ -8,6 +8,7 @@ defmodule Nexus.Messaging.Workers.EmailWorker do
   require Logger
 
   alias Broadway.Message
+  alias Nexus.Shared.Tracing
 
   def start_link(_opts) do
     Broadway.start_link(__MODULE__,
@@ -39,7 +40,7 @@ defmodule Nexus.Messaging.Workers.EmailWorker do
 
     # Extract the OTel context from RabbitMQ headers to continue the trace
     headers = Map.get(metadata, :headers, [])
-    Nexus.Shared.Tracing.extract_from_headers(headers)
+    Tracing.extract_from_headers(headers)
 
     OpenTelemetry.Tracer.with_span "Messaging.EmailWorker.process_email" do
       Logger.info("[Messaging] Processing Email Task: #{inspect(data)}")

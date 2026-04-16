@@ -11,21 +11,23 @@ defmodule Nexus.Messaging.Producers.EmailDispatcher do
   require Logger
 
   alias Nexus.Identity.Events.{UserActivated, UserRegistered}
+  alias Nexus.Identity.WebAuthn.BiometricInvitation
+  alias Nexus.Shared.Tracing
 
   @doc """
   Handle UserRegistered events and publish an 'Invitation Email' task to RabbitMQ
   if the user is in the 'invited' state (missing biometric anchors).
   """
   def handle(%UserRegistered{credential_id: nil} = event, metadata) do
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     require OpenTelemetry.Tracer
     OpenTelemetry.Tracer.with_span "Messaging.EmailDispatcher.dispatch_invitation" do
       Logger.info("[Messaging] Dispatching invitation email task for user: #{event.user_id}")
 
       # Generate a secure Magic Link token
-      token = Nexus.Identity.WebAuthn.BiometricInvitation.generate_token(event.user_id)
-      magic_link = Nexus.Identity.WebAuthn.BiometricInvitation.magic_link(token)
+      token = BiometricInvitation.generate_token(event.user_id)
+      magic_link = BiometricInvitation.magic_link(token)
 
       payload = %{
         user_id: event.user_id,
@@ -43,7 +45,7 @@ defmodule Nexus.Messaging.Producers.EmailDispatcher do
   def handle(%UserActivated{} = event, metadata) do
     # Elite Standard: Trace Propagation (The Optical Fiber)
     # Extract traceparent from metadata and attach it to the current process
-    Nexus.Shared.Tracing.extract_and_set_context(metadata)
+    Tracing.extract_and_set_context(metadata)
 
     require OpenTelemetry.Tracer
     OpenTelemetry.Tracer.with_span "Messaging.EmailDispatcher.dispatch" do

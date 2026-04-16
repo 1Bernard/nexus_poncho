@@ -5,6 +5,8 @@ defmodule Nexus.DataCase do
   """
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   using do
     quote do
       alias Nexus.Repo
@@ -21,10 +23,8 @@ defmodule Nexus.DataCase do
   end
 
   def setup_sandbox(tags) do
-    alias Ecto.Adapters.SQL.Sandbox
-
     if tags[:no_sandbox] do
-      Ecto.Adapters.SQL.Sandbox.mode(Nexus.Repo, :auto)
+      Sandbox.mode(Nexus.Repo, :auto)
       :ok
     else
       pid = Sandbox.start_owner!(Nexus.Repo, shared: not tags[:async])

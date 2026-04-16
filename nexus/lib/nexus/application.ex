@@ -2,6 +2,8 @@ defmodule Nexus.Application do
   @moduledoc false
   use Application
 
+  alias Nexus.Identity.WebAuthn.AuthChallengeStore
+
   @impl true
   def start(_type, _args) do
     # Initialize Mnesia for distributed biometric challenges
@@ -22,7 +24,7 @@ defmodule Nexus.Application do
           # Periodically prune expired challenges
           {Task, fn ->
             Stream.interval(:timer.minutes(5))
-            |> Enum.each(fn _ -> Nexus.Identity.WebAuthn.AuthChallengeStore.prune_expired() end)
+            |> Enum.each(fn _ -> AuthChallengeStore.prune_expired() end)
           end}
         ]
       else
@@ -39,7 +41,7 @@ defmodule Nexus.Application do
           # Periodically prune expired challenges
           {Task, fn ->
             Stream.interval(:timer.minutes(5))
-            |> Enum.each(fn _ -> Nexus.Identity.WebAuthn.AuthChallengeStore.prune_expired() end)
+            |> Enum.each(fn _ -> AuthChallengeStore.prune_expired() end)
           end}
         ]
       end

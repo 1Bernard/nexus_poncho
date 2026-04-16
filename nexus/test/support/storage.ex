@@ -3,6 +3,9 @@ defmodule Nexus.Storage do
   Hardened Storage Reset for Nexus Distributed Integration Tests.
   Ensures literal 'Clean Slate' by bypassing triggers and truncating schemas.
   """
+  alias Ecto.Adapters.SQL
+  alias EventStore.Storage.Initializer
+
   require Logger
 
   def reset! do
@@ -25,14 +28,14 @@ defmodule Nexus.Storage do
     # Absolute Reset: Drop and Re-create schema
     Postgrex.query!(conn, "DROP SCHEMA IF EXISTS \"#{schema}\" CASCADE;", [])
     Postgrex.query!(conn, "CREATE SCHEMA \"#{schema}\";", [])
-    EventStore.Storage.Initializer.run!(conn, config)
+    Initializer.run!(conn, config)
 
     GenServer.stop(conn)
   end
 
   defp truncate_repo do
     # Truncate all tables in public schema except migrations
-    Ecto.Adapters.SQL.query!(
+    SQL.query!(
       Nexus.Repo,
       """
       DO $$ DECLARE
