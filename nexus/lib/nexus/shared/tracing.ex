@@ -15,16 +15,10 @@ defmodule Nexus.Shared.Tracing do
   def inject_context(metadata \\ %{}) do
     if Code.ensure_loaded?(:otel_propagator_text_map) do
       # Note: :otel_propagator_text_map.inject/1 is the stable high-level API.
-      # It injects into a list of tuples which we then map to our metadata.
+      # It injects into a list of tuples which we then merge into our metadata.
       case :otel_propagator_text_map.inject([]) do
-        headers when is_list(headers) ->
-          # Merge the OTel headers into our metadata map (preferring binary keys)
-          Enum.reduce(headers, metadata, fn {field, value}, acc ->
-            Map.put(acc, to_string(field), value)
-          end)
-
-        _ ->
-          metadata
+        headers when is_list(headers) -> merge_otel_headers(headers, metadata)
+        _ -> metadata
       end
     else
       metadata
@@ -35,34 +29,19 @@ defmodule Nexus.Shared.Tracing do
       metadata
   end
 
+  defp merge_otel_headers(headers, metadata) do
+    Enum.reduce(headers, metadata, fn {field, value}, acc ->
+      Map.put(acc, to_string(field), value)
+    end)
+  end
+
   @doc """
   Extracts the trace context from a metadata map and attaches it to the current process.
   Supports both string and atom keys for resilience.
   """
   def extract_and_set_context(metadata) when is_map(metadata) do
     if Code.ensure_loaded?(:otel_propagator_text_map) do
-      # Pull traceparent (and optional tracestate) from string or atom keys
-      traceparent = Map.get(metadata, @traceparent) || Map.get(metadata, :traceparent)
-      tracestate = Map.get(metadata, "tracestate") || Map.get(metadata, :tracestate)
-
-      if traceparent do
-        # Build the carrier with all W3C headers present
-        carrier =
-          [{@traceparent, to_string(traceparent)}]
-          |> then(fn c ->
-            if tracestate, do: [{"tracestate", to_string(tracestate)} | c], else: c
-          end)
-
-        # CORRECT API: extract_to/2 takes the CURRENT context and carrier,
-        # and returns a NEW context enriched with the traceparent span.
-        # extract/1 (which we were using before) returns an otel_ctx:token()
-        # representing the OLD context — the exact opposite of what we need.
-        current_ctx = :otel_ctx.get_current()
-        new_ctx = :otel_propagator_text_map.extract_to(current_ctx, carrier)
-        :otel_ctx.attach(new_ctx)
-      else
-        :ok
-      end
+      do_extract_and_set_context(metadata)
     else
       :ok
     end
@@ -70,6 +49,30 @@ defmodule Nexus.Shared.Tracing do
     e ->
       Logger.error("[Tracing] Context extraction failed: #{inspect(e)}")
       :ok
+  end
+
+  defp do_extract_and_set_context(metadata) do
+    # Pull traceparent (and optional tracestate) from string or atom keys
+    traceparent = Map.get(metadata, @traceparent) || Map.get(metadata, :traceparent)
+    tracestate = Map.get(metadata, "tracestate") || Map.get(metadata, :tracestate)
+
+    if traceparent do
+      carrier = build_w3c_carrier(traceparent, tracestate)
+      # CORRECT API: extract_to/2 takes the CURRENT context and carrier,
+      # and returns a NEW context enriched with the traceparent span.
+      # extract/1 returns an otel_ctx:token() for the OLD context — the opposite of what we need.
+      current_ctx = :otel_ctx.get_current()
+      new_ctx = :otel_propagator_text_map.extract_to(current_ctx, carrier)
+      :otel_ctx.attach(new_ctx)
+    else
+      :ok
+    end
+  end
+
+  defp build_w3c_carrier(traceparent, nil), do: [{@traceparent, to_string(traceparent)}]
+
+  defp build_w3c_carrier(traceparent, tracestate) do
+    [{@traceparent, to_string(traceparent)}, {"tracestate", to_string(tracestate)}]
   end
 
   @doc """
@@ -92,14 +95,8 @@ defmodule Nexus.Shared.Tracing do
     if Code.ensure_loaded?(:otel_propagator_text_map) do
       # Note: Use inject([]) to resolve current context and injector automatically.
       case :otel_propagator_text_map.inject([]) do
-        headers when is_list(headers) ->
-          case List.keyfind(headers, @traceparent, 0) do
-            {@traceparent, tp} -> tp
-            _ -> nil
-          end
-
-        _ ->
-          nil
+        headers when is_list(headers) -> find_traceparent(headers)
+        _ -> nil
       end
     else
       nil
@@ -108,5 +105,12 @@ defmodule Nexus.Shared.Tracing do
     e ->
       Logger.error("[Tracing] Failed to retrieve current traceparent: #{inspect(e)}")
       nil
+  end
+
+  defp find_traceparent(headers) do
+    case List.keyfind(headers, @traceparent, 0) do
+      {@traceparent, tp} -> tp
+      _ -> nil
+    end
   end
 end

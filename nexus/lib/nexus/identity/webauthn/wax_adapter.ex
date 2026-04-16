@@ -28,41 +28,41 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   @impl true
   def register_finish(params, challenge_id, _user_id) do
     Logger.info("[WaxAdapter] Completing registration for challenge: #{challenge_id}")
-    # Retrieve challenge from Mnesia
     case AuthChallengeStore.get(challenge_id) do
       nil -> {:error, :challenge_not_found_or_expired}
-      challenge ->
-        if not is_map(challenge) do
-          Logger.error("[WaxAdapter] Retrieved challenge is not a map! Got: #{inspect(challenge)}")
-          {:error, :invalid_challenge_format}
-        else
-          # params is the attestation map from JS, which contains a nested "response"
-          response = params["response"]
-          attestation = Base.decode64!(response["attestationObject"])
-          client_data = Base.decode64!(response["clientDataJSON"])
+      challenge -> do_register_finish(params, challenge_id, challenge)
+    end
+  end
 
-          case Wax.register(attestation, client_data, challenge) do
-            {:ok, {authenticator_data, attestation_result}} ->
-              # Remove challenge after successful use
-              AuthChallengeStore.delete(challenge_id)
+  defp do_register_finish(_params, _challenge_id, challenge) when not is_map(challenge) do
+    Logger.error("[WaxAdapter] Retrieved challenge is not a map! Got: #{inspect(challenge)}")
+    {:error, :invalid_challenge_format}
+  end
 
-              # Elite Standard: Extract keys from the AuthenticatorData struct (first element)
-              # and return them in a structured map for the UI.
-              # The second element (attestation_result) can be {:self, nil, nil} for self-attestation.
-              {:ok,
-               %{
-                 authenticator_data: authenticator_data,
-                 auth_data: %{
-                   credential_id: authenticator_data.attested_credential_data.credential_id,
-                   cose_key: authenticator_data.attested_credential_data.credential_public_key
-                 },
-                 attestation_result: attestation_result
-               }}
+  defp do_register_finish(params, challenge_id, challenge) do
+    # params is the attestation map from JS, which contains a nested "response"
+    response = params["response"]
+    attestation = Base.decode64!(response["attestationObject"])
+    client_data = Base.decode64!(response["clientDataJSON"])
 
-            {:error, reason} ->
-              {:error, reason}
-          end
-        end
+    case Wax.register(attestation, client_data, challenge) do
+      {:ok, {authenticator_data, attestation_result}} ->
+        AuthChallengeStore.delete(challenge_id)
+        # Elite Standard: Extract keys from the AuthenticatorData struct (first element)
+        # and return them in a structured map for the UI.
+        # The second element (attestation_result) can be {:self, nil, nil} for self-attestation.
+        {:ok,
+         %{
+           authenticator_data: authenticator_data,
+           auth_data: %{
+             credential_id: authenticator_data.attested_credential_data.credential_id,
+             cose_key: authenticator_data.attested_credential_data.credential_public_key
+           },
+           attestation_result: attestation_result
+         }}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -89,24 +89,29 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   def verify_authentication(params, challenge_id, user_credentials) do
     case AuthChallengeStore.get(challenge_id) do
       nil -> {:error, :challenge_not_found_or_expired}
-      challenge ->
-        if not is_map(challenge) do
-          Logger.error("[WaxAdapter] Retrieved challenge is not a map! Got: #{inspect(challenge)}")
-          {:error, :invalid_challenge_format}
-        else
-          raw_id = Base.decode64!(params["rawId"])
-          auth_data = Base.decode64!(params["authenticatorData"])
-          signature = Base.decode64!(params["signature"])
-          client_data = Base.decode64!(params["clientDataJSON"])
+      challenge -> do_verify_authentication(params, challenge_id, user_credentials, challenge)
+    end
+  end
 
-          case Wax.authenticate(raw_id, auth_data, signature, client_data, challenge, user_credentials) do
-            {:ok, authenticator} ->
-              AuthChallengeStore.delete(challenge_id)
-              {:ok, authenticator}
-            {:error, reason} ->
-              {:error, reason}
-          end
-        end
+  defp do_verify_authentication(_params, _challenge_id, _user_credentials, challenge)
+       when not is_map(challenge) do
+    Logger.error("[WaxAdapter] Retrieved challenge is not a map! Got: #{inspect(challenge)}")
+    {:error, :invalid_challenge_format}
+  end
+
+  defp do_verify_authentication(params, challenge_id, user_credentials, challenge) do
+    raw_id = Base.decode64!(params["rawId"])
+    auth_data = Base.decode64!(params["authenticatorData"])
+    signature = Base.decode64!(params["signature"])
+    client_data = Base.decode64!(params["clientDataJSON"])
+
+    case Wax.authenticate(raw_id, auth_data, signature, client_data, challenge, user_credentials) do
+      {:ok, authenticator} ->
+        AuthChallengeStore.delete(challenge_id)
+        {:ok, authenticator}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

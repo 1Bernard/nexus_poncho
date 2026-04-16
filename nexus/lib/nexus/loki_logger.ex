@@ -137,9 +137,7 @@ defmodule Nexus.LokiLogger do
     do: inspect(report)
 
   defp format_message({:report, report}) when is_list(report) do
-    report
-    |> Enum.map(fn {k, v} -> "#{k}=#{inspect(v)}" end)
-    |> Enum.join(" ")
+    Enum.map_join(report, " ", fn {k, v} -> "#{k}=#{inspect(v)}" end)
   end
 
   defp format_message({:format, fmt, args}) do
