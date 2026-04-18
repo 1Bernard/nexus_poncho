@@ -64,8 +64,9 @@ jobs:
       - name: Compliance Audit (Git Sovereignty)
         run: |
           # Use the same regex as lefthook.yml
+          # Skip auto-generated merge commits — check the most recent non-merge commit instead.
           REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(.+\)!?: .+"
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_MSG=$(git log --no-merges -1 --pretty=%B)
           echo "Checking commit message: $COMMIT_MSG"
           if [[ ! $COMMIT_MSG =~ $REGEX ]]; then
             echo "❌ ELITE ERROR: Commit message does not follow Conventional Commits standard with mandatory scope."
