@@ -330,6 +330,7 @@ services:
       START_ONBOARDING_PM: "false"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       OTEL_SERVICE_NAME: web
+      MIX_BUILD_PATH: /app/_build_docker
 
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}

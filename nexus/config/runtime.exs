@@ -136,6 +136,7 @@ if config_env() != :test do
     start_treasury_projections: get_bool.("START_TREASURY_PROJECTIONS", true),
     start_messaging_projections: get_bool.("START_MESSAGING_PROJECTIONS", true),
     start_onboarding_pm: get_bool.("START_ONBOARDING_PM", true),
+    start_platform_audit: get_bool.("START_PLATFORM_AUDIT", true),
     web_host: System.get_env("WEB_HOST") || "http://localhost:4000",
     token_secret_key_base: token_secret_key_base,
     loki_url: System.get_env("LOKI_URL")
