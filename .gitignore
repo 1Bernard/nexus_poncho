@@ -4,6 +4,7 @@
 
 # 🧪 Elixir & Phoenix
 **/_build/
+_build_docker/
 **/deps/
 **/cover/
 **/doc/
