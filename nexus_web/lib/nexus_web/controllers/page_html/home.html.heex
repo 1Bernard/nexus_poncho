@@ -1,27 +1,16 @@
-<%!-- Main content wrapper --%>
-
 <main class="relative z-10">
-  
-<!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+  <!-- Hero Section -->
   <section class="min-h-screen flex flex-col justify-center items-center px-4 pt-28 pb-20 relative">
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/10 blur-[120px] rounded-full -z-10">
     </div>
 
-    <div class="mb-8 flex items-center gap-3 opacity-0" id="hero-badge">
-      <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#34d399]">
-      </span>
-      <span class="font-mono text-[10px] tracking-[0.4em] uppercase text-zinc-500">
-        Enterprise Treasury Intelligence · Now in Private Access
-      </span>
-    </div>
-
     <h1 class="hero-title font-serif italic text-center max-w-6xl mb-12">
-      <span class="block opacity-0 translate-y-10" id="hero-line-1">The Future is</span>
+      <span class="block opacity-0 translate-y-10" id="hero-line-1">One Platform.</span>
       <span
         class="block text-emerald-400 opacity-0 translate-y-10 text-glow-emerald"
         id="hero-line-2"
       >
-        Verifiable.
+        Every Subsidiary. Every Currency.
       </span>
     </h1>
 
@@ -29,7 +18,7 @@
       id="hero-desc"
       class="text-zinc-400 text-lg md:text-xl max-w-2xl text-center mb-12 opacity-0 font-light translate-y-10"
     >
-      Secure your institution's digital future with Equinox. Onboard in as little as 48 hours.
+      The treasury operating system for multinationals. Real-time FX exposure, automated intercompany netting, and compliance by design — across every entity, from a single pane of glass.
     </p>
 
     <div class="flex flex-col md:flex-row gap-6 opacity-0" id="hero-ctas">
@@ -44,23 +33,19 @@
         href="#features"
         class="btn-liquid px-10 py-5 border border-white/20 hover:border-emerald-400 transition-colors font-mono text-xs tracking-widest uppercase text-white"
       >
-        <span class="relative z-10">Platform Overview</span>
+        <span class="relative z-10">See Platform Demo</span>
         <div class="liquid-bg bg-white/5"></div>
       </a>
     </div>
-    
-<!-- Stats -->
+
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mt-20 md:mt-32 w-full max-w-6xl border-t border-white/5 pt-12">
       <div class="reveal-y">
         <div class="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-3 flex items-center gap-2">
           <span class="w-1 h-1 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></span>
-          FX Exposure Tracked
+          Interco Volume Settled
         </div>
         <div class="text-4xl md:text-5xl font-light tracking-tighter mb-1">
-          $<span class="counter" data-target="1.4">0</span>
-          <span class="text-emerald-400 ml-1 italic font-serif">
-            B
-          </span>
+          <span class="counter" data-target="2.8">0</span><span class="text-emerald-400 ml-1 italic font-serif">B</span>
         </div>
         <div class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
           Billion USD
@@ -69,76 +54,74 @@
       <div class="reveal-y">
         <div class="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-3 flex items-center gap-2">
           <span class="w-1 h-1 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></span>
-          Forecast Horizon
+          Settlement Speed
         </div>
         <div class="text-4xl md:text-5xl font-light tracking-tighter mb-1">
-          <span class="counter" data-target="30">0</span><span class="text-emerald-400 ml-1 italic font-serif">D</span>
+          <span class="counter" data-target="0.14">0</span><span class="text-emerald-400 ml-1 italic font-serif">S</span>
+        </div>
+        <div class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">Seconds</div>
+      </div>
+      <div class="reveal-y">
+        <div class="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-3 flex items-center gap-2">
+          <span class="w-1 h-1 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></span>
+          Managed Entities
+        </div>
+        <div class="text-4xl md:text-5xl font-light tracking-tighter mb-1">
+          <span class="counter" data-target="142">0</span>
         </div>
         <div class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-          Day Outlook
+          Subsidiaries
         </div>
       </div>
       <div class="reveal-y">
         <div class="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-3 flex items-center gap-2">
           <span class="w-1 h-1 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></span>
-          Compliance Controls
-        </div>
-        <div class="text-4xl md:text-5xl font-light tracking-tighter mb-1">
-          <span class="counter" data-target="6">0</span>
-        </div>
-        <div class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-          Real-time Metrics
-        </div>
-      </div>
-      <div class="reveal-y">
-        <div class="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-3 flex items-center gap-2">
-          <span class="w-1 h-1 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"></span>
-          Audit Coverage
+          Compliance Rate
         </div>
         <div class="text-4xl md:text-5xl font-light tracking-tighter mb-1">
           <span class="counter" data-target="100">0</span><span class="text-emerald-400 ml-1 italic font-serif">%</span>
         </div>
         <div class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-          Immutable Events
+          Percent Certified
         </div>
       </div>
     </div>
   </section>
   
-<!-- ── Partner Marquee ───────────────────────────────────────────────────── -->
+<!-- Partner Marquee -->
   <section class="py-12 border-y border-white/5 bg-zinc-950/20 overflow-hidden">
     <div class="flex animate-marquee whitespace-nowrap gap-12 items-center">
       <div class="flex items-center gap-24 px-12 opacity-40 hover:opacity-100 transition-opacity">
-        <span class="text-2xl font-bold tracking-tighter">SAP INTEGRATION</span>
-        <span class="text-2xl font-bold tracking-tighter">MANUFACTURING</span>
-        <span class="text-2xl font-bold tracking-tighter">ENERGY</span>
-        <span class="text-2xl font-bold tracking-tighter">LOGISTICS</span>
-        <span class="text-2xl font-bold tracking-tighter">RETAIL GROUPS</span>
-        <span class="text-2xl font-bold tracking-tighter">FMCG</span>
+        <span class="text-2xl font-bold tracking-tighter">SHELL</span>
+        <span class="text-2xl font-bold tracking-tighter">SIEMENS</span>
+        <span class="text-2xl font-bold tracking-tighter">MTN GROUP</span>
+        <span class="text-2xl font-bold tracking-tighter">UNILEVER</span>
+        <span class="text-2xl font-bold tracking-tighter">ABB</span>
+        <span class="text-2xl font-bold tracking-tighter">NESTLÉ</span>
       </div>
       <div class="flex items-center gap-24 px-12 opacity-40 hover:opacity-100 transition-opacity">
-        <span class="text-2xl font-bold tracking-tighter">SAP INTEGRATION</span>
-        <span class="text-2xl font-bold tracking-tighter">MANUFACTURING</span>
-        <span class="text-2xl font-bold tracking-tighter">ENERGY</span>
-        <span class="text-2xl font-bold tracking-tighter">LOGISTICS</span>
-        <span class="text-2xl font-bold tracking-tighter">RETAIL GROUPS</span>
-        <span class="text-2xl font-bold tracking-tighter">FMCG</span>
+        <span class="text-2xl font-bold tracking-tighter">SHELL</span>
+        <span class="text-2xl font-bold tracking-tighter">SIEMENS</span>
+        <span class="text-2xl font-bold tracking-tighter">MTN GROUP</span>
+        <span class="text-2xl font-bold tracking-tighter">UNILEVER</span>
+        <span class="text-2xl font-bold tracking-tighter">ABB</span>
+        <span class="text-2xl font-bold tracking-tighter">NESTLÉ</span>
       </div>
     </div>
   </section>
   
-<!-- ── Globe ─────────────────────────────────────────────────────────────── -->
+<!-- REALISTIC 3D GLOBE with Transaction Notifications -->
   <section id="globe-section" class="py-24 relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4">
       <div class="text-center mb-12">
         <h2 class="text-5xl font-serif italic mb-4">
-          Multi-Entity Treasury <span class="text-emerald-400">at a Glance</span>
+          The Global <span class="text-emerald-400">Treasury Mesh</span>
         </h2>
         <p class="text-zinc-400 text-lg max-w-2xl mx-auto font-light">
-          One consolidated view of all subsidiaries, vaults, and live FX rates —
-          <span class="text-emerald-400 font-mono" id="latency-value">250ms</span>
-          refresh | <span id="active-flows" class="text-emerald-400">Live</span>
-          across all entities
+          142 multinational entities across 6 continents |
+          <span class="text-emerald-400 font-mono" id="latency-value">45ms</span>
+          avg latency | <span id="active-flows" class="text-emerald-400">247</span>
+          active settlement flows
         </p>
       </div>
       <div
@@ -148,58 +131,59 @@
         <div id="globe-container" class="w-full h-full"></div>
         <div class="globe-glow-overlay"></div>
         <div id="notification-container" class="absolute inset-0 pointer-events-none z-30"></div>
+
         <div class="absolute bottom-6 left-6 z-20 flex gap-3">
           <div class="bracket-card px-4 py-2 rounded-full text-[10px] font-mono backdrop-blur-md border border-emerald-400/20">
             <span class="text-emerald-400">●</span>
-            ACTIVE VAULTS: <span id="vault-counter">24</span>
+            ACTIVE ENTITIES: <span id="node-counter">142</span>
           </div>
           <div class="bracket-card px-4 py-2 rounded-full text-[10px] font-mono backdrop-blur-md border border-emerald-400/20">
-            <span class="text-emerald-400">⚡</span> TX TODAY: <span id="tx-counter">1,247</span>
+            <span class="text-emerald-400">⚡</span>
+            SETTLEMENTS/S: <span id="tx-counter">1,247</span>
           </div>
         </div>
         <div class="absolute top-6 right-6 z-20 bracket-card px-4 py-2 rounded-full text-[10px] font-mono backdrop-blur-md border border-emerald-400/20">
           <span class="text-emerald-400">🌍</span>
-          LIVE FX PAIRS: <span id="flow-counter">12</span>
-          tracked
+          NETTING CYCLES: <span id="flow-counter">12</span>
+          active routes
         </div>
       </div>
     </div>
   </section>
   
-<!-- ── Features Bento Grid ──────────────────────────────────────────────── -->
+<!-- Bento Grid Feature Section -->
   <section id="features" class="py-32 px-4 max-w-7xl mx-auto">
     <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
       <div class="max-w-2xl">
         <h2 class="text-5xl font-serif italic mb-6">
-          Built for the <span class="text-emerald-400">Finance Function.</span>
+          Built for the <span class="text-emerald-400">Modern Treasurer.</span>
         </h2>
         <p class="text-zinc-400 text-lg font-light">
-          Every module in Equinox is architected for the auditability, compliance, and real-time visibility that institutional treasury teams demand.
+          Every component of Equinox is engineered for the realities of global enterprise finance — not retrofitted for compliance, but built with it at the core.
         </p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-5 auto-rows-[320px]">
-      
-<!-- Event-Sourced Ledger (large) -->
+      <!-- 1. Postgres Database Card -->
       <div class="md:col-span-8 elite-card p-10 rounded-3xl flex flex-col md:flex-row justify-between items-center group cursor-pointer">
         <div class="max-w-md z-10">
           <div class="flex items-center gap-3 mb-6">
             <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
             <span class="font-mono text-[9px] text-zinc-600 tracking-[0.4em] uppercase">
-              Immutable Ledger
+              Immutable Protocol
             </span>
           </div>
-          <h3 class="text-4xl font-serif italic mb-6">Complete Audit Trail</h3>
+          <h3 class="text-4xl font-serif italic mb-6">Every Transaction. Forever Traceable.</h3>
           <p class="text-zinc-500 text-sm font-light leading-relaxed mb-6">
-            Every transfer, invoice match, role change, and policy decision is permanently recorded and replayable. Nothing is ever deleted. Everything is provable.
+            Equinox records every financial event as an immutable fact — from policy changes to settlement confirmations. Complete audit-readiness is built in, not bolted on.
           </p>
           <div class="flex gap-4">
             <span class="px-3 py-1 border border-white/5 rounded font-mono text-[8px] text-zinc-500 uppercase">
-              Event-Sourced
+              SOC 2 Ready
             </span>
             <span class="px-3 py-1 border border-white/5 rounded font-mono text-[8px] text-zinc-500 uppercase">
-              Replay-on-Demand
+              Tamper-Proof
             </span>
           </div>
         </div>
@@ -208,64 +192,79 @@
             viewBox="0 0 240 240"
             class="w-full h-full transform transition-all duration-700 group-hover:scale-110"
           >
-            <circle cx="120" cy="120" r="100" class="tech-path" stroke-dasharray="4 8" />
-            <circle cx="120" cy="120" r="85" class="tech-path" stroke-opacity="0.3" />
-            <path
-              class="tech-path tech-path-primary"
-              d="M160 120 C160 60, 80 60, 80 120 C80 180, 160 180, 160 120"
-            />
-            <path
-              class="tech-path tech-path-primary"
-              d="M120 80 C140 80, 175 100, 175 135 C175 170, 140 185, 120 185"
-            />
-            <path class="tech-path tech-path-primary" d="M175 135 L210 135" />
-            <circle cx="150" cy="105" r="2.5" class="node-pulse" />
-            <line x1="120" y1="20" x2="120" y2="220" class="tech-path" stroke-opacity="0.1" />
+            <g class="parallax-layer" data-speed="0.05">
+              <circle cx="120" cy="120" r="100" class="tech-path" stroke-dasharray="4 8" />
+              <circle cx="120" cy="120" r="85" class="tech-path" stroke-opacity="0.3" />
+              <line x1="120" y1="20" x2="120" y2="220" class="tech-path" stroke-opacity="0.1" />
+              <line x1="20" y1="120" x2="220" y2="120" class="tech-path" stroke-opacity="0.1" />
+            </g>
+            <g class="parallax-layer" data-speed="0.1">
+              <path
+                class="tech-path tech-path-primary"
+                d="M160 120 C160 60, 80 60, 80 120 C80 180, 160 180, 160 120"
+              />
+              <path
+                class="tech-path tech-path-primary"
+                d="M120 80 C140 80, 175 100, 175 135 C175 170, 140 185, 120 185"
+              />
+              <circle cx="150" cy="105" r="3" class="node-pulse" />
+              <circle cx="90" cy="135" r="3" class="node-pulse" style="animation-delay: 0.5s;" />
+              <circle
+                cx="120"
+                cy="120"
+                r="5"
+                class="fill-emerald-400/20 stroke-emerald-400 stroke-1"
+              />
+            </g>
+            <g class="parallax-layer opacity-20" data-speed="0.15">
+              <line x1="150" y1="105" x2="120" y2="120" class="tech-path" stroke-dasharray="2 4" />
+              <line x1="90" y1="135" x2="120" y2="120" class="tech-path" stroke-dasharray="2 4" />
+            </g>
           </svg>
         </div>
       </div>
       
-<!-- Biometric Auth -->
+<!-- 2. Auth Vault Card -->
       <div class="md:col-span-4 elite-card p-10 rounded-3xl group flex flex-col justify-between">
         <div>
           <div class="flex items-center gap-3 mb-4">
-            <i data-lucide="fingerprint" class="w-4 h-4 text-emerald-400"></i>
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
             <span class="font-mono text-[9px] text-zinc-600 tracking-[0.4em] uppercase">
               Identity
             </span>
           </div>
-          <h3 class="text-2xl font-serif italic mb-4">Biometric Auth</h3>
+          <h3 class="text-2xl font-serif italic mb-4">Auth_Vault</h3>
           <p class="text-zinc-500 text-xs font-light">
-            WebAuthn fingerprint authentication. Step-up verification required for high-value transfers. No passwords. No shared credentials.
+            Passwordless access via hardware-backed WebAuthn. Touch ID and Windows Hello for treasury operators — with step-up authorization for high-value transfers. Zero phishing surface.
           </p>
         </div>
         <div class="relative flex flex-col gap-2 mt-8 mask-fade-bottom overflow-hidden">
           <div class="h-10 border border-white/5 rounded-lg bg-zinc-950/80 flex items-center px-4 font-mono text-[8px] text-zinc-600 transition-all group-hover:border-emerald-500/30 group-hover:text-emerald-400">
-            cfo@meridian-group.com ●●●●
+            admin_01@vanguard.ch
           </div>
           <div class="h-10 border border-white/5 rounded-lg bg-zinc-950/80 flex items-center px-4 font-mono text-[8px] text-zinc-600">
-            treasury.lead@vantage.io ●●●●
+            operator_delta@blackrock.io
           </div>
           <div class="h-10 border border-white/5 rounded-lg bg-zinc-950/80 flex items-center px-4 font-mono text-[8px] text-zinc-800">
-            approver@atlas-group.ch ●●●●
+            node_root@equinox.io
           </div>
         </div>
       </div>
       
-<!-- Liquidity Forecasting -->
+<!-- 3. Edge Functions Card -->
       <div class="md:col-span-4 elite-card p-10 rounded-3xl group flex flex-col items-center text-center">
-        <div class="w-full flex justify-between items-start mb-4">
-          <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i>
+        <div class="w-full flex items-center gap-3 mb-4">
+          <i data-lucide="git-merge" class="w-4 h-4 text-emerald-400"></i>
           <span class="font-mono text-[8px] text-zinc-700 uppercase tracking-widest">
-            Forecasting
+            Settlement
           </span>
         </div>
-        <h3 class="text-2xl font-serif italic mb-3">30-Day Liquidity View</h3>
+        <h3 class="text-2xl font-serif italic mb-3">Interco Netting</h3>
         <p class="text-zinc-500 text-xs font-light mb-8 max-w-[200px]">
-          ML-powered cash flow predictions built from your historical invoices and bank statements.
+          Automated multi-currency netting cycles across all subsidiaries. What took 12 days settles in seconds.
         </p>
         <div class="relative w-full flex-1 flex items-center justify-center">
-          <svg viewBox="0 0 200 200" class="w-48 h-48">
+          <svg viewBox="0 0 200 200" class="w-48 h-48" id="globe-viz">
             <circle cx="100" cy="100" r="85" class="tech-path" stroke-opacity="0.1" />
             <circle
               cx="100"
@@ -274,191 +273,171 @@
               class="tech-path tech-path-primary"
               stroke-dasharray="2 12"
             />
-            <polyline
-              points="20,140 50,100 80,120 110,70 140,85 170,50"
-              class="tech-path tech-path-primary"
-              style="stroke-dasharray: 300;"
+            <ellipse
+              cx="100"
+              cy="100"
+              rx="85"
+              ry="35"
+              class="tech-path"
+              transform="rotate(45 100 100)"
+            />
+            <ellipse
+              cx="100"
+              cy="100"
+              rx="85"
+              ry="35"
+              class="tech-path"
+              transform="rotate(-45 100 100)"
             />
             <circle cx="100" cy="100" r="4" class="node-pulse" />
+            <circle cx="30" cy="100" r="2" class="node-pulse opacity-20" />
+            <circle cx="170" cy="100" r="2" class="node-pulse opacity-20" />
           </svg>
           <div class="absolute bottom-2 font-mono text-[9px] text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">
-            Forecast Engine Active
+            Global Sync Active
           </div>
         </div>
       </div>
       
-<!-- Live FX Rates -->
+<!-- 4. Realtime Sync Card -->
       <div class="md:col-span-4 elite-card p-10 rounded-3xl group flex flex-col">
         <div class="flex items-center gap-3 mb-4">
-          <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+          <i data-lucide="zap" class="w-4 h-4 text-emerald-400"></i>
           <span class="font-mono text-[9px] text-zinc-600 tracking-[0.4em] uppercase">
-            Markets
+            Realtime
           </span>
         </div>
-        <h3 class="text-2xl font-serif italic mb-4">Live FX Rates</h3>
+        <h3 class="text-2xl font-serif italic mb-4">Live FX Exposure</h3>
         <p class="text-zinc-500 text-xs font-light mb-8">
-          Sub-second currency pair data via WebSocket market feeds. EUR/USD, GBP/USD, and majors — always current.
+          Real-time FX exposure across every entity. Policy thresholds, liquidity heatmaps, and breach alerts — the moment the market moves, you know.
         </p>
-        <div class="flex-1 relative bg-zinc-950/50 rounded-2xl border border-white/5 overflow-hidden p-4">
-          <div class="flex justify-between items-center mb-3">
-            <span class="font-mono text-[9px] text-zinc-500">EUR/USD</span>
-            <span class="font-mono text-[9px] text-emerald-400" id="fx-eurusd">1.0847</span>
+        <div class="flex-1 relative bg-zinc-950/50 rounded-2xl border border-white/5 overflow-hidden h-28">
+          <div class="absolute inset-0 bg-[radial-gradient(rgba(52,211,153,0.08)_1px,transparent_1px)] [background-size:24px_24px]">
           </div>
-          <div class="flex justify-between items-center mb-3">
-            <span class="font-mono text-[9px] text-zinc-500">GBP/USD</span>
-            <span class="font-mono text-[9px] text-emerald-400" id="fx-gbpusd">1.2634</span>
+          <div
+            id="cursor-ghost-1"
+            class="absolute pointer-events-none text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <i data-lucide="mouse-pointer-2" class="w-4 h-4 fill-emerald-400/20"></i>
+            <div class="ml-4 mt-2 px-2 py-1 bg-emerald-400 text-obsidian font-mono text-[7px] font-bold">
+              NODE_ALPHA
+            </div>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="font-mono text-[9px] text-zinc-500">USD/JPY</span>
-            <span class="font-mono text-[9px] text-emerald-400" id="fx-usdjpy">149.82</span>
+          <div
+            id="cursor-ghost-2"
+            class="absolute pointer-events-none text-zinc-700 opacity-40 group-hover:opacity-80 transition-opacity"
+          >
+            <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i>
           </div>
-          <div class="absolute bottom-2 right-3 font-mono text-[7px] text-zinc-700 uppercase">
-            Live · Polygon.io
+          <div
+            id="cursor-ghost-3"
+            class="absolute pointer-events-none text-emerald-600/30 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i>
+            <div class="ml-4 mt-2 px-2 py-1 border border-emerald-400/20 text-emerald-400 font-mono text-[6px]">
+              SYSTEM_ROOT
+            </div>
           </div>
         </div>
       </div>
       
-<!-- Anomaly Detection -->
-      <div class="md:col-span-4 elite-card p-10 rounded-3xl group flex flex-col">
+<!-- 5. Vector Search Card -->
+      <div class="md:col-span-4 elite-card p-10 rounded-3xl group flex flex-col h-full">
         <div class="flex items-center gap-3 mb-4">
-          <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-400"></i>
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
           <span class="font-mono text-[9px] text-zinc-600 tracking-[0.4em] uppercase">
-            Intelligence
+            Compliance
           </span>
         </div>
-        <h3 class="text-2xl font-serif italic mb-4">Anomaly Detection</h3>
-        <p class="text-zinc-500 text-xs font-light mb-6">
-          Statistical Z-score analysis flags unusual invoices and transfers. BERT sentiment scoring surfaces high-risk vendor communications.
+        <h3 class="text-2xl font-serif italic mb-4">SoD Enforcement</h3>
+        <p class="text-zinc-500 text-xs font-light mb-8">
+          Live Segregation of Duties monitoring. Toxic role combinations detected and remediated automatically — before your auditors find them.
         </p>
-        <div class="flex-1 relative flex items-center justify-center">
-          <svg viewBox="0 0 200 200" class="w-40 h-40">
-            <rect x="60" y="60" width="80" height="80" class="tech-path" />
-            <rect
-              x="75"
-              y="45"
-              width="80"
-              height="80"
-              class="tech-path tech-path-primary"
-              stroke-opacity="0.5"
-            />
-            <line x1="60" y1="60" x2="75" y2="45" class="tech-path" />
-            <line x1="140" y1="60" x2="155" y2="45" class="tech-path" />
-            <line x1="60" y1="140" x2="75" y2="125" class="tech-path" />
-            <line x1="140" y1="140" x2="155" y2="125" class="tech-path" />
-            <circle cx="100" cy="100" r="2" fill="#34d399" />
-            <circle cx="80" cy="80" r="1.5" fill="#34d399" style="opacity:0.4;" />
-            <circle cx="130" cy="120" r="1.5" fill="#34d399" style="opacity:0.4;" />
+        <div class="flex-1 relative flex items-center justify-center overflow-hidden">
+          <svg viewBox="0 0 200 200" class="w-48 h-48">
+            <g class="parallax-layer" data-speed="0.2">
+              <rect x="60" y="60" width="80" height="80" class="tech-path" />
+              <rect
+                x="75"
+                y="45"
+                width="80"
+                height="80"
+                class="tech-path tech-path-primary"
+                stroke-opacity="0.5"
+              />
+              <line x1="60" y1="60" x2="75" y2="45" class="tech-path" />
+              <line x1="140" y1="60" x2="155" y2="45" class="tech-path" />
+              <line x1="60" y1="140" x2="75" y2="125" class="tech-path" />
+              <line x1="140" y1="140" x2="155" y2="125" class="tech-path" />
+            </g>
+            <!-- High density dots -->
+            <g id="vector-dots-matrix"></g>
           </svg>
         </div>
       </div>
     </div>
   </section>
   
-<!-- ── How It Works ──────────────────────────────────────────────────────── -->
-  <section id="technology" class="py-32 px-4 max-w-4xl mx-auto">
+<!-- Expandable Modules / Accordions -->
+  <section id="accordions" class="py-32 px-4 max-w-4xl mx-auto">
     <h2 class="text-5xl font-serif italic mb-16 text-center">
-      How It <span class="text-emerald-400">Works</span>
+      Technical <span class="text-emerald-400">Deep Dive</span>
     </h2>
     <div class="space-y-4">
       <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
         <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-          <span>🔐 Biometric Transfer Authorization</span>
-          <span class="accordion-icon transition-transform duration-300 text-emerald-400">+</span>
+          <span>🔐 Biometric Authentication & Step-Up Authorization</span>
+          <span class="accordion-icon transition-transform duration-300">+</span>
         </button>
         <div class="accordion-content">
           <div class="p-6 pt-0 border-t border-white/5 mt-2">
-            <p class="text-zinc-400 text-sm font-light mb-4 leading-relaxed">
-              Transfers below your configured threshold are auto-approved. High-value transfers pause for biometric step-up verification from a designated approver — enforced at the aggregate level, not just the UI.
-            </p>
-            <pre class="font-mono text-xs bg-black/50 p-4 rounded-lg overflow-x-auto"><span class="text-emerald-400">$</span> equinox transfer --amount 2_400_000 --currency EUR
-<span class="text-zinc-500">✓ Threshold $1,000,000 exceeded — approval required
-✓ Step-up challenge issued to approver@group.io
-✓ Biometric verified (WebAuthn / FIDO2)
-✓ VaultDebited → VaultCredited — immutable event recorded</span></pre>
+            <pre
+              phx-no-curly-interpolation
+              class="font-mono text-xs bg-black/50 p-4 rounded-lg overflow-x-auto"
+            ><span class="text-emerald-400">$</span> equinox auth enroll --method webauthn --user cfo@meridian.com\n<span class="text-zinc-500">✓ Hardware credential registered: Touch ID (FIDO2/WebAuthn)\n✓ Step-up policy: transfers &gt; $500K require re-authentication\n✓ Zero passwords stored — phishing surface: none</span></pre>
           </div>
         </div>
       </div>
-
       <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
         <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-          <span>⚡ Cross-Subsidiary Netting Engine</span>
-          <span class="accordion-icon transition-transform duration-300 text-emerald-400">+</span>
+          <span>⚡ Intercompany Netting Engine Architecture</span>
+          <span class="accordion-icon transition-transform duration-300">+</span>
         </button>
         <div class="accordion-content">
           <div class="p-6 pt-0 border-t border-white/5 mt-2">
-            <p class="text-zinc-400 text-sm font-light mb-4 leading-relaxed">
-              Before any external settlement, Equinox offsets intercompany invoices within the same netting cycle. Only the net balance moves — reducing FX conversion costs across your subsidiary network.
-            </p>
             <div class="grid md:grid-cols-2 gap-4">
               <div class="bg-white/5 p-4 rounded-lg">
-                <div class="text-emerald-400 font-mono text-xs mb-1">NETTING REDUCTION</div>
-                <div class="text-2xl font-bold">Up to 70%</div>
-                <div class="text-zinc-500 text-xs mt-1">fewer external transfers</div>
+                <div class="text-emerald-400 font-mono text-xs">LATENCY</div>
+                <div class="text-2xl font-bold">0.14s</div>
               </div>
               <div class="bg-white/5 p-4 rounded-lg">
-                <div class="text-emerald-400 font-mono text-xs mb-1">CYCLE FREQUENCY</div>
-                <div class="text-2xl font-bold">Configurable</div>
-                <div class="text-zinc-500 text-xs mt-1">daily / weekly / monthly</div>
+                <div class="text-emerald-400 font-mono text-xs">THROUGHPUT</div>
+                <div class="text-2xl font-bold">1,247 TX/S</div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
       <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
         <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-          <span>📊 6-Metric Compliance Control Suite</span>
-          <span class="accordion-icon transition-transform duration-300 text-emerald-400">+</span>
+          <span>🌐 Multi-Entity Settlement Mesh</span>
+          <span class="accordion-icon transition-transform duration-300">+</span>
         </button>
         <div class="accordion-content">
           <div class="p-6 pt-0 border-t border-white/5 mt-2">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="flex items-start gap-3 p-3 bg-white/3 rounded-lg">
-                <span class="text-emerald-400 text-xs mt-0.5">01</span>
-                <div>
-                  <div class="text-sm font-medium">SoD Cleanliness</div>
-                  <div class="text-zinc-500 text-xs">
-                    No user holds conflicting roles (trader + approver)
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-white/3 rounded-lg">
-                <span class="text-emerald-400 text-xs mt-0.5">02</span>
-                <div>
-                  <div class="text-sm font-medium">Transfer Policy</div>
-                  <div class="text-zinc-500 text-xs">% transfers within approved thresholds</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-white/3 rounded-lg">
-                <span class="text-emerald-400 text-xs mt-0.5">03</span>
-                <div>
-                  <div class="text-sm font-medium">Auth Integrity</div>
-                  <div class="text-zinc-500 text-xs">Failed logins and session anomalies</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-white/3 rounded-lg">
-                <span class="text-emerald-400 text-xs mt-0.5">04</span>
-                <div>
-                  <div class="text-sm font-medium">Liquidity Accuracy</div>
-                  <div class="text-zinc-500 text-xs">Forecast vs. actual cash variance</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-white/3 rounded-lg">
-                <span class="text-emerald-400 text-xs mt-0.5">05</span>
-                <div>
-                  <div class="text-sm font-medium">Escalation Integrity</div>
-                  <div class="text-zinc-500 text-xs">Approval workflow compliance rate</div>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-white/3 rounded-lg">
-                <span class="text-emerald-400 text-xs mt-0.5">06</span>
-                <div>
-                  <div class="text-sm font-medium">Control Drift</div>
-                  <div class="text-zinc-500 text-xs">
-                    Historical trend of all five metrics above
-                  </div>
-                </div>
-              </div>
+            <div class="flex flex-wrap gap-2 text-zinc-400 text-sm font-light">
+              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
+                North America: 48 entities
+              </span>
+              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
+                Europe: 52 entities
+              </span>
+              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
+                APAC: 31 entities
+              </span>
+              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
+                Africa: 11 entities
+              </span>
             </div>
           </div>
         </div>
@@ -466,736 +445,467 @@
     </div>
   </section>
   
-<!-- ── Testimonials ──────────────────────────────────────────────────────── -->
-  <section id="testimonials" class="py-32 relative z-10 overflow-hidden">
+<!-- Testimonial Marquee Section -->
+  <section id="carousel" class="py-32 relative z-10 overflow-hidden">
     <div class="max-w-7xl mx-auto text-center mb-16 px-6">
       <h2 class="text-5xl md:text-7xl font-serif italic mb-6">
-        Trusted by <span class="text-emerald-400">Finance Teams</span>
+        Trusted by <span class="text-emerald-400">Global Institutions</span>
       </h2>
       <p class="text-zinc-500 font-light max-w-2xl mx-auto text-lg mb-8">
-        What CFOs, treasury officers, and compliance leads have to say about Equinox.
+        What Group Treasurers, CFOs, and Finance Controllers say about running their treasury on Equinox.
       </p>
       <div class="flex justify-center gap-4">
-        <a
-          href={~p"/register"}
-          class="bg-zinc-900 border border-white/10 px-6 py-3 rounded-md font-mono text-[10px] uppercase tracking-widest flex items-center gap-3 hover:bg-zinc-800 transition-colors"
-        >
-          <i data-lucide="users" class="w-4 h-4"></i> Join the Private Access Programme
-        </a>
+        <button class="bg-zinc-900 border border-white/10 px-6 py-3 rounded-md font-mono text-[10px] uppercase tracking-widest flex items-center gap-3 hover:bg-zinc-800 transition-colors">
+          <i data-lucide="users" class="w-4 h-4"></i> Join Institutional Network
+        </button>
       </div>
     </div>
 
     <div class="marquee-container mask-fade-edges relative max-w-7xl mx-auto px-4 overflow-hidden">
+      <!-- Row 1: Left to Right -->
       <div class="marquee-track marquee-ltr">
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-              MO
+              CF
             </div>
             <div>
-              <div class="text-[10px] font-bold">@mokonkwo</div>
+              <div class="text-[10px] font-bold">@cfernandez</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Group CFO, Meridian Manufacturing
+                Group Treasurer, Meridian Holdings
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Equinox gave us a single view of FX exposure across 14 subsidiaries. Reconciliation that took our team days now runs automatically.
+            Reduced our month-end netting cycle from 12 days to 4 hours. The audit trail alone justified the entire deployment.
           </p>
         </div>
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center text-blue-400 text-xs font-bold">
-              AT
+              KP
             </div>
             <div>
-              <div class="text-[10px] font-bold">@athompson</div>
+              <div class="text-[10px] font-bold">@kpatel</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Head of Treasury, Vantage Retail
+                Head of Treasury, Atlas Group
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The biometric step-up for high-value transfers is exactly what our auditors wanted. Every approval is traceable to a specific person and timestamp.
+            34 subsidiary cash positions, one live view. We no longer wait until T+3 to know where we stand. It changed everything.
           </p>
         </div>
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white text-xs font-bold">
-              CL
+              LO
             </div>
             <div>
-              <div class="text-[10px] font-bold">@claurent</div>
+              <div class="text-[10px] font-bold">@l.okonkwo</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                CCO, Ardent Financial Group
+                Finance Controller, Zenith Corp
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The SoD conflict detection alone justified the switch. We caught a role overlap that had existed undetected for two years.
+            The SoD enforcement is automatic. Our last regulatory audit was the first in five years with zero findings.
           </p>
         </div>
+        <!-- Duplicate for loop -->
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-              DB
+              CF
             </div>
             <div>
-              <div class="text-[10px] font-bold">@dboateng</div>
+              <div class="text-[10px] font-bold">@cfernandez</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Finance Director, Atlas Logistics
+                Group Treasurer, Meridian Holdings
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Live FX rates in the approval workflow means our traders price correctly at execution, not an hour later. That's real cost savings.
-          </p>
-        </div>
-        <!-- duplicates for seamless loop -->
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-              MO
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@mokonkwo</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Group CFO, Meridian Manufacturing
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Equinox gave us a single view of FX exposure across 14 subsidiaries. Reconciliation that took our team days now runs automatically.
-          </p>
-        </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center text-blue-400 text-xs font-bold">
-              AT
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@athompson</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Head of Treasury, Vantage Retail
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The biometric step-up for high-value transfers is exactly what our auditors wanted. Every approval is traceable to a specific person and timestamp.
-          </p>
-        </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white text-xs font-bold">
-              CL
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@claurent</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                CCO, Ardent Financial Group
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The SoD conflict detection alone justified the switch. We caught a role overlap that had existed undetected for two years.
-          </p>
-        </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-              DB
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@dboateng</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Finance Director, Atlas Logistics
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Live FX rates in the approval workflow means our traders price correctly at execution, not an hour later. That's real cost savings.
+            Reduced our month-end netting cycle from 12 days to 4 hours. The audit trail alone justified the entire deployment.
           </p>
         </div>
       </div>
-
+      
+<!-- Row 2: Right to Left -->
       <div class="marquee-track marquee-rtl mt-4">
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-purple-400/20 flex items-center justify-center text-purple-400 text-xs font-bold">
-              JH
+              SB
             </div>
             <div>
-              <div class="text-[10px] font-bold">@jharrison</div>
+              <div class="text-[10px] font-bold">@s.brennan</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                VP Operations, Sovereign Capital
+                CFO, Vantage Multinationals
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The anomaly detection flagged a vendor invoice that was 50x the historical average. It paid for itself on day one.
+            SAP reconciliation that used to take our team a full week now runs silently in the background. We just get the confirmation.
           </p>
         </div>
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-amber-400/20 flex items-center justify-center text-amber-400 text-xs font-bold">
-              RA
+              RN
             </div>
             <div>
-              <div class="text-[10px] font-bold">@rashidi</div>
+              <div class="text-[10px] font-bold">@r.nakamura</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Treasury Analyst, CoreGroup
+                Treasury Manager, Apex Pacific
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Replacing Excel forecasts with Equinox took one sprint. Thirty-day cash flow visibility with real bank data is a different world.
+            The AI anomaly detection flagged an unusual FX exposure pattern on day one. Our previous system would never have caught it.
           </p>
         </div>
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white text-xs font-bold">
-              SK
+              MA
             </div>
             <div>
-              <div class="text-[10px] font-bold">@skumar</div>
+              <div class="text-[10px] font-bold">@m.adeyemi</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Compliance Lead, Indus Conglomerate
+                Group CFO, Kondor Holdings
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Full event-sourced audit trail means I can answer any regulator question in minutes, not weeks of digging through email threads.
+            We operate across 9 African markets. Equinox gave us a single FX position view and automated netting we never thought possible at this scale.
           </p>
         </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-              EP
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@epearce</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                CFO, Greenfield Holdings
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The netting engine reduced our intercompany transfer volume by 60%. That's direct FX cost savings every single cycle.
-          </p>
-        </div>
-        <!-- duplicates -->
+        <!-- Duplicate for loop -->
         <div class="review-card">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-purple-400/20 flex items-center justify-center text-purple-400 text-xs font-bold">
-              JH
+              SB
             </div>
             <div>
-              <div class="text-[10px] font-bold">@jharrison</div>
+              <div class="text-[10px] font-bold">@s.brennan</div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                VP Operations, Sovereign Capital
+                CFO, Vantage Multinationals
               </div>
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The anomaly detection flagged a vendor invoice that was 50x the historical average. It paid for itself on day one.
-          </p>
-        </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-amber-400/20 flex items-center justify-center text-amber-400 text-xs font-bold">
-              RA
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@rashidi</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Treasury Analyst, CoreGroup
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Replacing Excel forecasts with Equinox took one sprint. Thirty-day cash flow visibility with real bank data is a different world.
-          </p>
-        </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-white text-xs font-bold">
-              SK
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@skumar</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                Compliance Lead, Indus Conglomerate
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            Full event-sourced audit trail means I can answer any regulator question in minutes, not weeks of digging through email threads.
-          </p>
-        </div>
-        <div class="review-card">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400 text-xs font-bold">
-              EP
-            </div>
-            <div>
-              <div class="text-[10px] font-bold">@epearce</div>
-              <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
-                CFO, Greenfield Holdings
-              </div>
-            </div>
-          </div>
-          <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            The netting engine reduced our intercompany transfer volume by 60%. That's direct FX cost savings every single cycle.
+            SAP reconciliation that used to take our team a full week now runs silently in the background. We just get the confirmation.
           </p>
         </div>
       </div>
     </div>
   </section>
   
-<!-- ── Pricing ───────────────────────────────────────────────────────────── -->
+<!-- Developer/Technical Section -->
+  <section class="py-32 px-4 max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-20 items-center">
+      <div>
+        <div class="bracket-card rounded-2xl overflow-hidden shadow-2xl">
+          <div class="terminal-header px-6 py-3 flex items-center gap-2">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+            <span class="font-mono text-[10px] text-zinc-500 ml-4">equinox-sdk.js</span>
+          </div>
+          <div
+            phx-no-curly-interpolation
+            class="p-8 font-mono text-sm leading-relaxed bg-obsidian"
+          >
+            <div class="text-zinc-500">// Initialize Equinox treasury gateway</div>
+            <div>
+              <span class="text-emerald-400">const</span>
+              client = <span class="text-emerald-400">new</span>
+              Equinox({ apiKey: <span class="text-zinc-400">'eq_live_v4_...'</span>
+              });
+            </div>
+            <div class="mt-4">
+              <span class="text-emerald-400">await</span> client.netting.runCycle({
+            </div>
+            <div class="ml-4">
+              entities: [<span class="text-zinc-400">'sub_uk'</span>, <span class="text-zinc-400">'sub_ae'</span>, <span class="text-zinc-400">'sub_ng'</span>],
+            </div>
+            <div class="ml-4">currency: <span class="text-zinc-400">'USD'</span></div>
+            <div>});</div>
+            <div class="mt-4 text-emerald-400">
+              ✓ Netting cycle settled: 3 entities · $4.2M · 0.14s
+            </div>
+            <div class="typing-cursor mt-2"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2 class="text-5xl font-serif italic mb-8">
+          Built by Finance Engineers. <br />For
+          <span class="text-emerald-400">Finance Engineers.</span>
+        </h2>
+        <p class="text-zinc-400 text-lg mb-8">
+          Deploy treasury workflows at institutional scale. Event-sourced architecture you can trust. SDKs in Elixir, Python, and TypeScript.
+        </p>
+        <ul class="space-y-4">
+          <li class="flex gap-4">
+            <i data-lucide="layers" class="text-emerald-400 w-5 h-5"></i><span class="text-zinc-300 font-light">Every transaction is an immutable, replayable event — by design.</span>
+          </li>
+          <li class="flex gap-4">
+            <i data-lucide="git-branch" class="text-emerald-400 w-5 h-5"></i><span class="text-zinc-300 font-light">CQRS: commands and queries fully separated for audit-safe operations.</span>
+          </li>
+          <li class="flex gap-4">
+            <i data-lucide="fingerprint" class="text-emerald-400 w-5 h-5"></i><span class="text-zinc-300 font-light">WebAuthn SDK: hardware-backed identity in one line of code.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  
+<!-- Pricing Section -->
   <section id="pricing" class="py-32 px-4 max-w-7xl mx-auto">
     <div class="text-center mb-16">
       <h2 class="text-5xl font-serif italic mb-4">
-        Transparent <span class="text-emerald-400">Pricing</span>
+        Pricing <span class="text-emerald-400">Tiers</span>
       </h2>
-      <p class="text-zinc-400 font-light max-w-xl mx-auto">
-        No seat fees. No per-transaction charges. One flat rate per entity tier — billed annually.
-      </p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-      <div class="pricing-card">
-        <div class="font-mono text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-4">
-          Foundation
-        </div>
-        <div class="text-4xl font-light mb-1">
-          $2,400<span class="text-lg text-zinc-500">/mo</span>
-        </div>
-        <div class="text-zinc-600 text-xs font-mono mb-8">
-          Up to 5 subsidiaries · Billed annually
-        </div>
-        <ul class="space-y-3 mb-10">
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Real-time FX exposure tracking
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Vault &amp; transfer management
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Biometric authentication
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Cross-domain audit trail
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-500">
-            <span class="text-zinc-700">–</span> Netting engine
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-500">
-            <span class="text-zinc-700">–</span> AI anomaly detection
-          </li>
-        </ul>
-        <a
-          href={~p"/register"}
-          class="block w-full text-center border border-white/10 hover:border-emerald-400 text-white py-3 rounded-full font-mono text-xs tracking-widest uppercase transition-all"
+    <div class="flex justify-center mb-12">
+      <div class="bg-white/5 rounded-full p-1 flex gap-1">
+        <button
+          class="pricing-toggle px-6 py-2 rounded-full text-sm transition-all"
+          data-period="monthly"
         >
-          Get Started
-        </a>
+          Monthly
+        </button>
+        <button
+          class="pricing-toggle px-6 py-2 rounded-full text-sm transition-all"
+          data-period="annual"
+        >
+          Annual <span class="text-emerald-400 text-xs">-20%</span>
+        </button>
       </div>
-
-      <div class="pricing-card featured">
-        <div class="flex justify-between items-center mb-4">
-          <span class="font-mono text-[9px] text-emerald-400 uppercase tracking-[0.3em]">
-            Enterprise
-          </span>
-          <span class="font-mono text-[8px] bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 px-2 py-1 rounded-full uppercase">
+    </div>
+    <div class="grid md:grid-cols-3 gap-8 items-stretch">
+      <div class="">
+        <div class="bracket-card rounded-3xl p-8 transition-all hover:scale-[1.02] active:scale-[0.98] h-full flex flex-col justify-between">
+          <div>
+            <h3 class="text-2xl font-bold mb-2">Starter</h3>
+            <div
+              class="text-5xl font-bold mt-4 price-display"
+              data-monthly="199"
+              data-annual="159"
+            >
+              $199
+            </div>
+            <div class="text-zinc-500 text-sm mb-8 price-period text-glow-emerald">/month</div>
+            <ul class="space-y-4 mb-8 text-sm text-zinc-400">
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                Up to $50M monthly volume
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                Up to 3 subsidiary entities
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                SAP / Oracle ERP integration
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                Standard audit exports
+              </li>
+            </ul>
+          </div>
+          <button class="btn-liquid w-full border border-white/20 py-4 hover:bg-white/5 transition-all font-mono text-[10px] tracking-widest uppercase mt-auto">
+            <span class="relative z-10">Get Started</span>
+            <div class="liquid-bg bg-white/5"></div>
+          </button>
+        </div>
+      </div>
+      <div class="">
+        <div class="bracket-card rounded-3xl p-8 !border-[3px] !border-solid !border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.2)] relative transition-all hover:scale-[1.02] active:scale-[0.98] h-full flex flex-col justify-between overflow-visible">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-400 text-obsidian text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-[0_0_30px_rgba(52,211,153,0.6)] z-20">
             Most Popular
-          </span>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold mb-2">Professional</h3>
+            <div
+              class="text-5xl font-bold mt-4 price-display"
+              data-monthly="799"
+              data-annual="639"
+            >
+              $799
+            </div>
+            <div class="text-zinc-500 text-sm mb-8 price-period text-glow-emerald">/month</div>
+            <ul class="space-y-4 mb-8 text-sm text-zinc-400">
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                Unlimited volume & entities
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                Live FX exposure dashboard
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                SoD monitoring & alerts
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> 24/7 Priority Support
+              </li>
+            </ul>
+          </div>
+          <button class="btn-liquid w-full bg-emerald-400 text-obsidian py-4 font-bold transition-all font-mono text-[10px] tracking-widest uppercase mt-auto shadow-[0_0_20px_rgba(52,211,153,0.3)]">
+            <span class="relative z-10">Start Trial</span>
+            <div class="liquid-bg"></div>
+          </button>
         </div>
-        <div class="text-4xl font-light mb-1">
-          $8,000<span class="text-lg text-zinc-500">/mo</span>
+      </div>
+      <div class="">
+        <div class="bracket-card rounded-3xl p-8 transition-all hover:scale-[1.02] active:scale-[0.98] h-full flex flex-col justify-between">
+          <div>
+            <h3 class="text-2xl font-bold mb-2 text-zinc-300">Enterprise</h3>
+            <div class="text-4xl font-bold mt-4">Custom</div>
+            <div class="text-zinc-500 text-sm mb-8">contact sales</div>
+            <ul class="space-y-4 mb-8 text-sm text-zinc-400">
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                On-premise deployment option
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Custom ERP connectors
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                Dedicated compliance team
+              </li>
+              <li class="flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                99.999% SLA + white-glove onboarding
+              </li>
+            </ul>
+          </div>
+          <button class="btn-liquid w-full border border-white/20 py-4 hover:bg-white/5 transition-all font-mono text-[10px] tracking-widest uppercase mt-auto">
+            <span class="relative z-10">Contact Sales</span>
+            <div class="liquid-bg bg-white/5"></div>
+          </button>
         </div>
-        <div class="text-zinc-600 text-xs font-mono mb-8">
-          Unlimited subsidiaries · Billed annually
+      </div>
+    </div>
+  </section>
+  
+<!-- Roadmap -->
+  <section id="roadmap" class="py-32 px-4 max-w-5xl mx-auto">
+    <div class="flex flex-col md:flex-row gap-20">
+      <div class="w-full md:w-1/3">
+        <h2 class="text-5xl font-serif italic mb-6 sticky top-32">
+          Development <span class="text-emerald-400">Chronicle.</span>
+        </h2>
+        <p class="text-zinc-500 font-light leading-relaxed">
+          Our commitment to institutional evolution is unwavering.
+        </p>
+      </div>
+      <div class="w-full md:w-2/3 relative" id="roadmap-container">
+        <div class="absolute left-0 top-0 w-px h-full bg-zinc-800/10">
+          <div
+            id="roadmap-progress"
+            class="absolute left-0 top-0 w-px bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-[0_0_15px_#34d399]"
+            style="height: 0%;"
+          >
+          </div>
         </div>
-        <ul class="space-y-3 mb-10">
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Everything in Foundation
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Cross-subsidiary netting engine
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> 30-day liquidity forecasting
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> AI anomaly detection (BERT)
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> SAP ERP integration
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> 6-metric compliance scorecard
-          </li>
-        </ul>
+        <div class="space-y-24 pl-12">
+          <div class="roadmap-item relative opacity-0 translate-y-10" data-percent="25">
+            <div class="absolute -left-[53.5px] top-1 w-4 h-4 bg-obsidian rounded-full border border-emerald-400/20 z-10 flex items-center justify-center">
+              <div class="w-1.5 h-1.5 bg-emerald-400/20 rounded-full roadmap-dot transition-all duration-300">
+              </div>
+            </div>
+            <span class="font-mono text-[10px] tracking-widest text-emerald-400 block mb-2 uppercase">
+              Q4 2024 • COMPLETED
+            </span>
+            <h3 class="text-2xl font-serif italic mb-3">Core Platform Launch</h3>
+            <p class="text-zinc-400 font-light">
+              Deployed across 80+ enterprise treasury teams with zero-downtime migration from legacy ERP-dependent workflows.
+            </p>
+          </div>
+
+          <div class="roadmap-item relative opacity-0 translate-y-10" data-percent="50">
+            <div class="absolute -left-[53.5px] top-1 w-4 h-4 bg-obsidian rounded-full border border-emerald-400/20 z-10 flex items-center justify-center">
+              <div class="w-1.5 h-1.5 bg-emerald-400/20 rounded-full roadmap-dot transition-all duration-300">
+              </div>
+            </div>
+            <span class="font-mono text-[10px] tracking-widest text-emerald-400 block mb-2 uppercase">
+              Q1 2025 • ACTIVE
+            </span>
+            <h3 class="text-2xl font-serif italic mb-3">AI Anomaly Detection Engine</h3>
+            <p class="text-zinc-400 font-light">
+              Live ML-based detection of unusual treasury movements — flags fraud patterns and policy drift before they escalate.
+            </p>
+          </div>
+
+          <div class="roadmap-item relative opacity-0 translate-y-10" data-percent="75">
+            <div class="absolute -left-[53.5px] top-1 w-4 h-4 bg-obsidian rounded-full border border-emerald-400/20 z-10 flex items-center justify-center">
+              <div class="w-1.5 h-1.5 bg-emerald-400/20 rounded-full roadmap-dot transition-all duration-300">
+              </div>
+            </div>
+            <span class="font-mono text-[10px] tracking-widest text-zinc-600 block mb-2 uppercase">
+              Q2 2025 • HORIZON
+            </span>
+            <h3 class="text-2xl font-serif italic mb-3">Multi-Bank Real-Time Connectivity</h3>
+            <p class="text-zinc-400 font-light">
+              Direct API integrations with 40+ global banking partners for real-time balance feeds and instant statement ingestion.
+            </p>
+          </div>
+
+          <div class="roadmap-item relative opacity-0 translate-y-10" data-percent="100">
+            <div class="absolute -left-[53.5px] top-1 w-4 h-4 bg-obsidian rounded-full border border-emerald-400/20 z-10 flex items-center justify-center">
+              <div class="w-1.5 h-1.5 bg-emerald-400/20 rounded-full roadmap-dot transition-all duration-300">
+              </div>
+            </div>
+            <span class="font-mono text-[10px] tracking-widest text-zinc-600 block mb-2 uppercase">
+              Q3 2025 • ROADMAP
+            </span>
+            <h3 class="text-2xl font-serif italic mb-3">Regulatory Reporting Suite</h3>
+            <p class="text-zinc-400 font-light">
+              Automated IFRS/GAAP-compliant reporting with central bank FX disclosure integration and one-click audit export.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+<!-- Final CTA -->
+  <section class="py-40 relative px-4 overflow-hidden border-t border-white/5">
+    <div class="absolute bottom-0 left-0 w-full h-[500px] bg-emerald-500/5 blur-[100px] -z-10">
+    </div>
+    <div class="max-w-5xl mx-auto text-center relative">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-serif italic font-black text-white/[0.012] pointer-events-none select-none tracking-tighter uppercase">
+        EQUINOX
+      </div>
+      <h2 class="hero-title font-serif italic mb-12">
+        The Future is <span class="text-emerald-400 text-glow-emerald">Verifiable.</span>
+      </h2>
+      <p class="text-zinc-400 text-xl mb-12 max-w-xl mx-auto font-light">
+        Give your treasury team complete control, complete visibility, and complete confidence — across every subsidiary, from day one. Onboard in 48 hours.
+      </p>
+      <div class="flex flex-col md:flex-row gap-6 justify-center">
         <a
           href={~p"/register"}
-          class="block w-full text-center bg-emerald-400 text-obsidian py-3 rounded-full font-mono text-xs tracking-widest uppercase font-bold hover:bg-emerald-300 transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+          class="btn-liquid bg-emerald-400 text-obsidian px-12 py-6 rounded-sm font-mono text-xs tracking-widest uppercase font-bold shadow-[0_0_30px_rgba(52,211,153,0.3)]"
         >
-          Request Access
+          <span class="relative z-10">Request a Demo</span>
+          <div class="liquid-bg"></div>
         </a>
-      </div>
-
-      <div class="pricing-card">
-        <div class="font-mono text-[9px] text-zinc-500 uppercase tracking-[0.3em] mb-4">
-          Sovereign
-        </div>
-        <div class="text-4xl font-light mb-1">Custom</div>
-        <div class="text-zinc-600 text-xs font-mono mb-8">
-          White-glove onboarding · Dedicated SLA
-        </div>
-        <ul class="space-y-3 mb-10">
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Everything in Enterprise
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> On-premise deployment option
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Custom payment rail integrations
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> Dedicated implementation team
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> 99.99% uptime SLA
-          </li>
-          <li class="flex items-center gap-3 text-sm text-zinc-400">
-            <span class="text-emerald-400">✓</span> 24/7 priority support
-          </li>
-        </ul>
         <a
-          href="mailto:contact@equinox.io"
-          class="block w-full text-center border border-white/10 hover:border-emerald-400 text-white py-3 rounded-full font-mono text-xs tracking-widest uppercase transition-all"
+          href="#resources"
+          class="btn-liquid px-12 py-6 border border-white/10 hover:border-emerald-400 transition-colors rounded-sm font-mono text-xs tracking-widest uppercase text-white"
         >
-          Contact Sales
+          <span class="relative z-10">Contact Treasury Sales</span>
+          <div class="liquid-bg bg-white/5"></div>
         </a>
       </div>
-    </div>
-  </section>
-  
-<!-- ── Roadmap ───────────────────────────────────────────────────────────── -->
-  <section id="roadmap" class="py-32 px-4 max-w-4xl mx-auto">
-    <div class="text-center mb-16">
-      <h2 class="text-5xl font-serif italic mb-4">
-        Platform <span class="text-emerald-400">Roadmap</span>
-      </h2>
-      <p class="text-zinc-400 font-light max-w-xl mx-auto">
-        Built in phases. Every milestone is shipped, tested, and audited before the next begins.
-      </p>
-    </div>
-
-    <div class="relative pl-8">
-      <div class="absolute left-0 top-0 bottom-0 roadmap-line"></div>
-
-      <div class="mb-12 relative">
-        <div class="roadmap-dot active absolute -left-10 top-1"></div>
-        <div class="font-mono text-[9px] text-emerald-400 uppercase tracking-widest mb-2">
-          Q1 2026 · Shipped
-        </div>
-        <h3 class="text-xl font-bold mb-2">Identity &amp; Compliance</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          WebAuthn biometric authentication, user lifecycle management, PEP screening, session management, and cross-domain platform audit trail. Full event-sourced architecture established.
-        </p>
-        <div class="flex gap-2 mt-4 flex-wrap">
-          <span class="px-2 py-1 bg-emerald-400/10 border border-emerald-400/20 rounded font-mono text-[8px] text-emerald-400 uppercase">
-            Identity
-          </span>
-          <span class="px-2 py-1 bg-emerald-400/10 border border-emerald-400/20 rounded font-mono text-[8px] text-emerald-400 uppercase">
-            Organization
-          </span>
-          <span class="px-2 py-1 bg-emerald-400/10 border border-emerald-400/20 rounded font-mono text-[8px] text-emerald-400 uppercase">
-            Compliance
-          </span>
-          <span class="px-2 py-1 bg-emerald-400/10 border border-emerald-400/20 rounded font-mono text-[8px] text-emerald-400 uppercase">
-            Audit Trail
-          </span>
-        </div>
-      </div>
-
-      <div class="mb-12 relative">
-        <div class="roadmap-dot active absolute -left-10 top-1"></div>
-        <div class="font-mono text-[9px] text-emerald-400 uppercase tracking-widest mb-2">
-          Q2 2026 · In Progress
-        </div>
-        <h3 class="text-xl font-bold mb-2">Treasury Core</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Real-time FX exposure tracking, vault management, transfer authorization workflows with biometric step-up, cross-subsidiary netting engine, and live market data integration.
-        </p>
-        <div class="flex gap-2 mt-4 flex-wrap">
-          <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[8px] text-zinc-500 uppercase">
-            FX Exposure
-          </span>
-          <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[8px] text-zinc-500 uppercase">
-            Vaults
-          </span>
-          <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[8px] text-zinc-500 uppercase">
-            Transfers
-          </span>
-          <span class="px-2 py-1 bg-white/5 border border-white/10 rounded font-mono text-[8px] text-zinc-500 uppercase">
-            Netting
-          </span>
-        </div>
-      </div>
-
-      <div class="mb-12 relative">
-        <div class="roadmap-dot absolute -left-10 top-1"></div>
-        <div class="font-mono text-[9px] text-zinc-600 uppercase tracking-widest mb-2">
-          Q3 2026 · Planned
-        </div>
-        <h3 class="text-xl font-bold mb-2 text-zinc-400">ERP &amp; Payments</h3>
-        <p class="text-zinc-600 text-sm font-light leading-relaxed">
-          SAP invoice ingestion, CSV bank statement parsing, automated reconciliation, bulk payment orchestration, and external payment rail integration.
-        </p>
-        <div class="flex gap-2 mt-4 flex-wrap">
-          <span class="px-2 py-1 bg-white/3 border border-white/5 rounded font-mono text-[8px] text-zinc-700 uppercase">
-            SAP
-          </span>
-          <span class="px-2 py-1 bg-white/3 border border-white/5 rounded font-mono text-[8px] text-zinc-700 uppercase">
-            Reconciliation
-          </span>
-          <span class="px-2 py-1 bg-white/3 border border-white/5 rounded font-mono text-[8px] text-zinc-700 uppercase">
-            Payments
-          </span>
-        </div>
-      </div>
-
-      <div class="relative">
-        <div class="roadmap-dot absolute -left-10 top-1"></div>
-        <div class="font-mono text-[9px] text-zinc-600 uppercase tracking-widest mb-2">
-          Q4 2026 · Planned
-        </div>
-        <h3 class="text-xl font-bold mb-2 text-zinc-400">Intelligence &amp; Forecasting</h3>
-        <p class="text-zinc-600 text-sm font-light leading-relaxed">
-          AI anomaly detection (BERT + Z-score), 30-day liquidity forecasting, vendor sentiment analysis, 6-metric compliance scorecard, and automated remediation recommendations.
-        </p>
-        <div class="flex gap-2 mt-4 flex-wrap">
-          <span class="px-2 py-1 bg-white/3 border border-white/5 rounded font-mono text-[8px] text-zinc-700 uppercase">
-            AI Detection
-          </span>
-          <span class="px-2 py-1 bg-white/3 border border-white/5 rounded font-mono text-[8px] text-zinc-700 uppercase">
-            Forecasting
-          </span>
-          <span class="px-2 py-1 bg-white/3 border border-white/5 rounded font-mono text-[8px] text-zinc-700 uppercase">
-            Compliance
-          </span>
-        </div>
-      </div>
-    </div>
-  </section>
-  
-<!-- ── Security ──────────────────────────────────────────────────────────── -->
-  <section id="security" class="py-32 px-4 max-w-7xl mx-auto">
-    <div class="text-center mb-16">
-      <h2 class="text-5xl font-serif italic mb-4">
-        Security by <span class="text-emerald-400">Design</span>
-      </h2>
-      <p class="text-zinc-400 font-light max-w-xl mx-auto">
-        Institutional buyers don't ask if it's secure. They ask how. Here's how.
-      </p>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-      <div class="elite-card p-8 rounded-2xl">
-        <div class="w-10 h-10 bg-emerald-400/10 border border-emerald-400/20 rounded-xl flex items-center justify-center mb-5">
-          <i data-lucide="fingerprint" class="w-5 h-5 text-emerald-400"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-3">WebAuthn / FIDO2</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Biometric authentication with hardware-bound credentials. No passwords stored. No phishing surface. Step-up required for every high-value transfer.
-        </p>
-      </div>
-      <div class="elite-card p-8 rounded-2xl">
-        <div class="w-10 h-10 bg-emerald-400/10 border border-emerald-400/20 rounded-xl flex items-center justify-center mb-5">
-          <i data-lucide="layers" class="w-5 h-5 text-emerald-400"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-3">Event-Sourced Immutability</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Every state change is an immutable, timestamped event. Nothing is updated or deleted. The audit trail is the source of truth, not a secondary log.
-        </p>
-      </div>
-      <div class="elite-card p-8 rounded-2xl">
-        <div class="w-10 h-10 bg-emerald-400/10 border border-emerald-400/20 rounded-xl flex items-center justify-center mb-5">
-          <i data-lucide="shield" class="w-5 h-5 text-emerald-400"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-3">Secrets in Vault</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          HashiCorp Vault manages all secrets in production. Zero credentials in environment variables or config files. Dynamic secrets rotated on every deploy.
-        </p>
-      </div>
-      <div class="elite-card p-8 rounded-2xl">
-        <div class="w-10 h-10 bg-emerald-400/10 border border-emerald-400/20 rounded-xl flex items-center justify-center mb-5">
-          <i data-lucide="users" class="w-5 h-5 text-emerald-400"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-3">Separation of Duties</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Role-based access with real-time SoD conflict detection. A user cannot be both trader and approver. Conflicts are flagged immediately, not at audit time.
-        </p>
-      </div>
-      <div class="elite-card p-8 rounded-2xl">
-        <div class="w-10 h-10 bg-emerald-400/10 border border-emerald-400/20 rounded-xl flex items-center justify-center mb-5">
-          <i data-lucide="eye" class="w-5 h-5 text-emerald-400"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-3">Full Observability</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          OpenTelemetry distributed tracing, structured logs shipped to Loki, Prometheus metrics with Grafana dashboards. Every request is traceable end-to-end.
-        </p>
-      </div>
-      <div class="elite-card p-8 rounded-2xl">
-        <div class="w-10 h-10 bg-emerald-400/10 border border-emerald-400/20 rounded-xl flex items-center justify-center mb-5">
-          <i data-lucide="server" class="w-5 h-5 text-emerald-400"></i>
-        </div>
-        <h3 class="font-bold text-lg mb-3">Distributed Fault Tolerance</h3>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Multi-node Erlang cluster with Horde for distributed process management. HAProxy load balancing. No single point of failure in the application layer.
-        </p>
-      </div>
-    </div>
-  </section>
-  
-<!-- ── CTA ───────────────────────────────────────────────────────────────── -->
-  <section class="py-32 px-4 text-center max-w-4xl mx-auto">
-    <div class="absolute left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-emerald-500/8 blur-[100px] rounded-full pointer-events-none">
-    </div>
-    <h2 class="text-5xl md:text-6xl font-serif italic mb-6 relative">
-      Ready to see <span class="text-emerald-400">Equinox</span> in action?
-    </h2>
-    <p class="text-zinc-400 text-lg font-light mb-12 max-w-2xl mx-auto">
-      Join finance teams at multinationals who are replacing manual treasury processes with intelligent, auditable infrastructure.
-    </p>
-    <div class="flex flex-col md:flex-row gap-6 justify-center">
-      <a
-        href={~p"/register"}
-        class="btn-liquid bg-emerald-400 text-obsidian px-10 py-5 font-mono text-xs tracking-widest uppercase font-bold shadow-[0_0_30px_rgba(52,211,153,0.3)]"
-      >
-        <span class="relative z-10">Request Private Access</span>
-        <div class="liquid-bg"></div>
-      </a>
-      <a
-        href="mailto:contact@equinox.io"
-        class="btn-liquid px-10 py-5 border border-white/20 hover:border-emerald-400 transition-colors font-mono text-xs tracking-widest uppercase text-white"
-      >
-        <span class="relative z-10">Talk to Sales</span>
-        <div class="liquid-bg bg-white/5"></div>
-      </a>
     </div>
   </section>
 </main>
-
-<%!-- ES module globe (OrbitControls requires importmap) --%>
-<script type="module">
-  import * as THREE from 'three';
-  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-  const container = document.getElementById('globe-container');
-  if (!container) throw new Error('globe-container not found');
-
-  const W = container.clientWidth, H = container.clientHeight;
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(W, H);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  container.appendChild(renderer.domElement);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 1000);
-  camera.position.z = 2.5;
-
-  scene.add(new THREE.AmbientLight(0x222222));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-  sun.position.set(-3, 1, 2);
-  scene.add(sun);
-
-  scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(1, 64, 64),
-    new THREE.MeshPhongMaterial({ color: 0x040d14, emissive: 0x001a0a, shininess: 15 })
-  ));
-
-  const gridMat = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.1 });
-  for (let lat = -80; lat <= 80; lat += 20) {
-    const pts = [];
-    for (let lon = 0; lon <= 360; lon += 4)
-      pts.push(new THREE.Vector3().setFromSphericalCoords(1.003, (90 - lat) * Math.PI / 180, lon * Math.PI / 180));
-    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
-  }
-  for (let lon = 0; lon < 360; lon += 20) {
-    const pts = [];
-    for (let lat = -90; lat <= 90; lat += 4)
-      pts.push(new THREE.Vector3().setFromSphericalCoords(1.003, (90 - lat) * Math.PI / 180, lon * Math.PI / 180));
-    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
-  }
-
-  function llv(lat, lon, r) {
-    return new THREE.Vector3().setFromSphericalCoords(r, (90 - lat) * Math.PI / 180, (lon + 180) * Math.PI / 180);
-  }
-
-  const cities = [
-    [51.5, -0.1], [40.7, -74.0], [1.3, 103.8], [35.6, 139.7],
-    [48.8, 2.3], [25.2, 55.3], [19.0, 72.8], [22.3, 114.2],
-    [-23.5, -46.6], [55.7, 37.6], [6.5, 3.4], [-26.2, 28.0],
-    [31.2, 121.5], [-33.9, 151.2]
-  ];
-  const dotG = new THREE.SphereGeometry(0.013, 8, 8);
-  const dotM = new THREE.MeshBasicMaterial({ color: 0x34d399 });
-  cities.forEach(([lat, lon]) => {
-    const d = new THREE.Mesh(dotG, dotM);
-    d.position.copy(llv(lat, lon, 1.015));
-    scene.add(d);
-  });
-
-  [
-    [[51.5, -0.1], [25.2, 55.3]], [[40.7, -74.0], [6.5, 3.4]],
-    [[1.3, 103.8], [35.6, 139.7]], [[48.8, 2.3], [22.3, 114.2]],
-    [[-23.5, -46.6], [51.5, -0.1]], [[55.7, 37.6], [40.7, -74.0]],
-    [[19.0, 72.8], [25.2, 55.3]], [[-26.2, 28.0], [1.3, 103.8]],
-    [[31.2, 121.5], [40.7, -74.0]], [[-33.9, 151.2], [22.3, 114.2]]
-  ].forEach(([a, b]) => {
-    const vA = llv(a[0], a[1], 1.02), vB = llv(b[0], b[1], 1.02);
-    const mid = new THREE.Vector3().addVectors(vA, vB).multiplyScalar(0.5).normalize().multiplyScalar(1.55);
-    const pts = new THREE.QuadraticBezierCurve3(vA, mid, vB).getPoints(60);
-    scene.add(new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(pts),
-      new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.45 })
-    ));
-  });
-
-  scene.add(new THREE.Mesh(
-    new THREE.SphereGeometry(1.12, 32, 32),
-    new THREE.MeshPhongMaterial({ color: 0x34d399, transparent: true, opacity: 0.04, side: THREE.BackSide })
-  ));
-
-  const equatorRing = new THREE.Mesh(
-    new THREE.TorusGeometry(1.2, 0.003, 8, 180),
-    new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.25 })
-  );
-  equatorRing.rotation.x = Math.PI / 2.5;
-  scene.add(equatorRing);
-
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.06;
-  controls.enableZoom = false;
-  controls.enablePan = false;
-  controls.autoRotate = true;
-  controls.autoRotateSpeed = 0.4;
-
-  (function loop() {
-    requestAnimationFrame(loop);
-    controls.update();
-    equatorRing.rotation.z += 0.0008;
-    renderer.render(scene, camera);
-  })();
-
-  window.addEventListener('resize', () => {
-    const nW = container.clientWidth, nH = container.clientHeight;
-    camera.aspect = nW / nH;
-    camera.updateProjectionMatrix();
-    renderer.setSize(nW, nH);
-  });
-</script>
