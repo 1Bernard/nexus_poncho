@@ -16,7 +16,7 @@ defmodule Nexus.Identity.Projections.User do
     field(:credential_id, :string)
     field(:cose_key, :string)
 
-    timestamps()
+    timestamps(type: :utc_datetime_usec, inserted_at: :created_at)
   end
 
   def changeset(user, attrs) do
