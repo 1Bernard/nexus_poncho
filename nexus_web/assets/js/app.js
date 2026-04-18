@@ -53,9 +53,10 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-if (document.getElementById('cursor-dot')) {
+if (document.getElementById('globe-container')) {
   document.addEventListener('DOMContentLoaded', () => Marketing.init());
 }
+
 
 // The lines below enable quality of life phoenix_live_reload
 // development features:

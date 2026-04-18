@@ -7,6 +7,14 @@
     <.live_title default="NexusWeb" suffix=" · Phoenix Framework">
       {assigns[:page_title]}
     </.live_title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/assets/vendor/three.module.js",
+          "three/examples/jsm/": "/assets/vendor/"
+        }
+      }
+    </script>
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <script defer phx-track-static type="module" src={~p"/assets/js/app.js"}>
     </script>
