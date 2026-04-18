@@ -32,7 +32,8 @@ defmodule NexusWeb.Identity.LoginLive do
           <.header>
             Biometric Authentication
             <:subtitle>
-              Press your fingerprint to access <span class="font-mono text-xs font-bold text-indigo-500">SecureFlow</span>
+              Press your fingerprint to access
+              <span class="font-mono text-xs font-bold text-indigo-500">SecureFlow</span>
             </:subtitle>
           </.header>
 
@@ -81,15 +82,18 @@ defmodule NexusWeb.Identity.LoginLive do
                 ]}>
                   <.icon
                     name="hero-finger-print"
-                    class={[
-                      "w-20 h-20 transition-colors duration-500",
-                      @status == :complete && "text-emerald-500",
-                      @status == :scanning && "text-indigo-500 pulse-soft",
-                      @status == :error && "text-red-400",
-                      @status == :idle && "text-zinc-400 dark:text-zinc-600 group-hover:text-indigo-400"
-                    ]
-                    |> Enum.filter(& &1)
-                    |> Enum.join(" ")}
+                    class={
+                      [
+                        "w-20 h-20 transition-colors duration-500",
+                        @status == :complete && "text-emerald-500",
+                        @status == :scanning && "text-indigo-500 pulse-soft",
+                        @status == :error && "text-red-400",
+                        @status == :idle &&
+                          "text-zinc-400 dark:text-zinc-600 group-hover:text-indigo-400"
+                      ]
+                      |> Enum.filter(& &1)
+                      |> Enum.join(" ")
+                    }
                   />
                 </div>
               </div>
@@ -104,26 +108,37 @@ defmodule NexusWeb.Identity.LoginLive do
                 @status == :idle && "text-zinc-900 dark:text-zinc-100"
               ]}>
                 <%= case @status do %>
-                  <% :idle -> %> Scan Fingerprint
-                  <% :scanning -> %> Verifying Identity...
-                  <% :complete -> %> Identity Confirmed
-                  <% :error -> %> Authentication Failed
+                  <% :idle -> %>
+                    Scan Fingerprint
+                  <% :scanning -> %>
+                    Verifying Identity...
+                  <% :complete -> %>
+                    Identity Confirmed
+                  <% :error -> %>
+                    Authentication Failed
                 <% end %>
               </h3>
 
               <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
                 <%= case @status do %>
-                  <% :idle -> %> Place your enrolled finger on the sensor to authenticate.
-                  <% :scanning -> %> Hold still — verifying your biometric signature.
-                  <% :complete -> %> Redirecting you now...
-                  <% :error -> %> {@error}
+                  <% :idle -> %>
+                    Place your enrolled finger on the sensor to authenticate.
+                  <% :scanning -> %>
+                    Hold still — verifying your biometric signature.
+                  <% :complete -> %>
+                    Redirecting you now...
+                  <% :error -> %>
+                    {@error}
                 <% end %>
               </p>
             </div>
 
             <%= if @status == :idle do %>
               <.button
-                phx-click={JS.push("biometric_login_start") |> JS.dispatch("nx:biometric-login-start", to: "#login-trigger")}
+                phx-click={
+                  JS.push("biometric_login_start")
+                  |> JS.dispatch("nx:biometric-login-start", to: "#login-trigger")
+                }
                 class="mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
               >
                 Authenticate
@@ -161,7 +176,12 @@ defmodule NexusWeb.Identity.LoginLive do
 
       {:error, reason} ->
         Logger.error("[LoginUI] Challenge generation failed: #{inspect(reason)}")
-        {:noreply, assign(socket, status: :error, error: "Could not initiate authentication. Please try again.")}
+
+        {:noreply,
+         assign(socket,
+           status: :error,
+           error: "Could not initiate authentication. Please try again."
+         )}
     end
   end
 
@@ -172,7 +192,8 @@ defmodule NexusWeb.Identity.LoginLive do
     with {:ok, raw_id} <- decode_raw_id(params["rawId"]),
          user when not is_nil(user) <- GetUserByCredentialId.execute(raw_id),
          {:ok, cose_key} <- decode_cose_key(user.cose_key),
-         {:ok, _auth} <- WebAuthn.verify_authentication(params, challenge_id, [{raw_id, cose_key}]),
+         {:ok, _auth} <-
+           WebAuthn.verify_authentication(params, challenge_id, [{raw_id, cose_key}]),
          session_id <- Uniq.UUID.uuid7(),
          :ok <- dispatch_start_session(session_id, user, params) do
       auth_token = Phoenix.Token.sign(NexusWeb.Endpoint, "session_auth", session_id)
@@ -223,22 +244,18 @@ defmodule NexusWeb.Identity.LoginLive do
   defp decode_raw_id(nil), do: {:error, :missing_credential}
 
   defp decode_raw_id(raw_id) do
-    try do
-      {:ok, Base.decode64!(raw_id)}
-    rescue
-      _ -> {:error, :invalid_credential_encoding}
-    end
+    {:ok, Base.decode64!(raw_id)}
+  rescue
+    _ -> {:error, :invalid_credential_encoding}
   end
 
   defp decode_cose_key(nil), do: {:error, :no_enrolled_credential}
 
   defp decode_cose_key(encoded) do
-    try do
-      key = encoded |> Base.decode64!(padding: false) |> :erlang.binary_to_term([:safe])
-      {:ok, key}
-    rescue
-      _ -> {:error, :invalid_cose_key}
-    end
+    key = encoded |> Base.decode64!(padding: false) |> :erlang.binary_to_term([:safe])
+    {:ok, key}
+  rescue
+    _ -> {:error, :invalid_cose_key}
   end
 
   defp dispatch_start_session(session_id, user, params) do

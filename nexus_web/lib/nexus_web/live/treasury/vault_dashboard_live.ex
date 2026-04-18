@@ -11,7 +11,10 @@ defmodule NexusWeb.Treasury.VaultDashboardLive do
         Treasury Vaults
         <:subtitle>Real-time asset monitoring across distributed nodes</:subtitle>
         <:actions>
-          <.link navigate={~p"/vaults/new"} class="bg-blue-600 px-3 py-1 font-semibold text-white rounded-md">
+          <.link
+            navigate={~p"/vaults/new"}
+            class="bg-blue-600 px-3 py-1 font-semibold text-white rounded-md"
+          >
             + New Vault
           </.link>
         </:actions>
