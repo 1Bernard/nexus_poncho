@@ -63,7 +63,8 @@ defmodule Nexus.Application do
       {:start_treasury_projections, [Nexus.Treasury.Projectors.VaultProjector]},
       {:start_messaging_projections,
        [Nexus.Messaging.Producers.EmailDispatcher, Nexus.Messaging.Workers.EmailWorker]},
-      {:start_onboarding_pm, [Nexus.Onboarding.ProcessManagers.OnboardingProcessManager]}
+      {:start_onboarding_pm, [Nexus.Onboarding.ProcessManagers.OnboardingProcessManager]},
+      {:start_platform_audit, [Nexus.Audit.Projectors.PlatformAuditProjector]}
     ]
 
     domain_children =
