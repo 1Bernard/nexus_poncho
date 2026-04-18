@@ -29,6 +29,8 @@ defmodule NexusWeb.Identity.LoginLive do
     <div class="fixed inset-0 bg-[#030303]"></div>
     <div class="ambient-glow-auth"></div>
     <div class="bg-grid"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
 
     <div
       id="login-hook"

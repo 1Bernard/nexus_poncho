@@ -8,11 +8,44 @@ const LoginLive = {
       setTimeout(() => { window.location.href = redirect; }, 1500);
     });
 
+    this.initCursor();
     this.setupSensor();
   },
 
   updated() {
     this.setupSensor();
+  },
+
+  initCursor() {
+    if (window.innerWidth <= 1024) return;
+    const dot = document.getElementById("cursor-dot");
+    const ring = document.getElementById("cursor-ring");
+    if (!dot || !ring) return;
+
+    // Suppress CSS transition so dot moves instantly (matches gsap duration:0)
+    dot.style.transition = "none";
+
+    let targetX = 0, targetY = 0, ringX = 0, ringY = 0;
+
+    document.addEventListener("mousemove", (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      // Use transform like GSAP x/y — positions top-left at cursor point
+      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    });
+
+    // Lerp factor 0.38 ≈ GSAP ease-out over 0.1s at 60fps
+    const animateRing = () => {
+      ringX += (targetX - ringX) * 0.38;
+      ringY += (targetY - ringY) * 0.38;
+      ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+      this._cursorRaf = requestAnimationFrame(animateRing);
+    };
+    animateRing();
+  },
+
+  destroyed() {
+    if (this._cursorRaf) cancelAnimationFrame(this._cursorRaf);
   },
 
   setupSensor() {
