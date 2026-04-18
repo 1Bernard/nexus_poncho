@@ -25,19 +25,23 @@ const LoginLive = {
     // Suppress CSS transition so dot moves instantly (matches gsap duration:0)
     dot.style.transition = "none";
 
-    let targetX = 0, targetY = 0, ringX = 0, ringY = 0;
+    let targetX = 0, targetY = 0;
+    let ringX = 0, ringY = 0, vx = 0, vy = 0;
 
     document.addEventListener("mousemove", (e) => {
       targetX = e.clientX;
       targetY = e.clientY;
-      // Use transform like GSAP x/y — positions top-left at cursor point
       dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
     });
 
-    // Lerp factor 0.38 ≈ GSAP ease-out over 0.1s at 60fps
+    // Spring physics — matches GSAP's organic deceleration feel
     const animateRing = () => {
-      ringX += (targetX - ringX) * 0.38;
-      ringY += (targetY - ringY) * 0.38;
+      vx += (targetX - ringX) * 0.14;
+      vy += (targetY - ringY) * 0.14;
+      vx *= 0.78;
+      vy *= 0.78;
+      ringX += vx;
+      ringY += vy;
       ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
       this._cursorRaf = requestAnimationFrame(animateRing);
     };
