@@ -14,7 +14,7 @@ defmodule Nexus.Identity.Fixtures do
         %{
           id: user_id,
           org_id: Uniq.UUID.uuid7(),
-          email: "user_#{System.unique_integer([:positive])}@test.nexus.com",
+          email: "#{Uniq.UUID.uuid7()}@test.nexus.com",
           name: "Test User",
           role: "user",
           status: "registered"
