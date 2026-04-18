@@ -49,7 +49,9 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
               </div>
               <div class="text-sm">
                 <p class="font-bold text-zinc-900 dark:text-zinc-100">Hardware Bound</p>
-                <p class="text-zinc-500 dark:text-zinc-400 text-xs">Credential verified and signed by platform TPM.</p>
+                <p class="text-zinc-500 dark:text-zinc-400 text-xs">
+                  Credential verified and signed by platform TPM.
+                </p>
               </div>
             </div>
             <div class="flex items-center gap-3">
@@ -58,7 +60,9 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
               </div>
               <div class="text-sm">
                 <p class="font-bold text-zinc-900 dark:text-zinc-100">Biometric Verification</p>
-                <p class="text-zinc-500 dark:text-zinc-400 text-xs">TouchID/FaceID configured for instant access.</p>
+                <p class="text-zinc-500 dark:text-zinc-400 text-xs">
+                  TouchID/FaceID configured for instant access.
+                </p>
               </div>
             </div>
           </div>

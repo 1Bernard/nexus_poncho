@@ -7,16 +7,20 @@ defmodule Nexus.Identity.WebAuthn do
   """
 
   @callback register_begin(user_id :: String.t(), email :: String.t(), opts :: keyword()) ::
-    {:ok, map()} | {:error, term()}
+              {:ok, map()} | {:error, term()}
 
   @callback register_finish(params :: map(), challenge :: binary(), user_id :: binary()) ::
-    {:ok, map()} | {:error, term()}
+              {:ok, map()} | {:error, term()}
 
   @callback authenticate_challenge(user_credentials :: list()) ::
-    {:ok, map()} | {:error, term()}
+              {:ok, map()} | {:error, term()}
 
-  @callback verify_authentication(params :: map(), challenge :: binary(), user_credentials :: list()) ::
-    {:ok, map()} | {:error, term()}
+  @callback verify_authentication(
+              params :: map(),
+              challenge :: binary(),
+              user_credentials :: list()
+            ) ::
+              {:ok, map()} | {:error, term()}
 
   @doc """
   Returns the configured WebAuthn adapter.
@@ -27,11 +31,14 @@ defmodule Nexus.Identity.WebAuthn do
 
   # Proxy functions to the active adapter
 
-  def register_begin(user_id, email, opts \\ []), do: adapter().register_begin(user_id, email, opts)
+  def register_begin(user_id, email, opts \\ []),
+    do: adapter().register_begin(user_id, email, opts)
 
-  def register_finish(params, challenge, user_id), do: adapter().register_finish(params, challenge, user_id)
+  def register_finish(params, challenge, user_id),
+    do: adapter().register_finish(params, challenge, user_id)
 
-  def authenticate_challenge(user_credentials), do: adapter().authenticate_challenge(user_credentials)
+  def authenticate_challenge(user_credentials),
+    do: adapter().authenticate_challenge(user_credentials)
 
   def verify_authentication(params, challenge, user_credentials) do
     adapter().verify_authentication(params, challenge, user_credentials)

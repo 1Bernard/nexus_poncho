@@ -10,6 +10,10 @@ defmodule Nexus.Identity.Commands.DeactivateUser do
     field(:user_id, String.t(), doc: "User to deactivate")
     field(:org_id, String.t(), doc: "Organization identifier")
     field(:reason, String.t(), enforce: false, doc: "Reason for deactivation (audit trail)")
-    field(:deactivated_by, String.t(), enforce: false, doc: "Actor user_id who initiated deactivation")
+
+    field(:deactivated_by, String.t(),
+      enforce: false,
+      doc: "Actor user_id who initiated deactivation"
+    )
   end
 end

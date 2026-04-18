@@ -23,13 +23,17 @@ defmodule Nexus.Identity.WebAuthn.AuthChallengeStore do
     if is_binary(challenge) do
       Logger.info("[AuthChallengeStore] Storing raw binary challenge for #{id}")
     else
-      Logger.info("[AuthChallengeStore] Storing struct-based challenge for #{id}: #{inspect(Map.get(challenge, :__struct__, "Map"))}")
+      Logger.info(
+        "[AuthChallengeStore] Storing struct-based challenge for #{id}: #{inspect(Map.get(challenge, :__struct__, "Map"))}"
+      )
     end
 
     expiry = System.system_time(:millisecond) + @ttl
 
     case :mnesia.transaction(fn -> :mnesia.write({@table, id, challenge, expiry}) end) do
-      {:atomic, :ok} -> :ok
+      {:atomic, :ok} ->
+        :ok
+
       {:aborted, reason} ->
         Logger.error("Failed to store auth challenge in Mnesia: #{inspect(reason)}")
         {:error, reason}
@@ -82,6 +86,7 @@ defmodule Nexus.Identity.WebAuthn.AuthChallengeStore do
       {:atomic, expired_ids} ->
         Enum.each(expired_ids, &delete/1)
         {:ok, length(expired_ids)}
+
       {:aborted, reason} ->
         {:error, reason}
     end

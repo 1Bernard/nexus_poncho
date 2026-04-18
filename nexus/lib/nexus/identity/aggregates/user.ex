@@ -112,7 +112,10 @@ defmodule Nexus.Identity.Aggregates.User do
   end
 
   def execute(%User{} = state, command) do
-    Logger.warning("[UserAggregate] Unhandled command #{inspect(command.__struct__)} in status #{inspect(state.status)}")
+    Logger.warning(
+      "[UserAggregate] Unhandled command #{inspect(command.__struct__)} in status #{inspect(state.status)}"
+    )
+
     {:error, :invalid_command_for_current_state}
   end
 

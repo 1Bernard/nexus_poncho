@@ -13,8 +13,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
       <.header class="text-center">
         Register for Nexus Poncho
         <:subtitle>
-          The Elite Standard in Modular Ledger Architecture
-          <br />
+          The Elite Standard in Modular Ledger Architecture <br />
           <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600">
             Biometric-Anchored Identity (WebAuthn)
           </span>
@@ -24,7 +23,9 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
       <%= if @success_link do %>
         <div class="mt-10 p-6 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl text-center">
           <.icon name="hero-check-circle" class="w-12 h-12 text-emerald-500 mx-auto" />
-          <h3 class="mt-4 text-lg font-bold text-zinc-900 dark:text-zinc-100">Identity Provisioned</h3>
+          <h3 class="mt-4 text-lg font-bold text-zinc-900 dark:text-zinc-100">
+            Identity Provisioned
+          </h3>
           <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
             User registered successfully. An invitation link has been generated to anchor your biometric identity.
           </p>
@@ -33,7 +34,10 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
               {@success_link}
             </a>
           </div>
-          <.button phx-click={JS.patch(~p"/register")} class="mt-8 w-full bg-zinc-200 hover:bg-zinc-300 text-zinc-900 border-0">
+          <.button
+            phx-click={JS.patch(~p"/register")}
+            class="mt-8 w-full bg-zinc-200 hover:bg-zinc-300 text-zinc-900 border-0"
+          >
             Register Another
           </.button>
         </div>
@@ -46,7 +50,12 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
         >
           <.input field={@form[:email]} type="email" label="Email" required />
           <.input field={@form[:name]} type="text" label="Full Name" required />
-          <.input field={@form[:role]} type="select" label="Initial Role" options={["admin", "treasurer", "viewer"]} />
+          <.input
+            field={@form[:role]}
+            type="select"
+            label="Initial Role"
+            options={["admin", "treasurer", "viewer"]}
+          />
 
           <:actions>
             <.button phx-disable-with="Registering..." class="w-full">
@@ -71,7 +80,9 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
   @impl true
   def handle_params(_params, uri, socket) do
     uri_struct = URI.parse(uri)
-    base_url = "#{uri_struct.scheme}://#{uri_struct.host}#{if uri_struct.port, do: ":#{uri_struct.port}"}"
+
+    base_url =
+      "#{uri_struct.scheme}://#{uri_struct.host}#{if uri_struct.port, do: ":#{uri_struct.port}"}"
 
     {:noreply,
      socket
@@ -87,7 +98,8 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
   @impl true
   def handle_event("save", %{"user" => user_params}, socket) do
     user_id = Uniq.UUID.uuid7()
-    org_id = Uniq.UUID.uuid7() # In a real flow, this might be picked from session
+    # In a real flow, this might be picked from session
+    org_id = Uniq.UUID.uuid7()
 
     command = %RegisterUser{
       user_id: user_id,

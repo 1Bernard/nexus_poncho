@@ -33,6 +33,14 @@ defmodule Nexus.Identity.Projections.Session do
       :started_at,
       :expired_at
     ])
-    |> validate_required([:id, :user_id, :org_id, :credential_id, :status, :expires_at, :started_at])
+    |> validate_required([
+      :id,
+      :user_id,
+      :org_id,
+      :credential_id,
+      :status,
+      :expires_at,
+      :started_at
+    ])
   end
 end

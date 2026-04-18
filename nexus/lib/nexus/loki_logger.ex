@@ -68,8 +68,8 @@ defmodule Nexus.LokiLogger do
   @impl true
   def init(opts) do
     loki_url = Keyword.get(opts, :loki_url, "http://loki:3100")
-    app      = Keyword.get(opts, :app, "nexus")
-    env      = Keyword.get(opts, :env, "dev")
+    app = Keyword.get(opts, :app, "nexus")
+    env = Keyword.get(opts, :env, "dev")
 
     # Start :inets (Erlang's built-in HTTP client) if not already running.
     # Safe to call multiple times — returns {:error, {:already_started, _}} and
@@ -82,13 +82,14 @@ defmodule Nexus.LokiLogger do
 
     schedule_flush()
 
-    {:ok, %{
-      buffer:   [],
-      loki_url: loki_url,
-      app:      app,
-      env:      env,
-      node:     to_string(node())
-    }}
+    {:ok,
+     %{
+       buffer: [],
+       loki_url: loki_url,
+       app: app,
+       env: env,
+       node: to_string(node())
+     }}
   end
 
   @impl true
@@ -98,7 +99,7 @@ defmodule Nexus.LokiLogger do
 
   @impl true
   def handle_cast({:log, level, msg, meta}, state) do
-    entry  = build_entry(level, msg, meta)
+    entry = build_entry(level, msg, meta)
     buffer = [entry | state.buffer]
 
     if length(buffer) >= @max_buffer do
@@ -123,9 +124,9 @@ defmodule Nexus.LokiLogger do
   defp schedule_flush, do: Process.send_after(self(), :flush, @flush_ms)
 
   defp build_entry(level, msg, meta) do
-    ts_ns   = :os.system_time(:nanosecond)
+    ts_ns = :os.system_time(:nanosecond)
     message = format_message(msg)
-    suffix  = format_meta(meta)
+    suffix = format_meta(meta)
     {level, ts_ns, message <> suffix}
   end
 
@@ -161,9 +162,10 @@ defmodule Nexus.LokiLogger do
       buffer
       |> Enum.group_by(fn {level, _, _} -> to_string(level) end)
       |> Enum.map(fn {level_str, entries} ->
-        values = Enum.map(entries, fn {_, ts_ns, message} ->
-          [to_string(ts_ns), message]
-        end)
+        values =
+          Enum.map(entries, fn {_, ts_ns, message} ->
+            [to_string(ts_ns), message]
+          end)
 
         %{
           stream: %{app: app, node: node_name, env: env, level: level_str},
@@ -172,7 +174,7 @@ defmodule Nexus.LokiLogger do
       end)
 
     payload = Jason.encode!(%{streams: streams})
-    url     = String.to_charlist("#{loki_url}#{@push_path}")
+    url = String.to_charlist("#{loki_url}#{@push_path}")
 
     # Use :error_logger (Erlang's logger) for our own errors to avoid
     # recursively shipping them back through this handler.

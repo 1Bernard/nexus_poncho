@@ -23,7 +23,15 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     name: "Identity.UserProjector"
 
   alias Ecto.Multi
-  alias Nexus.Identity.Events.{BiometricEnrolled, UserActivated, UserDeactivated, UserRegistered, UserRoleChanged}
+
+  alias Nexus.Identity.Events.{
+    BiometricEnrolled,
+    UserActivated,
+    UserDeactivated,
+    UserRegistered,
+    UserRoleChanged
+  }
+
   alias Nexus.Identity.Idempotency.IdempotencyKey
   alias Nexus.Identity.Projections.User
 
@@ -39,7 +47,10 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
   project(%BiometricEnrolled{} = event, metadata, fn multi ->
     multi
-    |> track_idempotency(metadata, "EnrollBiometric", %{user_id: event.user_id, status: "registered"})
+    |> track_idempotency(metadata, "EnrollBiometric", %{
+      user_id: event.user_id,
+      status: "registered"
+    })
     |> enroll_biometric(event, metadata)
   end)
 
@@ -51,13 +62,19 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
   project(%UserDeactivated{} = event, metadata, fn multi ->
     multi
-    |> track_idempotency(metadata, "DeactivateUser", %{user_id: event.user_id, status: "deactivated"})
+    |> track_idempotency(metadata, "DeactivateUser", %{
+      user_id: event.user_id,
+      status: "deactivated"
+    })
     |> deactivate_user(event)
   end)
 
   project(%UserRoleChanged{} = event, metadata, fn multi ->
     multi
-    |> track_idempotency(metadata, "UpdateUserRole", %{user_id: event.user_id, new_role: event.new_role})
+    |> track_idempotency(metadata, "UpdateUserRole", %{
+      user_id: event.user_id,
+      new_role: event.new_role
+    })
     |> update_user_role(event)
   end)
 
@@ -75,6 +92,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     }
 
     changeset = IdempotencyKey.changeset(%IdempotencyKey{}, attrs)
+
     Multi.insert(multi, :"idempotency_#{metadata.event_id}", changeset,
       on_conflict: :nothing,
       conflict_target: :id
@@ -96,11 +114,17 @@ defmodule Nexus.Identity.Projectors.UserProjector do
           {:ok, :already_exists_by_id}
 
         repo.get_by(User, email: event.email) ->
-          Logger.warning("[Identity] UserRegistered skip: email #{event.email} claimed by another user.")
+          Logger.warning(
+            "[Identity] UserRegistered skip: email #{event.email} claimed by another user."
+          )
+
           {:ok, :already_exists_by_email}
 
         event.credential_id && repo.get_by(User, credential_id: event.credential_id) ->
-          Logger.warning("[Identity] UserRegistered skip: credential_id #{event.credential_id} already anchored.")
+          Logger.warning(
+            "[Identity] UserRegistered skip: credential_id #{event.credential_id} already anchored."
+          )
+
           {:ok, :already_exists_by_credential_id}
 
         true ->

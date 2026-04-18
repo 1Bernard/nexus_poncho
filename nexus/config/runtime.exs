@@ -11,12 +11,12 @@ if config_env() != :test do
   # Falls back to env vars silently if Vault is unreachable (e.g. CI).
   # Secrets are stored by the vault-init service at: secret/data/nexus
   # ============================================================
-  vault_addr  = System.get_env("VAULT_ADDR")  || "http://vault:8200"
+  vault_addr = System.get_env("VAULT_ADDR") || "http://vault:8200"
   vault_token = System.get_env("VAULT_TOKEN") || ""
 
   vault_secrets =
     if vault_token != "" do
-      url     = String.to_charlist("#{vault_addr}/v1/secret/data/nexus")
+      url = String.to_charlist("#{vault_addr}/v1/secret/data/nexus")
       headers = [{~c"X-Vault-Token", String.to_charlist(vault_token)}]
 
       :inets.start()
@@ -25,10 +25,11 @@ if config_env() != :test do
         {:ok, {{_, 200, _}, _, body}} ->
           case Jason.decode(body) do
             {:ok, %{"data" => %{"data" => secrets}}} -> secrets
-            _                                        -> %{}
+            _ -> %{}
           end
 
-        _ -> %{}
+        _ ->
+          %{}
       end
     else
       %{}
@@ -36,11 +37,11 @@ if config_env() != :test do
 
   # Vault values take precedence; env vars remain the fallback.
   for {vault_key, env_var} <- [
-        {"db_pass",         "DB_PASS"},
+        {"db_pass", "DB_PASS"},
         {"eventstore_pass", "EVENTSTORE_PASS"},
-        {"rabbitmq_pass",   "RABBITMQ_PASS"},
+        {"rabbitmq_pass", "RABBITMQ_PASS"},
         {"secret_key_base", "SECRET_KEY_BASE"},
-        {"erl_cookie",      "ERL_COOKIE"}
+        {"erl_cookie", "ERL_COOKIE"}
       ] do
     if value = Map.get(vault_secrets, vault_key) do
       System.put_env(env_var, value)
@@ -72,8 +73,11 @@ if config_env() != :test do
 
   config :amqp,
     connections: [
-      email_dispatcher: amqp_conn ++ [client_properties: [{"connection_name", :longstr, "nexus.email_dispatcher"}]],
-      email_worker: amqp_conn ++ [client_properties: [{"connection_name", :longstr, "nexus.email_worker"}]]
+      email_dispatcher:
+        amqp_conn ++
+          [client_properties: [{"connection_name", :longstr, "nexus.email_dispatcher"}]],
+      email_worker:
+        amqp_conn ++ [client_properties: [{"connection_name", :longstr, "nexus.email_worker"}]]
     ],
     channels: [
       email_dispatcher: [connection: :email_dispatcher]
@@ -119,7 +123,8 @@ if config_env() != :test do
       System.get_env("SECRET_KEY_BASE") ||
         raise "environment variable SECRET_KEY_BASE is missing. Generate with: mix phx.gen.secret"
     else
-      System.get_env("SECRET_KEY_BASE") || "7pX8G_q9R_z2W_m4K_v1B_j5N_s6H_d3F_g2S_l9D_k4J_h5G_f6D_s7A"
+      System.get_env("SECRET_KEY_BASE") ||
+        "7pX8G_q9R_z2W_m4K_v1B_j5N_s6H_d3F_g2S_l9D_k4J_h5G_f6D_s7A"
     end
 
   config :nexus,

@@ -49,6 +49,7 @@ defmodule Nexus.Identity.SessionLifecycleTest do
 
     test "starting the same session twice is rejected" do
       session_id = Uniq.UUID.uuid7()
+
       cmd = %StartSession{
         session_id: session_id,
         user_id: Uniq.UUID.uuid7(),
@@ -84,7 +85,12 @@ defmodule Nexus.Identity.SessionLifecycleTest do
         end
       end)
 
-      :ok = Nexus.App.dispatch(%ExpireSession{session_id: session_id, user_id: user_id, org_id: org_id})
+      :ok =
+        Nexus.App.dispatch(%ExpireSession{
+          session_id: session_id,
+          user_id: user_id,
+          org_id: org_id
+        })
 
       session =
         wait_until(fn ->
@@ -112,10 +118,19 @@ defmodule Nexus.Identity.SessionLifecycleTest do
           expires_at: future_datetime(3600)
         })
 
-      :ok = Nexus.App.dispatch(%ExpireSession{session_id: session_id, user_id: user_id, org_id: org_id})
+      :ok =
+        Nexus.App.dispatch(%ExpireSession{
+          session_id: session_id,
+          user_id: user_id,
+          org_id: org_id
+        })
 
       assert {:error, :session_already_expired} =
-               Nexus.App.dispatch(%ExpireSession{session_id: session_id, user_id: user_id, org_id: org_id})
+               Nexus.App.dispatch(%ExpireSession{
+                 session_id: session_id,
+                 user_id: user_id,
+                 org_id: org_id
+               })
     end
 
     test "expiring a non-existent session is rejected" do

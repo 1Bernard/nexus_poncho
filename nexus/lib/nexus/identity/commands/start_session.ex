@@ -10,7 +10,11 @@ defmodule Nexus.Identity.Commands.StartSession do
     field(:session_id, String.t(), doc: "Unique session identifier (UUID v7, caller-generated)")
     field(:user_id, String.t(), doc: "Authenticated user identifier")
     field(:org_id, String.t(), doc: "Organization identifier")
-    field(:credential_id, String.t(), doc: "WebAuthn credential_id used to authenticate (biometric audit trail)")
+
+    field(:credential_id, String.t(),
+      doc: "WebAuthn credential_id used to authenticate (biometric audit trail)"
+    )
+
     field(:expires_at, DateTime.t(), doc: "Session expiry (typically 24h from now)")
     field(:ip_address, String.t(), enforce: false, doc: "Client IP address")
     field(:user_agent, String.t(), enforce: false, doc: "Client user-agent string")

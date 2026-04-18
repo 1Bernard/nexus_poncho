@@ -83,7 +83,10 @@ defmodule NexusWeb.UserAuth do
         if DateTime.compare(expires_at, DateTime.utc_now()) == :gt do
           Repo.get(User, user_id)
         else
-          Logger.info("[UserAuth] Session #{session_id} TTL elapsed — treating as unauthenticated")
+          Logger.info(
+            "[UserAuth] Session #{session_id} TTL elapsed — treating as unauthenticated"
+          )
+
           nil
         end
 

@@ -45,7 +45,10 @@ defmodule Nexus.Identity.Aggregates.Session do
   end
 
   def execute(%Session{} = state, command) do
-    Logger.warning("[SessionAggregate] Unhandled command #{inspect(command.__struct__)} in status #{state.status}")
+    Logger.warning(
+      "[SessionAggregate] Unhandled command #{inspect(command.__struct__)} in status #{state.status}"
+    )
+
     {:error, :invalid_command_for_current_state}
   end
 

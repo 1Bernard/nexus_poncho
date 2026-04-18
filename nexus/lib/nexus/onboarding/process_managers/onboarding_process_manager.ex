@@ -63,7 +63,9 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
     Tracing.extract_and_set_context(metadata)
 
     OpenTelemetry.Tracer.with_span "ProcessManager.PEPCompleted" do
-      Logger.info("[OnboardingPM] PEP Check completed for #{event.user_id} with status: #{event.status}")
+      Logger.info(
+        "[OnboardingPM] PEP Check completed for #{event.user_id} with status: #{event.status}"
+      )
 
       if event.status == "clean" do
         maybe_activate(%{state | pep_status: :completed}, event.org_id)
@@ -87,13 +89,19 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
 
   defp maybe_activate(state, org_id) do
     if state.pep_status == :completed and state.biometric_status == :completed do
-      Logger.info("[OnboardingPM] All conditions met for #{state.user_id}. Dispatching Activation.")
+      Logger.info(
+        "[OnboardingPM] All conditions met for #{state.user_id}. Dispatching Activation."
+      )
+
       %ActivateUser{
         user_id: state.user_id,
         org_id: org_id
       }
     else
-      Logger.info("[OnboardingPM] Activation pending for #{state.user_id} (PEP: #{state.pep_status || :pending}, Bio: #{state.biometric_status || :pending})")
+      Logger.info(
+        "[OnboardingPM] Activation pending for #{state.user_id} (PEP: #{state.pep_status || :pending}, Bio: #{state.biometric_status || :pending})"
+      )
+
       []
     end
   end

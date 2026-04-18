@@ -22,6 +22,7 @@ defmodule Nexus.Messaging.Producers.EmailDispatcher do
     Tracing.extract_and_set_context(metadata)
 
     require OpenTelemetry.Tracer
+
     OpenTelemetry.Tracer.with_span "Messaging.EmailDispatcher.dispatch_invitation" do
       Logger.info("[Messaging] Dispatching invitation email task for user: #{event.user_id}")
 
@@ -48,6 +49,7 @@ defmodule Nexus.Messaging.Producers.EmailDispatcher do
     Tracing.extract_and_set_context(metadata)
 
     require OpenTelemetry.Tracer
+
     OpenTelemetry.Tracer.with_span "Messaging.EmailDispatcher.dispatch" do
       Logger.info("[Messaging] Dispatching welcome email task for user: #{event.user_id}")
 
