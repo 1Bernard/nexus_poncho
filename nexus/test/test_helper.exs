@@ -45,7 +45,8 @@ IO.puts("==> [Nexus] Starting Domain Projections and Side-Effects...")
   Nexus.Treasury.Projectors.VaultProjector,
   Nexus.Compliance.Projectors.ScreeningProjector,
   Nexus.Compliance.Workers.PEPWorker,
-  Nexus.Onboarding.ProcessManagers.OnboardingProcessManager
+  Nexus.Onboarding.ProcessManagers.OnboardingProcessManager,
+  Nexus.Audit.Projectors.PlatformAuditProjector
 ]
 |> Enum.each(fn module ->
   case module.start_link() do

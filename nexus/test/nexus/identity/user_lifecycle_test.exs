@@ -174,7 +174,7 @@ defmodule Nexus.Identity.UserLifecycleTest do
     {user_id, org_id}
   end
 
-  defp unique_email, do: "user_#{System.unique_integer([:positive])}@test.nexus.com"
+  defp unique_email, do: "#{Uniq.UUID.uuid7()}@test.nexus.com"
 
   defp wait_until(fun, retries \\ 20) do
     case fun.() do
