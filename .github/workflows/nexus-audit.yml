@@ -8,9 +8,9 @@ name: Nexus Audit (Elite Legacy Enabled)
 
 on:
   push:
-    branches: [ main ]
+    branches: ["**"]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   audit:
@@ -109,6 +109,11 @@ jobs:
           # ecto.create + ecto.migrate set up the ledger_test projection tables.
           docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix event_store.init"
           docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix ecto.create --quiet && mix ecto.migrate --quiet"
+
+      - name: Format Audit
+        run: |
+          docker compose run --no-deps --rm node1 sh -c "cd nexus && mix format --check-formatted"
+          docker compose run --no-deps --rm web sh -c "cd nexus_web && mix format --check-formatted"
 
       - name: Static Security Audit (Sobelow)
         run: |
