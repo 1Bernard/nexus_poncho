@@ -25,6 +25,7 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/nexus_web"
 import topbar from "../vendor/topbar"
 import OnboardingLive from "./hooks/onboarding_live"
+import LoginLive from "./hooks/login_live"
 import { Marketing } from "./marketing_scripts"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
@@ -33,6 +34,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {
     OnboardingLive,
+    LoginLive,
     ...colocatedHooks
   },
 })
