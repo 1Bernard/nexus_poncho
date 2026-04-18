@@ -25,6 +25,7 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/nexus_web"
 import topbar from "../vendor/topbar"
 import OnboardingLive from "./hooks/onboarding_live"
+import { Marketing } from "./marketing_scripts"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -49,6 +50,10 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+if (document.getElementById('cursor-dot')) {
+  document.addEventListener('DOMContentLoaded', () => Marketing.init());
+}
 
 // The lines below enable quality of life phoenix_live_reload
 // development features:
