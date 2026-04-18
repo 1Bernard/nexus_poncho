@@ -59,6 +59,7 @@ defmodule NexusWeb.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
+      {:phoenix_ecto, "~> 4.6"},
       {:bandit, "~> 1.5"},
       {:prom_ex, "~> 1.10"},
       {:libcluster, "~> 3.3"},

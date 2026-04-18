@@ -22,6 +22,8 @@ defmodule NexusWeb.Router do
 
     get "/", PageController, :home
     get "/health", PageController, :health
+    get "/request-access", RequestAccessController, :new
+    post "/request-access", RequestAccessController, :create
 
     live_session :public,
       on_mount: [{NexusWeb.UserAuth, :fetch_current_user}] do

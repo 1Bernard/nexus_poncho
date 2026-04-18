@@ -1,0 +1,328 @@
+<section class="min-h-screen pt-32 pb-24 px-6 relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(99,102,241,0.08),transparent)]">
+  </div>
+
+  <div class="max-w-6xl mx-auto relative">
+    <%!-- Page header --%>
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-soft"></span>
+        <span class="font-mono text-xs tracking-[0.2em] text-white/60 uppercase">
+          Institutional Access
+        </span>
+      </div>
+      <h1 class="font-serif text-5xl md:text-6xl font-bold text-white leading-tight mb-4">
+        Start Your Treasury <span class="italic text-emerald-400">Transformation.</span>
+      </h1>
+      <p class="text-white/50 text-lg max-w-xl mx-auto">
+        Equinox is by invitation. Tell us about your organisation and we will be in touch within 48 hours.
+      </p>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-12 items-start">
+      <%!-- Left column: value props --%>
+      <div class="lg:col-span-2 space-y-10">
+        <div>
+          <p class="font-mono text-xs tracking-[0.2em] text-white/30 uppercase mb-6">
+            What you get from day one
+          </p>
+          <ul class="space-y-5">
+            <li class="flex gap-4">
+              <div class="mt-1 w-5 h-5 rounded-full border border-emerald-400/40 flex items-center justify-center flex-shrink-0">
+                <svg
+                  class="w-2.5 h-2.5 text-emerald-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-white font-medium text-sm">Immutable Audit Ledger</p>
+                <p class="text-white/40 text-sm mt-0.5">
+                  Every transaction, every approval — cryptographically sealed and permanently on record.
+                </p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="mt-1 w-5 h-5 rounded-full border border-emerald-400/40 flex items-center justify-center flex-shrink-0">
+                <svg
+                  class="w-2.5 h-2.5 text-emerald-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-white font-medium text-sm">Automated Interco Netting</p>
+                <p class="text-white/40 text-sm mt-0.5">
+                  Multilateral netting across all subsidiaries with real-time FX exposure and settlement dispatch.
+                </p>
+              </div>
+            </li>
+            <li class="flex gap-4">
+              <div class="mt-1 w-5 h-5 rounded-full border border-emerald-400/40 flex items-center justify-center flex-shrink-0">
+                <svg
+                  class="w-2.5 h-2.5 text-emerald-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-white font-medium text-sm">Biometric SoD Enforcement</p>
+                <p class="text-white/40 text-sm mt-0.5">
+                  WebAuthn passkeys replace passwords. Segregation of duties enforced at every approval gate.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <%!-- Stats grid --%>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="elite-card p-5 rounded-xl text-center">
+            <p class="font-mono text-2xl font-bold text-emerald-400">80+</p>
+            <p class="text-white/40 text-xs mt-1 font-mono tracking-wide uppercase">
+              Treasury Teams
+            </p>
+          </div>
+          <div class="elite-card p-5 rounded-xl text-center">
+            <p class="font-mono text-2xl font-bold text-emerald-400">48h</p>
+            <p class="text-white/40 text-xs mt-1 font-mono tracking-wide uppercase">
+              Onboarding SLA
+            </p>
+          </div>
+          <div class="elite-card p-5 rounded-xl text-center">
+            <p class="font-mono text-2xl font-bold text-emerald-400">$2.8B</p>
+            <p class="text-white/40 text-xs mt-1 font-mono tracking-wide uppercase">
+              Volume Settled
+            </p>
+          </div>
+          <div class="elite-card p-5 rounded-xl text-center">
+            <p class="font-mono text-2xl font-bold text-emerald-400">100%</p>
+            <p class="text-white/40 text-xs mt-1 font-mono tracking-wide uppercase">
+              Audit Coverage
+            </p>
+          </div>
+        </div>
+
+        <%!-- Trust note --%>
+        <div class="border border-white/5 rounded-xl p-5 bg-white/[0.02]">
+          <p class="font-mono text-xs tracking-[0.15em] text-white/30 uppercase mb-3">
+            Security & Privacy
+          </p>
+          <p class="text-white/40 text-sm leading-relaxed">
+            Your information is used solely to evaluate access eligibility. We do not sell data or send unsolicited communications.
+          </p>
+        </div>
+      </div>
+
+      <%!-- Right column: form --%>
+      <div class="lg:col-span-3">
+        <%= if @submitted do %>
+          <div class="elite-card rounded-2xl p-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center mx-auto mb-6">
+              <svg
+                class="w-7 h-7 text-emerald-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <p class="font-mono text-xs tracking-[0.2em] text-white/30 uppercase mb-4">
+              Request Received
+            </p>
+            <h2 class="font-serif text-3xl font-bold text-white mb-4">
+              We'll be in touch <span class="italic text-emerald-400">shortly.</span>
+            </h2>
+            <p class="text-white/50 max-w-sm mx-auto text-sm leading-relaxed">
+              Our treasury onboarding team reviews every request personally. Expect a response within 48 hours on business days.
+            </p>
+            <div class="mt-8 pt-8 border-t border-white/5">
+              <a
+                href={~p"/"}
+                class="font-mono text-xs tracking-[0.15em] text-white/40 hover:text-white/70 uppercase transition-colors duration-200"
+              >
+                ← Return to Equinox
+              </a>
+            </div>
+          </div>
+        <% else %>
+          <div class="elite-card rounded-2xl p-8 md:p-10">
+            <div class="mb-8">
+              <p class="font-mono text-xs tracking-[0.2em] text-white/30 uppercase mb-2">
+                Access Request
+              </p>
+              <p class="text-white/60 text-sm">Fields marked with * are required.</p>
+            </div>
+
+            <.form
+              :let={f}
+              for={@changeset}
+              action={~p"/request-access"}
+              method="post"
+              class="space-y-6"
+            >
+              <%!-- Name + Email row --%>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                    Full Name *
+                  </label>
+                  <.input
+                    field={f[:name]}
+                    type="text"
+                    placeholder="Jane Thornton"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200"
+                  />
+                </div>
+                <div>
+                  <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                    Work Email *
+                  </label>
+                  <.input
+                    field={f[:email]}
+                    type="email"
+                    placeholder="jane@company.com"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200"
+                  />
+                </div>
+              </div>
+
+              <%!-- Organisation + Job Title row --%>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                    Organisation *
+                  </label>
+                  <.input
+                    field={f[:organization]}
+                    type="text"
+                    placeholder="Acme Holdings Ltd."
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200"
+                  />
+                </div>
+                <div>
+                  <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                    Job Title *
+                  </label>
+                  <.input
+                    field={f[:job_title]}
+                    type="text"
+                    placeholder="Group Treasurer"
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200"
+                  />
+                </div>
+              </div>
+
+              <%!-- Monthly Treasury Volume --%>
+              <div>
+                <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                  Monthly Treasury Volume *
+                </label>
+                <div class="relative">
+                  <.input
+                    field={f[:treasury_volume]}
+                    type="select"
+                    options={[
+                      {"Select volume range...", ""},
+                      {"Under $10M / month", "lt_10m"},
+                      {"$10M – $100M / month", "10m_100m"},
+                      {"$100M – $500M / month", "100m_500m"},
+                      {"$500M – $1B / month", "500m_1b"},
+                      {"Over $1B / month", "gt_1b"}
+                    ]}
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200 appearance-none cursor-pointer"
+                  />
+                  <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                    <svg
+                      class="w-4 h-4 text-white/30"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <%!-- Number of Subsidiaries --%>
+              <div>
+                <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                  Number of Subsidiaries *
+                </label>
+                <div class="relative">
+                  <.input
+                    field={f[:subsidiaries]}
+                    type="select"
+                    options={[
+                      {"Select entity count...", ""},
+                      {"1 – 5 entities", "1_5"},
+                      {"6 – 20 entities", "6_20"},
+                      {"21 – 50 entities", "21_50"},
+                      {"51 – 100 entities", "51_100"},
+                      {"100+ entities", "100_plus"}
+                    ]}
+                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200 appearance-none cursor-pointer"
+                  />
+                  <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                    <svg
+                      class="w-4 h-4 text-white/30"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <%!-- Optional message --%>
+              <div>
+                <label class="block font-mono text-xs tracking-[0.15em] text-white/40 uppercase mb-2">
+                  Anything else? <span class="normal-case text-white/20">(optional)</span>
+                </label>
+                <.input
+                  field={f[:message]}
+                  type="textarea"
+                  placeholder="Tell us about your current treasury setup, specific pain points, or implementation timeline..."
+                  rows="4"
+                  class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 text-sm font-mono focus:outline-none focus:border-indigo-500/60 focus:bg-white/[0.07] transition-all duration-200 resize-none"
+                />
+              </div>
+
+              <%!-- Submit --%>
+              <div class="pt-2">
+                <button
+                  type="submit"
+                  class="btn-liquid w-full py-4 rounded-xl font-mono text-sm tracking-[0.1em] uppercase font-semibold"
+                >
+                  Submit Access Request
+                </button>
+                <p class="text-center text-white/20 text-xs font-mono mt-4">
+                  By submitting, you agree to our privacy policy. No spam, ever.
+                </p>
+              </div>
+            </.form>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>
