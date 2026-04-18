@@ -26,7 +26,11 @@ defmodule Nexus.Shared.Middleware.OpenTelemetry do
     # Step 2: Start Local Execution Span
     # We determine the name based on whether we have a traceparent (Aggregate side) or not (Web side)
     # But to keep it simple and unified, we'll label it by its command.
-    role = if Map.get(metadata, "traceparent") || Map.get(metadata, :traceparent), do: "Execute", else: "Dispatch"
+    role =
+      if Map.get(metadata, "traceparent") || Map.get(metadata, :traceparent),
+        do: "Execute",
+        else: "Dispatch"
+
     span_name = "Command.#{role}.#{command.__struct__ |> Module.split() |> List.last()}"
 
     span = OpenTelemetry.Tracer.start_span(span_name)
@@ -46,16 +50,24 @@ defmodule Nexus.Shared.Middleware.OpenTelemetry do
       nil -> :ok
       span -> OpenTelemetry.Span.end_span(span)
     end
+
     pipeline
   end
 
   def after_failure(%Pipeline{assigns: assigns} = pipeline) do
     case Map.get(assigns, :otel_span) do
-      nil -> :ok
+      nil ->
+        :ok
+
       span ->
-        OpenTelemetry.Span.set_status(span, OpenTelemetry.status(:error, "Command Execution Failure"))
+        OpenTelemetry.Span.set_status(
+          span,
+          OpenTelemetry.status(:error, "Command Execution Failure")
+        )
+
         OpenTelemetry.Span.end_span(span)
     end
+
     pipeline
   end
 end

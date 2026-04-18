@@ -10,7 +10,7 @@ config :nexus, Nexus.Repo,
   hostname: System.get_env("DB_HOSTNAME") || "postgres",
   port: String.to_integer(System.get_env("DB_PORT") || "5432"),
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 5,
+  pool_size: 10,
   show_sensitive_data_on_connection_error: true
 
 config :nexus, Nexus.EventStore,
@@ -18,7 +18,7 @@ config :nexus, Nexus.EventStore,
   username: System.get_env("EVENTSTORE_USER") || "ledger",
   password: System.get_env("EVENTSTORE_PASS") || "ledger",
   hostname: System.get_env("EVENTSTORE_HOSTNAME") || "postgres",
-  pool_size: 5,
+  pool_size: 10,
   column_data_type: "jsonb"
 
 config :commanded,

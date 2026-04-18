@@ -23,8 +23,15 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     name: "Identity.UserProjector"
 
   alias Ecto.Multi
-  alias Nexus.Identity.Audit.AuditLog
-  alias Nexus.Identity.Events.{BiometricEnrolled, UserActivated, UserRegistered}
+
+  alias Nexus.Identity.Events.{
+    BiometricEnrolled,
+    UserActivated,
+    UserDeactivated,
+    UserRegistered,
+    UserRoleChanged
+  }
+
   alias Nexus.Identity.Idempotency.IdempotencyKey
   alias Nexus.Identity.Projections.User
 
@@ -34,43 +41,42 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     status = if event.credential_id, do: "registered", else: "invited"
 
     multi
-    |> audit_event(event, metadata)
     |> track_idempotency(metadata, "RegisterUser", %{user_id: event.user_id, status: status})
     |> create_user(event, metadata)
   end)
 
   project(%BiometricEnrolled{} = event, metadata, fn multi ->
     multi
-    |> audit_event(event, metadata)
-    |> track_idempotency(metadata, "EnrollBiometric", %{user_id: event.user_id, status: "registered"})
+    |> track_idempotency(metadata, "EnrollBiometric", %{
+      user_id: event.user_id,
+      status: "registered"
+    })
     |> enroll_biometric(event, metadata)
   end)
 
   project(%UserActivated{} = event, metadata, fn multi ->
     multi
-    |> audit_event(event, metadata)
     |> track_idempotency(metadata, "ActivateUser", %{user_id: event.user_id, status: "active"})
     |> activate_user(event, metadata)
   end)
 
-  # --- Private Helpers ---
+  project(%UserDeactivated{} = event, metadata, fn multi ->
+    multi
+    |> track_idempotency(metadata, "DeactivateUser", %{
+      user_id: event.user_id,
+      status: "deactivated"
+    })
+    |> deactivate_user(event)
+  end)
 
-  defp audit_event(multi, event, metadata) do
-    attrs = %{
-      id: Uniq.UUID.uuid7(),
-      event_id: metadata.event_id,
-      org_id: event.org_id,
-      event_type: event.__struct__ |> Module.split() |> List.last(),
-      payload: Map.from_struct(event),
-      recorded_at: Nexus.Schema.utc_now()
-    }
-
-    changeset = AuditLog.changeset(%AuditLog{}, attrs)
-    Multi.insert(multi, :"audit_#{metadata.event_id}", changeset,
-      on_conflict: :nothing,
-      conflict_target: :id
-    )
-  end
+  project(%UserRoleChanged{} = event, metadata, fn multi ->
+    multi
+    |> track_idempotency(metadata, "UpdateUserRole", %{
+      user_id: event.user_id,
+      new_role: event.new_role
+    })
+    |> update_user_role(event)
+  end)
 
   defp track_idempotency(multi, metadata, command_name, result) do
     # Extract the deterministic key assigned by the Idempotency Middleware
@@ -86,6 +92,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     }
 
     changeset = IdempotencyKey.changeset(%IdempotencyKey{}, attrs)
+
     Multi.insert(multi, :"idempotency_#{metadata.event_id}", changeset,
       on_conflict: :nothing,
       conflict_target: :id
@@ -107,11 +114,17 @@ defmodule Nexus.Identity.Projectors.UserProjector do
           {:ok, :already_exists_by_id}
 
         repo.get_by(User, email: event.email) ->
-          Logger.warning("[Identity] UserRegistered skip: email #{event.email} claimed by another user.")
+          Logger.warning(
+            "[Identity] UserRegistered skip: email #{event.email} claimed by another user."
+          )
+
           {:ok, :already_exists_by_email}
 
         event.credential_id && repo.get_by(User, credential_id: event.credential_id) ->
-          Logger.warning("[Identity] UserRegistered skip: credential_id #{event.credential_id} already anchored.")
+          Logger.warning(
+            "[Identity] UserRegistered skip: credential_id #{event.credential_id} already anchored."
+          )
+
           {:ok, :already_exists_by_credential_id}
 
         true ->
@@ -154,6 +167,28 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     Multi.update_all(multi, :activate_user, query,
       set: [
         status: "active",
+        updated_at: DateTime.utc_now()
+      ]
+    )
+  end
+
+  defp deactivate_user(multi, event) do
+    query = from(u in User, where: u.id == ^event.user_id)
+
+    Multi.update_all(multi, :deactivate_user, query,
+      set: [
+        status: "deactivated",
+        updated_at: DateTime.utc_now()
+      ]
+    )
+  end
+
+  defp update_user_role(multi, event) do
+    query = from(u in User, where: u.id == ^event.user_id)
+
+    Multi.update_all(multi, :update_user_role, query,
+      set: [
+        role: event.new_role,
         updated_at: DateTime.utc_now()
       ]
     )

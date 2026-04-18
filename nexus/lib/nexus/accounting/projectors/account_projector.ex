@@ -51,6 +51,7 @@ defmodule Nexus.Accounting.Projectors.AccountProjector do
     }
 
     changeset = AuditLog.changeset(%AuditLog{}, attrs)
+
     Multi.insert(multi, :"audit_#{metadata.event_id}", changeset,
       on_conflict: :nothing,
       conflict_target: :id
@@ -65,6 +66,7 @@ defmodule Nexus.Accounting.Projectors.AccountProjector do
     }
 
     changeset = IdempotencyKey.changeset(%IdempotencyKey{}, attrs)
+
     Multi.insert(multi, :"idempotency_#{metadata.event_id}", changeset,
       on_conflict: :nothing,
       conflict_target: :id

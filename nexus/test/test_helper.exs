@@ -1,4 +1,4 @@
-ExUnit.start()
+ExUnit.start(max_cases: 1)
 
 # --- Sovereign Reset Strategy ---
 # Database is wiped and setup from the host BEFORE mix test starts.

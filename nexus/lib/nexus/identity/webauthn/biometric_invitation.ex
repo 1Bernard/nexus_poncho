@@ -23,6 +23,7 @@ defmodule Nexus.Identity.WebAuthn.BiometricInvitation do
   """
   def verify_token(token) do
     secret = get_secret()
+
     case Plug.Crypto.verify(secret, @salt, token, max_age: @max_age) do
       {:ok, user_id} -> {:ok, user_id}
       {:error, reason} -> {:error, reason}

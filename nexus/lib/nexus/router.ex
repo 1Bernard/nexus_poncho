@@ -22,8 +22,17 @@ defmodule Nexus.Router do
   alias Nexus.Treasury.Aggregates.Vault
   alias Nexus.Treasury.Commands.{CreditVault, RegisterVault}
 
-  alias Nexus.Identity.Aggregates.User
-  alias Nexus.Identity.Commands.{ActivateUser, EnrollBiometric, RegisterUser}
+  alias Nexus.Identity.Aggregates.{Session, User}
+
+  alias Nexus.Identity.Commands.{
+    ActivateUser,
+    DeactivateUser,
+    EnrollBiometric,
+    ExpireSession,
+    RegisterUser,
+    StartSession,
+    UpdateUserRole
+  }
 
   alias Nexus.Compliance.Aggregates.Screening
   alias Nexus.Compliance.Commands.{CompletePEPCheck, PerformPEPCheck}
@@ -42,11 +51,18 @@ defmodule Nexus.Router do
     identity: :vault_id
   )
 
-  # ==================== IDENTITY ====================
+  # ==================== IDENTITY — User lifecycle ====================
 
-  dispatch([RegisterUser, ActivateUser, EnrollBiometric],
+  dispatch([RegisterUser, ActivateUser, EnrollBiometric, DeactivateUser, UpdateUserRole],
     to: User,
     identity: :user_id
+  )
+
+  # ==================== IDENTITY — Session lifecycle ====================
+
+  dispatch([StartSession, ExpireSession],
+    to: Session,
+    identity: :session_id
   )
 
   # ==================== COMPLIANCE ====================

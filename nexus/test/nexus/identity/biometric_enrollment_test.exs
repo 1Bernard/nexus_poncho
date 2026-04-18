@@ -28,13 +28,14 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
       email = "biometric_#{Ecto.UUID.generate()}@nexus.com"
 
       # 1. Dispatch RegisterUser (simulating invitation)
-      :ok = Nexus.App.dispatch(%RegisterUser{
-        user_id: user_id,
-        org_id: Ecto.UUID.generate(),
-        email: email,
-        name: "Bio Tester",
-        role: "admin"
-      })
+      :ok =
+        Nexus.App.dispatch(%RegisterUser{
+          user_id: user_id,
+          org_id: Ecto.UUID.generate(),
+          email: email,
+          name: "Bio Tester",
+          role: "admin"
+        })
 
       # Wait for the initial projection
       wait_until(fn ->
@@ -50,19 +51,23 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
       # TenantGate only checks presence, so any org_id is acceptable here.
       org_id = Ecto.UUID.generate()
 
-      :ok = Nexus.App.dispatch(%EnrollBiometric{
-        user_id: user_id,
-        org_id: org_id,
-        credential_id: credential_id,
-        cose_key: cose_key
-      })
+      :ok =
+        Nexus.App.dispatch(%EnrollBiometric{
+          user_id: user_id,
+          org_id: org_id,
+          credential_id: credential_id,
+          cose_key: cose_key
+        })
 
       # 3. Verify read model updates
       wait_until(fn ->
         case Repo.get(UserProjection, user_id) do
           %{status: status, credential_id: ^credential_id, cose_key: ^cose_key} = u
-            when status in ["registered", "active"] -> {:ok, u}
-          u -> {:error, "Still waiting for biometric projection: #{inspect(u && u.status)}"}
+          when status in ["registered", "active"] ->
+            {:ok, u}
+
+          u ->
+            {:error, "Still waiting for biometric projection: #{inspect(u && u.status)}"}
         end
       end)
     end
@@ -70,10 +75,13 @@ defmodule Nexus.Identity.BiometricEnrollmentTest do
 
   defp wait_until(fun, retries \\ 20) do
     case fun.() do
-      {:ok, val} -> val
+      {:ok, val} ->
+        val
+
       {:error, _} when retries > 0 ->
         Process.sleep(200)
         wait_until(fun, retries - 1)
+
       {:error, reason} ->
         flunk(reason)
     end

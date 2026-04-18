@@ -22,7 +22,7 @@ defmodule Nexus.Treasury.Projections.Vault do
     field(:daily_withdrawal_limit, :decimal)
     field(:requires_multi_sig, :boolean, default: false)
 
-    timestamps()
+    timestamps(type: :utc_datetime_usec, inserted_at: :created_at)
   end
 
   def changeset(vault, attrs) do

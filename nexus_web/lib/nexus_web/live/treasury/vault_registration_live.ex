@@ -20,18 +20,47 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
         class="mt-10"
       >
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <.input field={@form[:name]} label="Vault Display Name" placeholder="e.g. Primary Operating" required />
-          <.input field={@form[:currency]} type="select" label="Currency" options={["USD", "EUR", "GBP", "SGD"]} />
-          
-          <.input field={@form[:bank_name]} label="Partner Bank" placeholder="Equinox Central Bank" required />
+          <.input
+            field={@form[:name]}
+            label="Vault Display Name"
+            placeholder="e.g. Primary Operating"
+            required
+          />
+          <.input
+            field={@form[:currency]}
+            type="select"
+            label="Currency"
+            options={["USD", "EUR", "GBP", "SGD"]}
+          />
+
+          <.input
+            field={@form[:bank_name]}
+            label="Partner Bank"
+            placeholder="Equinox Central Bank"
+            required
+          />
           <.input field={@form[:iban]} label="IBAN / Account Number" required />
-          
-          <.input field={@form[:provider]} type="select" label="Settlement Provider" options={["Stripe", "Modulr", "Internal"]} />
-          <.input field={@form[:daily_withdrawal_limit]} type="number" label="Daily Withdrawal Limit (Minor Units)" value="1000000" />
+
+          <.input
+            field={@form[:provider]}
+            type="select"
+            label="Settlement Provider"
+            options={["Stripe", "Modulr", "Internal"]}
+          />
+          <.input
+            field={@form[:daily_withdrawal_limit]}
+            type="number"
+            label="Daily Withdrawal Limit (Minor Units)"
+            value="1000000"
+          />
         </div>
 
         <div class="mt-4">
-          <.input field={@form[:requires_multi_sig]} type="checkbox" label="Enable Multi-Signature Approval" />
+          <.input
+            field={@form[:requires_multi_sig]}
+            type="checkbox"
+            label="Enable Multi-Signature Approval"
+          />
         </div>
 
         <:actions>
@@ -46,7 +75,8 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, form: to_form(%{"currency" => "USD", "provider" => "Stripe"}, as: "vault"))}
+    {:ok,
+     assign(socket, form: to_form(%{"currency" => "USD", "provider" => "Stripe"}, as: "vault"))}
   end
 
   @impl true

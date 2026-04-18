@@ -64,7 +64,7 @@ defmodule NexusWeb.PromEx do
       Plugins.Beam,
       {Plugins.Phoenix, router: NexusWeb.Router, endpoint: NexusWeb.Endpoint},
       {Plugins.Ecto, repos: [Nexus.Repo]},
-      Plugins.PhoenixLiveView,
+      Plugins.PhoenixLiveView
       # Plugins.Absinthe,
       # Plugins.Broadway,
 
@@ -90,7 +90,7 @@ defmodule NexusWeb.PromEx do
       {:prom_ex, "beam.json"},
       {:prom_ex, "phoenix.json"},
       {:prom_ex, "ecto.json"},
-      {:prom_ex, "phoenix_live_view.json"},
+      {:prom_ex, "phoenix_live_view.json"}
     ]
   end
 end

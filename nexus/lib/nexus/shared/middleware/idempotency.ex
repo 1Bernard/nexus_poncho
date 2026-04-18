@@ -53,6 +53,22 @@ defmodule Nexus.Shared.Middleware.Idempotency do
     Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
   end
 
+  defp find_idempotency_key(%Nexus.Identity.Commands.EnrollBiometric{}, id) do
+    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Identity.Commands.DeactivateUser{}, id) do
+    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Identity.Commands.UpdateUserRole{}, id) do
+    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Identity.Commands.StartSession{}, id) do
+    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+  end
+
   defp find_idempotency_key(%Nexus.Accounting.Commands.OpenAccount{}, id) do
     Repo.get(Nexus.Accounting.Idempotency.IdempotencyKey, id)
   end

@@ -12,12 +12,13 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   def register_begin(user_id, email, opts \\ []) do
     origin = opts[:origin] || origin()
 
-    challenge = Wax.new_registration_challenge(
-      user_id: user_id,
-      user_name: email,
-      rp_id: rp_id(origin),
-      origin: origin
-    )
+    challenge =
+      Wax.new_registration_challenge(
+        user_id: user_id,
+        user_name: email,
+        rp_id: rp_id(origin),
+        origin: origin
+      )
 
     case AuthChallengeStore.put(user_id, challenge) do
       :ok -> {:ok, challenge}
@@ -28,6 +29,7 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   @impl true
   def register_finish(params, challenge_id, _user_id) do
     Logger.info("[WaxAdapter] Completing registration for challenge: #{challenge_id}")
+
     case AuthChallengeStore.get(challenge_id) do
       nil -> {:error, :challenge_not_found_or_expired}
       challenge -> do_register_finish(params, challenge_id, challenge)
@@ -70,11 +72,13 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   def authenticate_challenge(user_credentials) do
     origin = origin()
 
-    challenge = Wax.new_authentication_challenge(
-      rp_id: rp_id(origin),
-      origin: origin,
-      allow_credentials: user_credentials
-    )
+    challenge =
+      Wax.new_authentication_challenge(
+        rp_id: rp_id(origin),
+        origin: origin,
+        allow_credentials: user_credentials
+      )
+
     # Since authentication might not have a user_id yet (if using discovery),
     # we use the challenge itself as the lookup key.
     challenge_id = Base.encode64(challenge.bytes)

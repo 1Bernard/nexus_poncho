@@ -8,9 +8,9 @@ name: Nexus Audit (Elite Legacy Enabled)
 
 on:
   push:
-    branches: [ main ]
+    branches: ["**"]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   audit:
@@ -64,8 +64,9 @@ jobs:
       - name: Compliance Audit (Git Sovereignty)
         run: |
           # Use the same regex as lefthook.yml
+          # Skip auto-generated merge commits — check the most recent non-merge commit instead.
           REGEX="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(.+\)!?: .+"
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_MSG=$(git log --no-merges -1 --pretty=%B)
           echo "Checking commit message: $COMMIT_MSG"
           if [[ ! $COMMIT_MSG =~ $REGEX ]]; then
             echo "❌ ELITE ERROR: Commit message does not follow Conventional Commits standard with mandatory scope."
@@ -109,6 +110,11 @@ jobs:
           # ecto.create + ecto.migrate set up the ledger_test projection tables.
           docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix event_store.init"
           docker compose run --no-deps -e MIX_ENV=test --rm node1 sh -c "cd nexus && mix ecto.create --quiet && mix ecto.migrate --quiet"
+
+      - name: Format Audit
+        run: |
+          docker compose run --no-deps --rm node1 sh -c "cd nexus && mix format --check-formatted"
+          docker compose run --no-deps --rm web sh -c "cd nexus_web && mix format --check-formatted"
 
       - name: Static Security Audit (Sobelow)
         run: |
