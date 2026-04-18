@@ -33,6 +33,6 @@ defmodule Nexus.Identity.Audit.AuditLog do
       :signature,
       :recorded_at
     ])
-    |> validate_required([:id, :event_id, :org_id, :event_type, :payload])
+    |> validate_required([:id, :event_id, :event_type, :payload])
   end
 end

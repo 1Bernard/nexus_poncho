@@ -7,33 +7,35 @@ defmodule NexusWeb.Identity.OnboardingLive do
   alias Nexus.Identity.WebAuthn.BiometricInvitation
   require Logger
 
+  @max_projection_retries 15
+  @projection_retry_ms 200
+
   @impl true
   def mount(%{"token" => token}, _session, socket) do
     Logger.info("[OnboardingUI] Verifying invitation token: #{token}")
+
     case BiometricInvitation.verify_token(token) do
       {:ok, user_id} ->
         user = GetUser.execute(user_id)
 
-        if user do
-          Logger.info("[OnboardingUI] Handshake authorized for user: #{user_id}")
+        socket =
+          socket
+          |> assign(:user_id, user_id)
+          |> assign(:user, user)
+          |> assign(token: token)
+          |> assign(status: if(user, do: :idle, else: :loading))
+          |> assign(progress: 0)
+          |> assign(current_origin: nil)
+          |> assign(error: nil)
+          |> assign(:retry_count, 0)
 
-          {:ok,
-           socket
-           |> assign(:user_id, user_id)
-           |> assign(:user, user)
-           |> assign(token: token)
-           |> assign(status: :idle)
-           |> assign(progress: 0)
-           |> assign(current_origin: nil)
-           |> assign(error: nil)}
-        else
-          Logger.warning("[OnboardingUI] Handshake failed: User #{user_id} not yet projected.")
-
-          {:ok,
-           socket
-           |> put_flash(:error, "Identity record not ready. Please refresh in a moment.")
-           |> push_navigate(to: "/register")}
+        if connected?(socket) && is_nil(user) do
+          Process.send_after(self(), :await_projection, @projection_retry_ms)
         end
+
+        if user, do: Logger.info("[OnboardingUI] Handshake authorized for user: #{user_id}")
+
+        {:ok, socket}
 
       {:error, reason} ->
         Logger.warning("[OnboardingUI] Handshake failed: #{inspect(reason)}")
@@ -51,7 +53,35 @@ defmodule NexusWeb.Identity.OnboardingLive do
     uri_struct = URI.parse(uri)
     origin = "#{uri_struct.scheme}://#{uri_struct.host}#{if uri_struct.port, do: ":#{uri_struct.port}"}"
 
-    {:noreply, assign(socket, current_origin: origin)}
+    socket = assign(socket, current_origin: origin)
+
+    # If the LiveView connected before the projection arrived, kick off the retry loop now
+    if socket.assigns.status == :loading do
+      Process.send_after(self(), :await_projection, @projection_retry_ms)
+    end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:await_projection, %{assigns: %{user_id: user_id, retry_count: count}} = socket) do
+    case GetUser.execute(user_id) do
+      nil when count < @max_projection_retries ->
+        Process.send_after(self(), :await_projection, @projection_retry_ms)
+        {:noreply, assign(socket, retry_count: count + 1)}
+
+      nil ->
+        Logger.warning("[OnboardingUI] Projection timeout: user #{user_id} not ready after #{count} retries.")
+
+        {:noreply,
+         socket
+         |> put_flash(:error, "Identity record not ready. Please refresh in a moment.")
+         |> push_navigate(to: "/register")}
+
+      user ->
+        Logger.info("[OnboardingUI] Handshake authorized for user: #{user_id} (after #{count} retries)")
+        {:noreply, socket |> assign(:user, user) |> assign(:status, :idle)}
+    end
   end
 
   @impl true
@@ -106,7 +136,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
                   "w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500",
                   @status == :scanning && "bg-indigo-500/10 scale-110",
                   @status == :complete && "bg-emerald-500/10 scale-110",
-                  @status == :idle && "bg-zinc-50 dark:bg-zinc-800 group-hover:bg-indigo-500/5"
+                  @status in [:idle, :loading] && "bg-zinc-50 dark:bg-zinc-800 group-hover:bg-indigo-500/5"
                 ]}>
                   <div class="relative overflow-hidden w-20 h-20">
                     <.icon
@@ -116,7 +146,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
                           "w-20 h-20 transition-colors duration-500",
                           @status == :complete && "text-emerald-500",
                           @status == :scanning && "text-indigo-500 pulse-soft",
-                          @status == :idle && "text-zinc-400 dark:text-zinc-600 group-hover:text-indigo-400"
+                          @status in [:idle, :loading] && "text-zinc-400 dark:text-zinc-600 group-hover:text-indigo-400"
                         ]
                         |> Enum.filter(& &1)
                         |> Enum.join(" ")
@@ -136,10 +166,11 @@ defmodule NexusWeb.Identity.OnboardingLive do
                 "text-lg font-semibold tracking-tight transition-colors duration-500",
                 @status == :complete && "text-emerald-500",
                 @status == :scanning && "text-indigo-500",
-                @status == :idle && "text-zinc-900 dark:text-zinc-100"
+                @status in [:idle, :loading] && "text-zinc-900 dark:text-zinc-100"
               ]}>
                 <%= case @status do %>
                   <% :idle -> %> Scan Biometric
+                  <% :loading -> %> Preparing Identity...
                   <% :scanning -> %> Hardware Handshake in Progress...
                   <% :complete -> %> Neural profile secured
                   <% :error -> %> Handshake Aborted
@@ -149,6 +180,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
               <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
                 <%= case @status do %>
                   <% :idle -> %> Please prepare your biometric authenticator (TouchID, FaceID, or YubiKey).
+                  <% :loading -> %> Anchoring your identity record. This takes just a moment...
                   <% :scanning -> %> Holding secure tunnel to authenticator. Please provide biometric verification.
                   <% :complete -> %> Biometric vault synchronized.
                   <% :error -> %> {@error}

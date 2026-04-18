@@ -250,7 +250,7 @@ services:
         condition: service_healthy
       vault-init:
         condition: service_completed_successfully
-    command: ["sh", "-c", "cd nexus && elixir --name nexus@node1.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
+    command: ["sh", "-c", "cd nexus && mix ecto.migrate && elixir --name nexus@node1.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
 
   node2:
     build:
@@ -303,7 +303,7 @@ services:
         condition: service_started
       vault-init:
         condition: service_completed_successfully
-    command: ["sh", "-c", "cd nexus && elixir --name nexus@node2.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
+    command: ["sh", "-c", "cd nexus && mix ecto.migrate && elixir --name nexus@node2.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
 
   web:
     build:

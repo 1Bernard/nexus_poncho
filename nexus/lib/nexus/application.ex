@@ -48,7 +48,11 @@ defmodule Nexus.Application do
 
     # Functional Partitioning: each entry is {app_config_key, [modules_to_start]}.
     domain_partitions = [
-      {:start_identity_projections, [Nexus.Identity.Projectors.UserProjector]},
+      {:start_identity_projections, [
+        Nexus.Identity.Projectors.UserProjector,
+        Nexus.Identity.Projectors.SessionProjector,
+        Nexus.Identity.Audit.AuditLogProjector
+      ]},
       {:start_organization_projections, [Nexus.Organization.Projectors.TenantProjector]},
       {:start_compliance_projections,
        [Nexus.Compliance.Projectors.ScreeningProjector, Nexus.Compliance.Workers.PEPWorker]},
