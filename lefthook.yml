@@ -29,8 +29,8 @@ commit-msg:
     conventional-commit:
       run: |
         # Basic regex for conventional commits: type(scope): description
-        COMMIT_MSG=$(cat {1})
-        if ! echo "$COMMIT_MSG" | grep -lE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(.+\)!?: .+" > /dev/null; then
+        COMMIT_MSG=$(head -1 {1})
+        if ! echo "$COMMIT_MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)\(.+\)!?: .+"; then
           echo "❌ ELITE ERROR: Commit message does not follow Conventional Commits standard."
           echo "Format: type(scope): description (e.g., feat(identity): implement RegisterUser)"
           exit 1
