@@ -81,17 +81,7 @@ defmodule NexusWeb.UserAuth do
     case Repo.get(Session, session_id) do
       %Session{status: "active", expires_at: expires_at, user_id: user_id} ->
         if DateTime.compare(expires_at, DateTime.utc_now()) == :gt do
-          case Repo.get(User, user_id) do
-            %User{status: "active"} = user ->
-              user
-
-            %User{status: status} ->
-              Logger.info("[UserAuth] User #{user_id} is #{status} — denying access")
-              nil
-
-            nil ->
-              nil
-          end
+          resolve_active_user(user_id)
         else
           Logger.info(
             "[UserAuth] Session #{session_id} TTL elapsed — treating as unauthenticated"
@@ -101,6 +91,20 @@ defmodule NexusWeb.UserAuth do
         end
 
       _ ->
+        nil
+    end
+  end
+
+  defp resolve_active_user(user_id) do
+    case Repo.get(User, user_id) do
+      %User{status: "active"} = user ->
+        user
+
+      %User{status: status} ->
+        Logger.info("[UserAuth] User #{user_id} is #{status} — denying access")
+        nil
+
+      nil ->
         nil
     end
   end
