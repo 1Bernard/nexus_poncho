@@ -26,7 +26,7 @@ import {hooks as colocatedHooks} from "phoenix-colocated/nexus_web"
 import topbar from "../vendor/topbar"
 import OnboardingLive from "./hooks/onboarding_live"
 import LoginLive from "./hooks/login_live"
-import { Marketing } from "./marketing_scripts"
+import AppShell from "./hooks/app_shell"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -35,6 +35,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
   hooks: {
     OnboardingLive,
     LoginLive,
+    AppShell,
     ...colocatedHooks
   },
 })
@@ -53,8 +54,8 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-if (document.getElementById('globe-container')) {
-  document.addEventListener('DOMContentLoaded', () => Marketing.init());
+if (document.getElementById('globe-container') || document.getElementById('cursor-dot')) {
+  import("./marketing_scripts").then(({ Marketing }) => Marketing.init());
 }
 
 

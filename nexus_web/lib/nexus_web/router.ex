@@ -36,7 +36,8 @@ defmodule NexusWeb.Router do
     # ── Protected routes (biometric session required) ──────────────────────
 
     live_session :authenticated,
-      on_mount: [{NexusWeb.UserAuth, :require_authenticated}] do
+      on_mount: [{NexusWeb.UserAuth, :require_authenticated}],
+      layout: {NexusWeb.Layouts, :app} do
       live "/vaults", Treasury.VaultDashboardLive, :index
       live "/vaults/new", Treasury.VaultRegistrationLive, :new
     end

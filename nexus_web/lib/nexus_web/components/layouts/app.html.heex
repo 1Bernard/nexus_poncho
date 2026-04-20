@@ -1,0 +1,303 @@
+<div
+  id="app-shell"
+  phx-hook="AppShell"
+  class="flex h-screen w-screen overflow-hidden bg-[#030303] text-white"
+>
+  <%!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ --%>
+  <aside
+    id="main-sidebar"
+    class="relative flex flex-col border-r border-white/5 bg-black/40 backdrop-blur-3xl"
+    style="width: 288px;"
+  >
+    <%!-- Collapse Toggle --%>
+    <button
+      id="sidebar-toggle"
+      class="absolute -right-3 top-24 w-6 h-6 bg-[#030303] border border-white/10 rounded-full flex items-center justify-center hover:border-emerald-400/50 transition-all z-[60] shadow-xl"
+    >
+      <.icon
+        name="hero-chevron-left-mini"
+        class="size-3 text-zinc-400 sidebar-toggle-icon transition-[transform] duration-500"
+      />
+    </button>
+
+    <%!-- Logo --%>
+    <div class="h-20 flex items-center px-8 border-b border-white/5 flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="relative w-6 h-6 flex-shrink-0">
+          <div class="absolute inset-0 border border-emerald-400 rotate-45 hover:rotate-180 transition-transform duration-700">
+          </div>
+          <div class="absolute inset-1.5 bg-emerald-400 rotate-45 shadow-[0_0_10px_rgba(52,211,153,0.5)]">
+          </div>
+        </div>
+        <span class="sidebar-text sidebar-header-text font-bold text-white tracking-tighter text-xl italic uppercase">
+          EQUINOX
+        </span>
+      </div>
+    </div>
+
+    <%!-- Navigation --%>
+    <div id="nav-container" class="flex-1 py-8 px-4">
+      <div class="space-y-1">
+        <p class="tech-label px-4 mb-6 opacity-40 sidebar-text text-zinc-400">Operations</p>
+        <nav class="space-y-1">
+          <.link
+            navigate={~p"/vaults"}
+            data-nav-path="/vaults"
+            class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
+          >
+            <.icon name="hero-squares-2x2-mini" class="size-4 flex-shrink-0" />
+            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+              Command Center
+            </span>
+            <span class="sidebar-tooltip">COMMAND_CENTER</span>
+          </.link>
+          <a
+            href="#"
+            data-nav-path="/network"
+            class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
+          >
+            <.icon name="hero-chart-bar-mini" class="size-4 flex-shrink-0" />
+            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+              Network State
+            </span>
+            <span class="sidebar-tooltip">NETWORK_STATE</span>
+          </a>
+          <a
+            href="#"
+            data-nav-path="/security"
+            class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
+          >
+            <.icon name="hero-shield-check-mini" class="size-4 flex-shrink-0" />
+            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+              Security
+            </span>
+            <span class="sidebar-tooltip">SECURITY</span>
+          </a>
+          <a
+            href="#"
+            data-nav-path="/terminal"
+            class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
+          >
+            <.icon name="hero-command-line-mini" class="size-4 flex-shrink-0" />
+            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+              Terminal
+            </span>
+            <span class="sidebar-tooltip">TERMINAL</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <%!-- Sidebar Footer --%>
+    <div class="p-6 border-t border-white/5 space-y-4 flex-shrink-0">
+      <div class="sidebar-text p-4 bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden">
+        <p class="tech-label text-emerald-400 mb-2 italic">Institutional Profile</p>
+        <p class="text-[10px] font-mono text-zinc-300 truncate uppercase">
+          <%= case assigns[:current_user] do %>
+            <% nil -> %>
+              UNAUTHORIZED
+            <% cu -> %>
+              ROLE: {cu |> Map.get(:role, "USER") |> to_string() |> String.upcase()}
+          <% end %>
+        </p>
+      </div>
+      <div class="flex items-center justify-between px-2">
+        <div class="flex items-center gap-3">
+          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></div>
+          <span class="sidebar-text text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+            Connection: Synchronized
+          </span>
+        </div>
+        <.link
+          href={~p"/auth/logout"}
+          method="delete"
+          class="text-zinc-600 hover:text-red-400 transition-colors"
+          title="Terminate Session"
+        >
+          <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" />
+        </.link>
+      </div>
+    </div>
+  </aside>
+
+  <%!-- ═══ MAIN VIEWPORT ══════════════════════════════════════════════════════ --%>
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <%!-- TOPBAR --%>
+    <header
+      id="app-topbar"
+      class="h-20 border-b border-white/5 bg-black/20 backdrop-blur-xl flex-shrink-0 relative z-20"
+    >
+      <div class="grid grid-cols-[1fr_auto_1fr] items-center h-full px-8">
+        <%!-- Left: Breadcrumb --%>
+        <div class="flex justify-start items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em]">
+          <span class="text-zinc-600">{assigns[:breadcrumb_section] || "Equinox"}</span>
+          <span class="text-zinc-700">›</span>
+          <span class="text-white font-bold">{assigns[:page_title] || "Dashboard"}</span>
+        </div>
+
+        <%!-- Center: Command Palette Trigger --%>
+        <div>
+          <button
+            data-cmd-palette
+            type="button"
+            class="command-trigger rounded-full px-4 py-2 flex items-center gap-0"
+          >
+            <div class="flex items-center gap-3 flex-1">
+              <.icon name="hero-command-line-mini" class="size-3.5 text-zinc-500" />
+              <span class="text-[10px] font-mono text-zinc-400 tracking-wider">
+                Type a command or search...
+              </span>
+            </div>
+            <div class="w-px h-6 bg-white/10 mx-3"></div>
+            <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/30 rounded border border-white/5">
+              <span class="font-mono text-[9px] text-zinc-600">⌘</span>
+              <span class="font-mono text-[9px] text-zinc-600 ml-0.5">K</span>
+            </div>
+          </button>
+        </div>
+
+        <%!-- Right: Clock + User --%>
+        <div class="flex justify-end items-center gap-6">
+          <div class="flex flex-col items-end"></div>
+
+          <div data-profile-toggle class="flex items-center gap-3 cursor-pointer group">
+            <div class="relative w-9 h-9 rounded-full bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center group-hover:border-emerald-400/50 transition-all">
+              <.icon name="hero-user-mini" class="size-4 text-emerald-400" />
+              <div class="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border-2 border-[#030303]">
+              </div>
+            </div>
+            <div class="flex flex-col"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <%!-- PAGE CONTENT --%>
+    <main class="flex-1 overflow-y-auto">
+      {@inner_content}
+    </main>
+  </div>
+
+  <%!-- ═══ COMMAND PALETTE ════════════════════════════════════════════════════ --%>
+  <div
+    id="app-command-palette"
+    class="hidden fixed inset-0 z-[200] flex items-start justify-center pt-[10vh] px-4"
+    style="background: rgba(3,3,3,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"
+  >
+    <div data-backdrop class="absolute inset-0"></div>
+    <div class="max-w-2xl w-full bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] relative z-10">
+      <div class="p-6 border-b border-white/5 flex items-center gap-4">
+        <.icon name="hero-command-line-mini" class="size-5 text-emerald-400 flex-shrink-0" />
+        <input
+          type="text"
+          id="palette-search"
+          placeholder="Type a command or search..."
+          class="flex-1 bg-transparent text-base font-mono text-white focus:outline-none placeholder:text-zinc-700"
+        />
+        <span class="tech-label text-zinc-500 flex-shrink-0">ESC to close</span>
+      </div>
+      <div class="p-4 max-h-[60vh] overflow-y-auto">
+        <p class="tech-label px-4 mb-4 opacity-50 text-zinc-500">Quick Actions</p>
+        <div class="space-y-1">
+          <.link
+            navigate={~p"/vaults/new"}
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:bg-emerald-400/10 hover:border-emerald-400/30 transition-all group"
+          >
+            <.icon
+              name="hero-plus-circle-mini"
+              class="size-4 text-zinc-500 group-hover:text-emerald-400"
+            />
+            <div class="flex-1 text-left">
+              <p class="text-sm font-bold text-white">Register New Vault</p>
+              <p class="text-[10px] text-zinc-500 font-mono">Establish a treasury vault</p>
+            </div>
+            <span class="tech-label text-zinc-700">⌘N</span>
+          </.link>
+          <.link
+            navigate={~p"/vaults"}
+            class="w-full flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:bg-emerald-400/10 hover:border-emerald-400/30 transition-all group"
+          >
+            <.icon
+              name="hero-squares-2x2-mini"
+              class="size-4 text-zinc-500 group-hover:text-emerald-400"
+            />
+            <div class="flex-1 text-left">
+              <p class="text-sm font-bold text-white">View All Vaults</p>
+              <p class="text-[10px] text-zinc-500 font-mono">Treasury vault dashboard</p>
+            </div>
+          </.link>
+          <button class="w-full flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:bg-emerald-400/10 hover:border-emerald-400/30 transition-all group text-left">
+            <.icon
+              name="hero-document-text-mini"
+              class="size-4 text-zinc-500 group-hover:text-emerald-400"
+            />
+            <div class="flex-1">
+              <p class="text-sm font-bold text-white">Export Audit Log</p>
+              <p class="text-[10px] text-zinc-500 font-mono">Compliance JSON / CSV export</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%!-- ═══ PROFILE DROPDOWN ══════════════════════════════════════════════════ --%>
+  <div
+    id="app-profile-menu"
+    class="hidden fixed right-10 top-24 z-[150] w-80 bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+  >
+    <div class="p-6 border-b border-white/5 bg-white/[0.02]">
+      <p class="tech-label text-emerald-400 mb-4">Authorized_Session</p>
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center">
+          <.icon name="hero-user-mini" class="size-6 text-emerald-400" />
+        </div>
+        <div>
+          <p class="text-sm font-black uppercase text-white">
+            <%= case assigns[:current_user] do %>
+              <% nil -> %>
+                UNAUTHORIZED
+              <% cu -> %>
+                {cu
+                |> Map.get(:name, Map.get(cu, :email, "USER"))
+                |> to_string()
+                |> String.upcase()}
+            <% end %>
+          </p>
+          <p class="text-[10px] font-mono text-zinc-500">Biometric Auth · Active</p>
+        </div>
+      </div>
+    </div>
+    <div class="p-4 space-y-4">
+      <div class="space-y-1">
+        <a
+          href="#"
+          class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
+        >
+          <.icon name="hero-cog-6-tooth-mini" class="size-4" /> Session Settings
+        </a>
+        <a
+          href="#"
+          class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-bold uppercase tracking-widest"
+        >
+          <.icon name="hero-key-mini" class="size-4" /> Manage Keys (HSM)
+        </a>
+        <.link
+          href={~p"/auth/logout"}
+          method="delete"
+          class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 border border-transparent hover:border-red-500/20 transition-all text-xs font-bold uppercase tracking-widest"
+        >
+          <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" /> Terminate Session
+        </.link>
+      </div>
+      <div class="p-4 bg-black rounded-2xl border border-white/5 font-mono text-[9px] text-zinc-600 space-y-1">
+        <p>SESSION: BIOMETRIC_FIDO2</p>
+        <p>ENCRYPTION: AES_256_GCM</p>
+        <p>STANDARD: FIPS_140-3</p>
+      </div>
+    </div>
+  </div>
+
+  <%!-- Flash messages --%>
+  <.flash_group flash={@flash} />
+</div>

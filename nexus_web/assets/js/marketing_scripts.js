@@ -1,270 +1,428 @@
-/**
- * Equinox Institutional Marketing Scripts
- * Handles: Custom Cursor, Globals, Three.js Globe, GSAP Animations, Accordions
- */
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export const Marketing = {
-  init() {
-    this.initLucide();
-    this.initCursor();
-    this.initNav();
-    this.initAnimations();
-    this.initAccordions();
-    this.initGlobe();
-    this.initNotifications();
-    this.initTickers();
-  },
+    _rafId: null,
+    _renderer: null,
 
-  initLucide() {
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
-  },
+    init() {
+        this.initCore();
+        this.initThreeGlobe();
+        this.initAnimations();
+        this.initPricingToggle();
+        this.initAccordions();
+        this.initParallaxCards();
+        this.initRoadmapProgress();
+    },
 
-  initCursor() {
-    const dot = document.getElementById('cursor-dot');
-    const ring = document.getElementById('cursor-ring');
-    if (!dot || !ring) return;
+    destroy() {
+        if (this._rafId) cancelAnimationFrame(this._rafId);
+        if (this._renderer) this._renderer.dispose();
+        this._rafId = null;
+        this._renderer = null;
+    },
 
-    let mx = 0, my = 0, rx = 0, ry = 0;
-    document.addEventListener('mousemove', e => {
-      mx = e.clientX;
-      my = e.clientY;
-      dot.style.left = mx + 'px';
-      dot.style.top = my + 'px';
-    });
+    initCore() {
+        if (typeof gsap === 'undefined') return;
+        gsap.registerPlugin(ScrollTrigger);
 
-    const animRing = () => {
-      rx += (mx - rx) * 0.12;
-      ry += (my - ry) * 0.12;
-      ring.style.left = rx + 'px';
-      ring.style.top = ry + 'px';
-      requestAnimationFrame(animRing);
-    };
-    animRing();
-  },
-
-  initNav() {
-    const nav = document.getElementById('main-nav');
-    if (!nav) return;
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 80);
-    });
-  },
-
-  initAnimations() {
-    if (!window.gsap || !window.ScrollTrigger) return;
-    const gsap = window.gsap;
-    gsap.registerPlugin(window.ScrollTrigger);
-
-    // Hero timeline
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    tl.to('#hero-badge', { opacity: 1, duration: 0.6 })
-      .to('#hero-line-1', { opacity: 1, y: 0, duration: 0.8 }, '-=0.3')
-      .to('#hero-line-2', { opacity: 1, y: 0, duration: 0.8 }, '-=0.5')
-      .to('#hero-desc', { opacity: 1, y: 0, duration: 0.7 }, '-=0.4')
-      .to('#hero-ctas', { opacity: 1, duration: 0.6 }, '-=0.3');
-
-    // Scroll reveals
-    gsap.utils.toArray('.reveal-y').forEach(el => {
-      gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 85%' }
-      });
-    });
-
-    // Roadmap line animation (Elite border draw)
-    gsap.to('.roadmap-line', {
-      height: '100%',
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '#roadmap',
-        start: 'top 40%',
-        end: 'bottom 60%',
-        scrub: true
-      }
-    });
-
-    // Counter animations
-    document.querySelectorAll('.counter').forEach(el => {
-      const target = parseFloat(el.dataset.target);
-      const isDecimal = target % 1 !== 0;
-      window.ScrollTrigger.create({
-        trigger: el,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => {
-          let start = 0;
-          const step = target / 60;
-          const timer = setInterval(() => {
-            start += step;
-            if (start >= target) {
-              el.textContent = isDecimal ? target.toFixed(1) : target;
-              clearInterval(timer);
-            } else {
-              el.textContent = isDecimal ? start.toFixed(1) : Math.floor(start);
+        // Custom Cursor
+        if (window.innerWidth > 1024) {
+            const cursorDot = document.getElementById('cursor-dot');
+            const cursorRing = document.getElementById('cursor-ring');
+            if (cursorDot && cursorRing) {
+                window.addEventListener('mousemove', (e) => {
+                    gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0 });
+                    gsap.to(cursorRing, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                });
             }
-          }, 16);
         }
-      });
-    });
-  },
 
-  initAccordions() {
-    document.querySelectorAll('.accordion-trigger').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const item = btn.parentElement;
-        const content = item.querySelector('.accordion-content');
-        const icon = btn.querySelector('.accordion-icon');
-        const isOpen = content.classList.contains('active');
+        // Navigation Scroll Effect
+        const nav = document.getElementById('main-nav');
+        if (nav) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) { 
+                    nav.classList.add('scrolled'); 
+                } else { 
+                    nav.classList.remove('scrolled'); 
+                }
+            });
+        }
 
-        document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.accordion-icon').forEach(i => {
-          i.textContent = '+';
-          i.style.transform = 'rotate(0deg)';
+        // Initialize Lucide Icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    },
+
+    initThreeGlobe() {
+        const container = document.getElementById('globe-container');
+        if (!container) return;
+
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x010101);
+
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(0, 0.2, 3.5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+        this._renderer = renderer;
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+
+        const textureLoader = new THREE.TextureLoader();
+        const earthMap = textureLoader.load('/images/textures/earth_atmos_2048.jpg');
+        const earthSpecularMap = textureLoader.load('/images/textures/earth_specular_2048.jpg');
+        const earthNormalMap = textureLoader.load('/images/textures/earth_normal_2048.jpg');
+        const cloudMap = textureLoader.load('/images/textures/earth_clouds_1024.png');
+        
+        const earthGeometry = new THREE.SphereGeometry(1.0, 128, 128);
+        const earthMaterial = new THREE.MeshPhongMaterial({ 
+            map: earthMap, 
+            specularMap: earthSpecularMap, 
+            specular: new THREE.Color('grey'), 
+            shininess: 5, 
+            normalMap: earthNormalMap 
+        });
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        scene.add(earth);
+        
+        const cloudGeometry = new THREE.SphereGeometry(1.01, 128, 128);
+        const cloudMaterial = new THREE.MeshPhongMaterial({ 
+            map: cloudMap, 
+            transparent: true, 
+            opacity: 0.15, 
+            blending: THREE.AdditiveBlending 
+        });
+        const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+        scene.add(clouds);
+        
+        const cities = [
+            { lat: 40.7, lon: -74.0, name: 'New York' }, 
+            { lat: 51.5, lon: -0.1, name: 'London' }, 
+            { lat: 35.7, lon: 139.7, name: 'Tokyo' },
+            { lat: 22.3, lon: 114.2, name: 'Hong Kong' }, 
+            { lat: 1.3, lon: 103.8, name: 'Singapore' }, 
+            { lat: 37.8, lon: -122.4, name: 'San Francisco' }
+        ];
+        
+        function latLonToVector(lat, lon, radius) {
+            const phi = (90 - lat) * Math.PI / 180;
+            const theta = lon * Math.PI / 180;
+            return new THREE.Vector3(
+                radius * Math.sin(phi) * Math.cos(theta), 
+                radius * Math.cos(phi), 
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+        }
+        
+        cities.forEach(city => {
+            const pos = latLonToVector(city.lat, city.lon, 1.02);
+            const sphereGeo = new THREE.SphereGeometry(0.015, 16, 16);
+            const sphereMat = new THREE.MeshStandardMaterial({ 
+                color: 0x34d399, 
+                emissive: 0x34d399, 
+                emissiveIntensity: 1 
+            });
+            const node = new THREE.Mesh(sphereGeo, sphereMat);
+            node.position.copy(pos);
+            scene.add(node);
+        });
+        
+        const particles = [];
+        const routes = [
+            { from: cities[0], to: cities[1] }, { from: cities[1], to: cities[2] }, 
+            { from: cities[2], to: cities[3] }, { from: cities[3], to: cities[4] }, 
+            { from: cities[4], to: cities[5] }, { from: cities[5], to: cities[0] }
+        ];
+        
+        routes.forEach(route => {
+            const start = latLonToVector(route.from.lat, route.from.lon, 1.03);
+            const end = latLonToVector(route.to.lat, route.to.lon, 1.03);
+            const points = [];
+            for (let t = 0; t <= 1; t += 0.05) {
+                const point = start.clone().lerp(end, t);
+                const height = Math.sin(t * Math.PI) * 0.12;
+                const dir = point.clone().normalize();
+                points.push(dir.multiplyScalar(1.03 + height));
+            }
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.2 });
+            const line = new THREE.Line(lineGeometry, lineMaterial);
+            scene.add(line);
         });
 
-        if (!isOpen) {
-          content.classList.add('active');
-          icon.textContent = '−';
-          icon.style.transform = 'rotate(0deg)';
+        for (let i = 0; i < 80; i++) {
+            const route = routes[i % routes.length];
+            const start = latLonToVector(route.from.lat, route.from.lon, 1.03);
+            const end = latLonToVector(route.to.lat, route.to.lon, 1.03);
+            const particleGeo = new THREE.SphereGeometry(0.006, 8, 8);
+            const particleMat = new THREE.MeshStandardMaterial({ color: 0x34d399, emissive: 0x34d399, emissiveIntensity: 2 });
+            const particle = new THREE.Mesh(particleGeo, particleMat);
+            particle.userData = { start, end, progress: Math.random(), speed: 0.001 + Math.random() * 0.002, route };
+            scene.add(particle);
+            particles.push(particle);
         }
-      });
-    });
-  },
 
-  initGlobe() {
-    const container = document.getElementById('globe-container');
-    if (!container || !window.THREE) return;
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        directionalLight.position.set(5, 3, 5);
+        scene.add(directionalLight);
+        const fillLight = new THREE.PointLight(0x34d399, 0.5);
+        fillLight.position.set(-2, -2, -2);
+        scene.add(fillLight);
 
-    const THREE = window.THREE;
-    const W = container.clientWidth, H = container.clientHeight;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
+        let activeNotifications = 0;
+        let lastNotificationTime = 0;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 1000);
-    camera.position.z = 2.5;
+        const showTransactionNotification = (fromCity, toCity, amount) => {
+            const now = Date.now();
+            if (activeNotifications >= 4 || now - lastNotificationTime < 1500) return;
+            lastNotificationTime = now;
+            
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+            const notification = document.createElement('div');
+            activeNotifications++;
+            notification.className = 'tx-notification';
+            notification.style.bottom = Math.random() * 40 + 30 + '%';
+            notification.style.left = Math.random() * 50 + 25 + '%';
+            notification.innerHTML = `<div class="flex items-center gap-2 mb-1"><div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div><span class="text-[8px] font-mono text-emerald-400 uppercase tracking-widest">Global Settlement</span></div><div class="text-[10px] font-semibold text-white mb-0.5">${fromCity} → ${toCity}</div><div class="text-xs font-bold text-white">$${amount}M <span class="text-[8px] text-zinc-500 font-light ml-1">USDC</span></div>`;
+            container.appendChild(notification);
+            gsap.fromTo(notification, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5 });
+            gsap.to(notification, { opacity: 0, y: -20, delay: 3, duration: 0.5, onComplete: () => { notification.remove(); activeNotifications--; } });
+        }
 
-    scene.add(new THREE.AmbientLight(0x222222));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-    sun.position.set(-3, 1, 2);
-    scene.add(sun);
+        const animate = () => {
+            this._rafId = requestAnimationFrame(animate);
+            particles.forEach(p => {
+                p.userData.progress += p.userData.speed;
+                if (p.userData.progress >= 1) {
+                    p.userData.progress = 0;
+                    showTransactionNotification(p.userData.route.from.name, p.userData.route.to.name, Math.floor(Math.random() * 500 + 50));
+                }
+                const t = p.userData.progress;
+                const pos = p.userData.start.clone().lerp(p.userData.end, t);
+                const height = Math.sin(t * Math.PI) * 0.12;
+                p.position.copy(pos.clone().normalize().multiplyScalar(1.03 + height));
+            });
+            clouds.rotation.y += 0.0005;
+            earth.rotation.y += 0.0002;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
 
-    // Globe Core
-    scene.add(new THREE.Mesh(
-      new THREE.SphereGeometry(1, 64, 64),
-      new THREE.MeshPhongMaterial({ color: 0x040d14, emissive: 0x001a0a, shininess: 15 })
-    ));
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    },
 
-    // Grid System
-    const gridMat = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.1 });
-    for (let lat = -80; lat <= 80; lat += 20) {
-      const pts = [];
-      for (let lon = 0; lon <= 360; lon += 4)
-        pts.push(new THREE.Vector3().setFromSphericalCoords(1.003, (90 - lat) * Math.PI / 180, lon * Math.PI / 180));
-      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gridMat));
+    initAnimations() {
+        if (typeof gsap === 'undefined') return;
+
+        // Hero Animations
+        const tl = gsap.timeline();
+        tl.to('#hero-line-1', { opacity: 1, y: 0, duration: 1.2, ease: "expo.out" }, 0.5)
+          .to('#hero-line-2', { opacity: 1, y: 0, duration: 1.2, ease: "expo.out" }, 0.8)
+          .to('#hero-desc', { opacity: 1, y: 0, duration: 1.2, ease: "expo.out" }, 1.1)
+          .to('#hero-ctas', { opacity: 1, y: 0, duration: 1.2, ease: "expo.out" }, 1.3);
+
+        // Global Reveal
+        document.querySelectorAll('.reveal-y').forEach(el => {
+            gsap.to(el, {
+                scrollTrigger: { trigger: el, start: "top 90%" },
+                y: 0, opacity: 1, duration: 1.2, ease: "expo.out"
+            });
+        });
+
+        // Stats Counters
+        document.querySelectorAll('.counter').forEach(counter => {
+            const target = parseFloat(counter.getAttribute('data-target'));
+            ScrollTrigger.create({
+                trigger: counter,
+                start: "top 95%",
+                onEnter: () => {
+                    gsap.to(counter, {
+                        innerText: target,
+                        duration: 2,
+                        snap: { innerText: target % 1 === 0 ? 1 : 0.01 },
+                        ease: "power2.out"
+                    });
+                }
+            });
+        });
+
+        // Realtime sync ghosts
+        gsap.to("#cursor-ghost-1", { x: 60, y: 20, duration: 3, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        gsap.to("#cursor-ghost-2", { x: -40, y: -30, duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+        gsap.to("#cursor-ghost-3", { x: 20, y: 50, duration: 5, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 1 });
+
+        // Vector Matrix Initialization
+        this.initVectorMatrix();
+
+        // Vector Search Floating
+        gsap.to(".vector-dot", {
+            y: "random(-8, 8)",
+            x: "random(-8, 8)",
+            duration: 2.5,
+            repeat: -1, yoyo: true, stagger: 0.2, ease: "sine.inOut"
+        });
+
+        // Edge Functions Globe
+        const globeViz = document.getElementById('globe-viz');
+        if (globeViz) gsap.to(globeViz, { rotation: 360, duration: 80, repeat: -1, ease: "none" });
+    },
+
+    initPricingToggle() {
+        const pricingToggles = document.querySelectorAll('.pricing-toggle');
+        if (pricingToggles.length < 2) return;
+
+        pricingToggles[0].classList.add('bg-emerald-400', 'text-obsidian');
+        pricingToggles[1].classList.add('text-zinc-500');
+
+        pricingToggles.forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const period = toggle.getAttribute('data-period');
+                pricingToggles.forEach(btn => {
+                    btn.classList.toggle('bg-emerald-400', btn === toggle);
+                    btn.classList.toggle('text-obsidian', btn === toggle);
+                    btn.classList.toggle('text-zinc-500', btn !== toggle);
+                });
+                document.querySelectorAll('.price-display').forEach(display => {
+                    const target = parseFloat(display.getAttribute(`data-${period}`));
+                    gsap.to(display, {
+                        innerText: target,
+                        duration: 0.6,
+                        snap: { innerText: 1 },
+                        onUpdate: function() { display.innerHTML = `$${Math.ceil(this.targets()[0].innerText)}`; }
+                    });
+                });
+                document.querySelectorAll('.price-period').forEach(p => {
+                    p.innerText = period === 'monthly' ? '/month' : '/year';
+                });
+            });
+        });
+    },
+
+    initAccordions() {
+        document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const item = trigger.parentElement;
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+                const isOpen = item.classList.contains('active');
+
+                document.querySelectorAll('.accordion-item').forEach(other => {
+                    if (other !== item && other.classList.contains('active')) {
+                        other.classList.remove('active');
+                        gsap.to(other.querySelector('.accordion-content'), { height: 0, duration: 0.5 });
+                        other.querySelector('.accordion-icon').innerText = '+';
+                    }
+                });
+
+                item.classList.toggle('active');
+                if (!isOpen) {
+                    gsap.to(content, { height: "auto", duration: 0.5 });
+                    icon.innerText = '−';
+                } else {
+                    gsap.to(content, { height: 0, duration: 0.5 });
+                    icon.innerText = '+';
+                }
+            });
+        });
+    },
+
+    initParallaxCards() {
+        document.querySelectorAll('.elite-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                gsap.to(card.querySelectorAll('.parallax-layer, svg'), {
+                    x: x * 20, y: y * 20, rotationY: x * 10, rotationX: -y * 10, duration: 0.5
+                });
+            });
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card.querySelectorAll('.parallax-layer, svg'), {
+                    x: 0, y: 0, rotationY: 0, rotationX: 0, duration: 0.8, ease: "elastic.out(1, 0.3)"
+                });
+            });
+        });
+    },
+
+    initRoadmapProgress() {
+        const roadmapContainer = document.getElementById('roadmap-container');
+        const progressBar = document.getElementById('roadmap-progress');
+        if (!roadmapContainer || !progressBar) return;
+
+        gsap.to(progressBar, {
+            height: "100%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: roadmapContainer,
+                start: "top 80%",
+                end: "bottom 80%",
+                scrub: true
+            }
+        });
+
+        document.querySelectorAll('.roadmap-item').forEach((item) => {
+            ScrollTrigger.create({
+                trigger: item,
+                start: "top 80%",
+                onEnter: () => {
+                    gsap.to(item, { opacity: 1, y: 0, duration: 0.8 });
+                    const dot = item.querySelector('.roadmap-dot');
+                    if (dot) {
+                        dot.style.background = '#34d399';
+                        dot.style.boxShadow = '0 0 15px #34d399';
+                    }
+                },
+                onLeaveBack: () => {
+                    const dot = item.querySelector('.roadmap-dot');
+                    if (dot) {
+                        dot.style.background = 'rgba(52, 211, 153, 0.2)';
+                        dot.style.boxShadow = 'none';
+                    }
+                }
+            });
+        });
+    },
+
+    initVectorMatrix() {
+        const matrix = document.getElementById('vector-dots-matrix');
+        if (!matrix) return;
+
+        const count = 12;
+        const spacing = 15;
+        const startX = 100 - (count * spacing) / 2;
+        const startY = 100 - (count * spacing) / 2;
+
+        for (let i = 0; i < count; i++) {
+            for (let j = 0; j < count; j++) {
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                const x = startX + i * spacing;
+                const y = startY + j * spacing;
+                dot.setAttribute("cx", x);
+                dot.setAttribute("cy", y);
+                dot.setAttribute("r", 0.6);
+                dot.setAttribute("class", "vector-dot opacity-20 fill-emerald-400");
+                matrix.appendChild(dot);
+            }
+        }
     }
-
-    // Helper for Lat/Lon to Vector3
-    const llv = (lat, lon, r) => {
-      return new THREE.Vector3().setFromSphericalCoords(r, (90 - lat) * Math.PI / 180, (lon + 180) * Math.PI / 180);
-    };
-
-    // Cities / Nodes
-    const cities = [
-      [51.5, -0.1], [40.7, -74.0], [1.3, 103.8], [35.6, 139.7],
-      [48.8, 2.3], [25.2, 55.3], [19.0, 72.8], [22.3, 114.2],
-      [-23.5, -46.6], [55.7, 37.6], [6.5, 3.4], [-26.2, 28.0],
-      [31.2, 121.5], [-33.9, 151.2]
-    ];
-    const dotG = new THREE.SphereGeometry(0.013, 8, 8);
-    const dotM = new THREE.MeshBasicMaterial({ color: 0x34d399 });
-    cities.forEach(([lat, lon]) => {
-      const d = new THREE.Mesh(dotG, dotM);
-      d.position.copy(llv(lat, lon, 1.015));
-      scene.add(d);
-    });
-
-    // Outer Glow
-    scene.add(new THREE.Mesh(
-      new THREE.SphereGeometry(1.12, 32, 32),
-      new THREE.MeshPhongMaterial({ color: 0x34d399, transparent: true, opacity: 0.04, side: THREE.BackSide })
-    ));
-
-    const equatorRing = new THREE.Mesh(
-      new THREE.TorusGeometry(1.2, 0.003, 8, 180),
-      new THREE.MeshBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.25 })
-    );
-    equatorRing.rotation.x = Math.PI / 2.5;
-    scene.add(equatorRing);
-
-    // Loop
-    const loop = () => {
-      requestAnimationFrame(loop);
-      equatorRing.rotation.z += 0.0008;
-      renderer.render(scene, camera);
-    };
-    loop();
-
-    window.addEventListener('resize', () => {
-      const nW = container.clientWidth, nH = container.clientHeight;
-      camera.aspect = nW / nH;
-      camera.updateProjectionMatrix();
-      renderer.setSize(nW, nH);
-    });
-  },
-
-  initNotifications() {
-    const txEvents = [
-      { from: 'London', to: 'Dubai', amount: '$4.2M', currency: 'USD/AED', type: 'FX Transfer' },
-      { from: 'Frankfurt', to: 'Singapore', amount: '€8.7M', currency: 'EUR/SGD', type: 'Netting Settlement' },
-      { from: 'New York', to: 'Lagos', amount: '$1.9M', currency: 'USD/NGN', type: 'Vault Credit' },
-      { from: 'Zurich', to: 'Mumbai', amount: 'CHF 3.1M', currency: 'CHF/INR', type: 'Interco Transfer' },
-      { from: 'Tokyo', to: 'Amsterdam', amount: '¥520M', currency: 'JPY/EUR', type: 'FX Hedge' },
-    ];
-    let txIndex = 0;
-    const notifContainer = document.getElementById('notification-container');
-    const showTxNotification = () => {
-      if (!notifContainer) return;
-      const tx = txEvents[txIndex % txEvents.length];
-      txIndex++;
-      const div = document.createElement('div');
-      div.className = 'tx-notification';
-      div.style.top = (20 + Math.random() * 60) + '%';
-      div.style.left = (5 + Math.random() * 55) + '%';
-      div.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <span style="width:6px;height:6px;background:#34d399;border-radius:50%;display:inline-block;box-shadow:0 0 8px #34d399;"></span>
-          <span style="font-family:monospace;font-size:9px;color:#34d399;text-transform:uppercase;letter-spacing:0.2em;">${tx.type}</span>
-        </div>
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${tx.amount} <span style="color:#34d399;">${tx.currency}</span></div>
-        <div style="font-size:10px;color:#71717a;">${tx.from} → ${tx.to}</div>`;
-      notifContainer.appendChild(div);
-      setTimeout(() => {
-        div.style.transition = 'opacity 0.5s';
-        div.style.opacity = '0';
-        setTimeout(() => div.remove(), 500);
-      }, 3000);
-    };
-    setInterval(showTxNotification, 2500);
-  },
-
-  initTickers() {
-    const nudge = (el, base, spread) => {
-      if (!el) return;
-      const v = base + (Math.random() - 0.5) * spread;
-      el.textContent = v.toFixed(4);
-    };
-    setInterval(() => {
-      nudge(document.getElementById('fx-eurusd'), 1.0847, 0.004);
-      nudge(document.getElementById('fx-gbpusd'), 1.2634, 0.005);
-      nudge(document.getElementById('fx-usdjpy'), 149.82, 0.1);
-    }, 2000);
-  }
 };

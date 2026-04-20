@@ -28,7 +28,8 @@ defmodule NexusWeb.Identity.LoginLive do
     ~H"""
     <div class="fixed inset-0 bg-[#030303]"></div>
     <div class="ambient-glow-auth"></div>
-    <div class="bg-grid"></div>
+    <div class="noise-overlay"></div>
+    <div class="bg-grid opacity-50"></div>
     <div id="cursor-dot"></div>
     <div id="cursor-ring"></div>
 
@@ -51,14 +52,9 @@ defmodule NexusWeb.Identity.LoginLive do
               </div>
             <% end %>
           </div>
-          <div class="flex items-center gap-2 px-4 py-1.5 bg-emerald-400/5 rounded-full border border-emerald-400/20">
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70">
-              </span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-            <span class="text-[8px] font-mono font-black tracking-[0.28em] text-emerald-400 uppercase">
-              ENCLAVE_ACTIVE
+          <div class="flex items-center">
+            <span class="text-[8px] font-mono font-bold tracking-[0.2em] text-emerald-400/90 uppercase">
+              SECURE ACCESS
             </span>
           </div>
         </div>
@@ -80,16 +76,16 @@ defmodule NexusWeb.Identity.LoginLive do
         <%!-- Compliance footer --%>
         <div class="border-t border-white/5 px-7 py-5 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
           <div class="flex items-center gap-2">
-            <.icon name="hero-finger-print" class="w-3 h-3 text-emerald-500/50" />
-            <span>NIST_SP_800-76</span>
+            <.icon name="hero-finger-print" class="w-3 h-3 text-zinc-600" />
+            <span>NIST_SP-800-76</span>
           </div>
           <div class="flex items-center gap-2">
-            <.icon name="hero-shield-check" class="w-3 h-3 text-emerald-500/50" />
+            <.icon name="hero-shield-check" class="w-3 h-3 text-zinc-600" />
             <span>ISO_27001:2022</span>
           </div>
           <div class="flex items-center gap-2">
             <svg
-              class="w-3 h-3 text-emerald-500/50"
+              class="w-3 h-3 text-zinc-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -132,8 +128,8 @@ defmodule NexusWeb.Identity.LoginLive do
             <.icon name="hero-finger-print" class="w-4 h-4 text-emerald-400" />
           </div>
           <div>
-            <p class="text-xs font-bold uppercase tracking-wider text-white/90">Liveness 3.0</p>
-            <p class="text-[9px] text-zinc-500 font-mono">Anti-spoof / depth-mapping</p>
+            <p class="text-xs font-bold uppercase tracking-wider text-white/90">Identity Integrity</p>
+            <p class="text-[9px] text-zinc-500 font-mono">Anti-spoofing protocols</p>
           </div>
         </div>
         <div class="flex gap-4 items-center">
@@ -149,10 +145,10 @@ defmodule NexusWeb.Identity.LoginLive do
 
       <button
         phx-click="advance_step"
-        class="cta-primary w-full py-5 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(52,211,153,0.15)]"
+        class="cta-primary w-full py-5 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
       >
         <span class="relative z-10 flex items-center gap-3">
-          Initialize handshake
+          Authenticate session
           <span class="arrow-wrap">
             <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-icon" />
             <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-clone" />
@@ -170,16 +166,24 @@ defmodule NexusWeb.Identity.LoginLive do
         <span class="emerald-glint">Privacy & Consent</span>
       </h2>
 
-      <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-xs text-zinc-300 max-h-36 overflow-y-auto leading-relaxed">
-        <p class="mb-3">
-          <span class="text-emerald-400 font-bold">GDPR Art. 9(2)(a)</span>
-          — Explicit biometric consent for institutional verification.
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-5 text-[10px] text-zinc-400 max-h-48 overflow-y-auto leading-relaxed">
+        <p class="mb-4">
+          Under <span class="text-white/80 font-semibold">GDPR Article 9(2)(a)</span>
+          and the <span class="text-white/80 font-semibold">California Consumer Privacy Act</span>, we require explicit consent to process biometric data for identity verification.
         </p>
-        <ul class="list-disc ml-4 space-y-1.5 text-[10px] text-zinc-400">
-          <li>Biometric salted hash generation</li>
-          <li>Cross-reference: global AML watchlists</li>
-          <li>Data retention: 30 days post-session</li>
+
+        <ul class="list-disc ml-4 space-y-2 mb-4">
+          <li>Biometric template is a one-way salted hash — never stored as a raw image.</li>
+          <li>Cross‑referenced with global watchlists (PEP, sanctions, adverse media).</li>
+          <li>
+            Data retention: <span class="text-white/80 font-semibold">30 days</span>
+            or until regulatory obligation met.
+          </li>
         </ul>
+
+        <p class="text-[9px] text-zinc-500 italic">
+          You may withdraw consent, but verification will fail.
+        </p>
       </div>
 
       <label class="flex items-start gap-4 cursor-pointer group mt-4">
@@ -190,8 +194,8 @@ defmodule NexusWeb.Identity.LoginLive do
           class="mt-1 w-5 h-5 rounded border-white/20 bg-white/5 accent-emerald-400"
         />
         <span class="text-xs text-zinc-400 group-hover:text-white transition-colors">
-          I accept the
-          <span class="text-emerald-400 underline underline-offset-4">institutional data notice</span>
+          I confirm that I have read and accept the
+          <span class="text-emerald-400 underline underline-offset-4">data processing notice</span>
           and consent to biometric verification.
         </span>
       </label>
@@ -203,7 +207,7 @@ defmodule NexusWeb.Identity.LoginLive do
           class={[
             "w-full py-5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all",
             @consent_checked &&
-              "cta-primary bg-emerald-400 text-black shadow-[0_15px_30px_rgba(16,185,129,0.1)]",
+              "cta-primary bg-emerald-400 text-black shadow-[0_10px_20px_rgba(16,185,129,0.08)]",
             not @consent_checked &&
               "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed"
           ]}
@@ -233,7 +237,7 @@ defmodule NexusWeb.Identity.LoginLive do
           </div>
         </div>
         <h3 class="text-2xl font-serif italic font-black uppercase tracking-wide text-white">
-          Auth_Processing
+          AUTHORIZATION PROCESSING
         </h3>
         <p class="text-[9px] text-zinc-500 font-mono mt-2 uppercase tracking-widest">
           Consensus: Multi-Validator Sync
@@ -244,14 +248,14 @@ defmodule NexusWeb.Identity.LoginLive do
             <span class="text-emerald-400">0x8E...F7B</span>
           </div>
           <div class="flex justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-            <span class="text-zinc-500 uppercase">Sanctions_Screen</span>
+            <span class="text-zinc-500 uppercase">Sanctions Screen</span>
             <span class="text-emerald-400 animate-pulse">SCANNING...</span>
           </div>
         </div>
       </div>
     <% else %>
       <div class="flex flex-col items-center">
-        <h2 class="text-2xl font-serif italic font-black uppercase tracking-wide text-white">
+        <h2 class="text-2xl font-serif font-bold uppercase tracking-wide text-white">
           Sensor Calibration
         </h2>
         <p class="text-[9px] text-zinc-500 mt-2 font-mono uppercase tracking-[0.25em]">
@@ -335,7 +339,7 @@ defmodule NexusWeb.Identity.LoginLive do
       <div class="w-full bg-white/5 border border-white/10 p-6 rounded-3xl mb-10 text-left font-mono">
         <div class="flex justify-between mb-2">
           <span class="text-[8px] text-zinc-500 uppercase tracking-wider">Status</span>
-          <span class="text-[10px] text-emerald-400">CLASS_A_CLEARANCE</span>
+          <span class="text-[10px] text-emerald-400">ACCESS CLEARANCE</span>
         </div>
         <div class="flex justify-between">
           <span class="text-[8px] text-zinc-500 uppercase tracking-wider">Session</span>
@@ -408,7 +412,8 @@ defmodule NexusWeb.Identity.LoginLive do
     challenge_id = socket.assigns.challenge_id
 
     with {:ok, raw_id} <- decode_raw_id(params["rawId"]),
-         user when not is_nil(user) <- GetUserByCredentialId.execute(raw_id),
+         credential_key = Base.encode64(raw_id, padding: false),
+         user when not is_nil(user) <- GetUserByCredentialId.execute(credential_key),
          {:ok, cose_key} <- decode_cose_key(user.cose_key),
          {:ok, _auth} <-
            WebAuthn.verify_authentication(params, challenge_id, [{raw_id, cose_key}]),
