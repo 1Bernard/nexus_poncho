@@ -70,8 +70,7 @@ defmodule Nexus.Identity.Audit.AuditLogProjector do
       event_type: event_type,
       payload: Map.from_struct(event),
       actor_id: actor_id,
-      recorded_at: metadata.created_at,
-      created_at: metadata.created_at
+      recorded_at: metadata.created_at
     }
 
     changeset = AuditLog.changeset(%AuditLog{}, attrs)
