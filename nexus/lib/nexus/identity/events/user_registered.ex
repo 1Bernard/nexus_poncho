@@ -13,6 +13,7 @@ defmodule Nexus.Identity.Events.UserRegistered do
     field(:email, String.t(), doc: "User's email")
     field(:name, String.t(), doc: "User's full name")
     field(:role, String.t(), doc: "User's role")
+    field(:status, String.t(), doc: "Derived status: 'invited' or 'registered'")
     field(:credential_id, String.t(), enforce: false, doc: "Biometric credential identifier")
     field(:cose_key, String.t(), enforce: false, doc: "Biometric public key (COSE format)")
   end

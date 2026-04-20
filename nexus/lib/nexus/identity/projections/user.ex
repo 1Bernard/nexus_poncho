@@ -9,8 +9,8 @@ defmodule Nexus.Identity.Projections.User do
     field(:org_id, :binary_id)
     field(:email, :string)
     field(:name, :string)
-    field(:role, :string, default: "user")
-    field(:status, :string, default: "registered")
+    field(:role, :string)
+    field(:status, :string)
 
     # Biometric Credentials
     field(:credential_id, :string)

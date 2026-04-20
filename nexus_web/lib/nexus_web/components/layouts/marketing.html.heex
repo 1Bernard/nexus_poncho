@@ -51,42 +51,48 @@
       id="main-nav"
       class="fixed top-0 left-1/2 -translate-x-1/2 mt-6 w-[90%] max-w-7xl z-50 transition-all duration-500 rounded-full border border-white/10 glass-nav px-8 py-3.5 flex items-center justify-between"
     >
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-emerald-400 rotate-45 flex items-center justify-center transition-all duration-300 hover:rotate-90">
+      <.link navigate={~p"/"} class="flex items-center gap-3 group">
+        <div class="w-8 h-8 bg-emerald-400 rotate-45 flex items-center justify-center transition-all duration-300 group-hover:rotate-90">
           <div class="w-4 h-4 border-2 border-obsidian rotate-45"></div>
         </div>
         <span class="font-mono text-[11px] tracking-[0.3em] uppercase font-bold bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">
           Equinox
         </span>
-      </div>
+      </.link>
 
       <div class="hidden md:flex items-center gap-10 font-mono text-[10px] tracking-widest uppercase">
         <a
-          href="#features"
+          href="/#features"
           class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
         >
           Infrastructure
         </a>
         <a
-          href="#carousel"
+          href="/#carousel"
           class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
         >
           Testimonials
         </a>
         <a
-          href="#accordions"
+          href="/#accordions"
           class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
         >
           Technology
         </a>
-        <a href="#pricing" class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors">
+        <a
+          href="/#pricing"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
           Pricing
         </a>
-        <a href="#roadmap" class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors">
+        <a
+          href="/#roadmap"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
           Roadmap
         </a>
         <a
-          href="#resources"
+          href="/#resources"
           class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
         >
           Resources

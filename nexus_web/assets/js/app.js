@@ -25,7 +25,8 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/nexus_web"
 import topbar from "../vendor/topbar"
 import OnboardingLive from "./hooks/onboarding_live"
-import { Marketing } from "./marketing_scripts"
+import LoginLive from "./hooks/login_live"
+import AppShell from "./hooks/app_shell"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -33,6 +34,8 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {
     OnboardingLive,
+    LoginLive,
+    AppShell,
     ...colocatedHooks
   },
 })
@@ -51,9 +54,10 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
-if (document.getElementById('cursor-dot')) {
-  document.addEventListener('DOMContentLoaded', () => Marketing.init());
+if (document.getElementById('globe-container') || document.getElementById('cursor-dot')) {
+  import("./marketing_scripts").then(({ Marketing }) => Marketing.init());
 }
+
 
 // The lines below enable quality of life phoenix_live_reload
 // development features:
