@@ -18,34 +18,16 @@ const LoginLive = {
 
   initCursor() {
     if (window.innerWidth <= 1024) return;
+    if (typeof gsap === "undefined") return;
+
     const dot = document.getElementById("cursor-dot");
     const ring = document.getElementById("cursor-ring");
     if (!dot || !ring) return;
 
-    // Suppress CSS transition so dot moves instantly (matches gsap duration:0)
-    dot.style.transition = "none";
-
-    let targetX = 0, targetY = 0;
-    let ringX = 0, ringY = 0, vx = 0, vy = 0;
-
-    document.addEventListener("mousemove", (e) => {
-      targetX = e.clientX;
-      targetY = e.clientY;
-      dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    window.addEventListener("mousemove", (e) => {
+      gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0 });
+      gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.1 });
     });
-
-    // Spring physics — matches GSAP's organic deceleration feel
-    const animateRing = () => {
-      vx += (targetX - ringX) * 0.14;
-      vy += (targetY - ringY) * 0.14;
-      vx *= 0.78;
-      vy *= 0.78;
-      ringX += vx;
-      ringY += vy;
-      ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
-      this._cursorRaf = requestAnimationFrame(animateRing);
-    };
-    animateRing();
   },
 
   destroyed() {
