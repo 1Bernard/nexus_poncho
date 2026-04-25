@@ -5,6 +5,8 @@ defmodule Nexus.Identity.IdentityIdempotencyTest do
   """
   use Nexus.DataCase
 
+  @moduletag :no_sandbox
+
   alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Identity.Idempotency.IdempotencyKey
   alias Nexus.Identity.Projections.User

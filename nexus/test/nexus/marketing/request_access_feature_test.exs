@@ -3,6 +3,7 @@ defmodule Nexus.Marketing.RequestAccessFeatureTest do
   use Nexus.DataCase
 
   @moduletag :feature
+  @moduletag :no_sandbox
 
   alias Nexus.Marketing.Projections.AccessRequest
   alias Nexus.Repo
