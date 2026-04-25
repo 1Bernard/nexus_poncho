@@ -1114,34 +1114,43 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   end
 
   defp confidence_score(request) do
-    volume_score =
-      case request.treasury_volume do
-        "gt_1b" -> 40
-        "500m_1b" -> 32
-        "100m_500m" -> 22
-        "10m_100m" -> 12
-        "lt_10m" -> 4
-        _ -> 0
-      end
+    score =
+      volume_score(request.treasury_volume) +
+        subsidiary_score(request.subsidiaries) +
+        message_score(request.message) +
+        email_score(request.email) +
+        org_score(request.organization)
 
-    subsidiary_score =
-      case request.subsidiaries do
-        "100_plus" -> 20
-        "51_100" -> 16
-        "21_50" -> 11
-        "6_20" -> 6
-        "1_5" -> 2
-        _ -> 0
-      end
-
-    message_score = if request.message && String.trim(request.message) != "", do: 15, else: 0
-    email_score = if work_email?(request.email), do: 15, else: 0
-
-    org_score =
-      if request.organization && String.length(request.organization) > 5, do: 10, else: 0
-
-    min(volume_score + subsidiary_score + message_score + email_score + org_score, 100)
+    min(score, 100)
   end
+
+  defp volume_score("gt_1b"), do: 40
+  defp volume_score("500m_1b"), do: 32
+  defp volume_score("100m_500m"), do: 22
+  defp volume_score("10m_100m"), do: 12
+  defp volume_score("lt_10m"), do: 4
+  defp volume_score(_), do: 0
+
+  defp subsidiary_score("100_plus"), do: 20
+  defp subsidiary_score("51_100"), do: 16
+  defp subsidiary_score("21_50"), do: 11
+  defp subsidiary_score("6_20"), do: 6
+  defp subsidiary_score("1_5"), do: 2
+  defp subsidiary_score(_), do: 0
+
+  defp message_score(msg) when is_binary(msg) do
+    if String.trim(msg) != "", do: 15, else: 0
+  end
+
+  defp message_score(_), do: 0
+
+  defp email_score(email), do: if(work_email?(email), do: 15, else: 0)
+
+  defp org_score(org) when is_binary(org) do
+    if String.length(org) > 5, do: 10, else: 0
+  end
+
+  defp org_score(_), do: 0
 
   @free_domains ~w(gmail.com yahoo.com hotmail.com outlook.com icloud.com)
 
