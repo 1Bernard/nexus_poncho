@@ -75,7 +75,9 @@ defmodule Nexus.Treasury.VaultLifecycleTest do
         wait_until(fn ->
           case Repo.get(Vault, vault_id) do
             %{balance: balance} = v ->
-              if Decimal.gt?(balance, Decimal.new(0)), do: {:ok, v}, else: {:error, "waiting for balance update"}
+              if Decimal.gt?(balance, Decimal.new(0)),
+                do: {:ok, v},
+                else: {:error, "waiting for balance update"}
 
             _ ->
               {:error, "waiting for balance update"}
