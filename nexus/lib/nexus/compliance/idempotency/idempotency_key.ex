@@ -1,4 +1,6 @@
 defmodule Nexus.Compliance.Idempotency.IdempotencyKey do
+  @moduledoc "Idempotency record for Compliance domain commands."
+
   use Nexus.Schema
 
   schema "compliance_idempotency_keys" do

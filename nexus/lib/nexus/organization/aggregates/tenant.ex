@@ -1,4 +1,9 @@
 defmodule Nexus.Organization.Aggregates.Tenant do
+  @moduledoc """
+  Tenant aggregate. Owns the organization provisioning lifecycle.
+  ProvisionTenant is the only entry point — a tenant cannot be created twice.
+  """
+
   defstruct [:org_id, :name, :status]
 
   alias __MODULE__, as: Tenant

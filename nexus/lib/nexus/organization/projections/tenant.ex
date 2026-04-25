@@ -1,4 +1,6 @@
 defmodule Nexus.Organization.Projections.Tenant do
+  @moduledoc "Ecto read model for provisioned tenants."
+
   use Nexus.Schema
 
   schema "tenants" do
