@@ -6,77 +6,90 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-2xl px-4 py-8">
-      <.header>
-        Establish New Vault
-        <:subtitle>Secure asset allocation with institutional grade precision</:subtitle>
-      </.header>
+    <Layouts.app
+      flash={@flash}
+      current_user={@current_user}
+      current_scope={:treasury}
+      page_title={@page_title}
+    >
+      <div class="p-8 max-w-3xl mx-auto">
+        <.eq_page_header
+          section="Treasury"
+          title="Register Vault"
+          subtitle="Establish a new asset vault with institutional-grade controls"
+        />
 
-      <.simple_form
-        for={@form}
-        id="vault_form"
-        phx-submit="save"
-        phx-change="validate"
-        class="mt-10"
-      >
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <.input
-            field={@form[:name]}
-            label="Vault Display Name"
-            placeholder="e.g. Primary Operating"
-            required
-          />
-          <.input
-            field={@form[:currency]}
-            type="select"
-            label="Currency"
-            options={["USD", "EUR", "GBP", "SGD"]}
-          />
+        <div class="vault-card rounded-2xl p-8">
+          <.eq_form
+            for={@form}
+            id="vault_form"
+            phx-submit="save"
+            phx-change="validate"
+          >
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <.eq_input
+                field={@form[:name]}
+                label="Vault Display Name"
+                placeholder="e.g. Primary Operating"
+                required
+              />
+              <.eq_select
+                field={@form[:currency]}
+                label="Currency"
+                options={["USD", "EUR", "GBP", "SGD"]}
+              />
+              <.eq_input
+                field={@form[:bank_name]}
+                label="Partner Bank"
+                placeholder="e.g. Equinox Central Bank"
+                required
+              />
+              <.eq_input
+                field={@form[:iban]}
+                label="IBAN / Account Number"
+                placeholder="e.g. GB29 NWBK 6016 1331 9268 19"
+                required
+              />
+              <.eq_select
+                field={@form[:provider]}
+                label="Settlement Provider"
+                options={["Stripe", "Modulr", "Internal"]}
+              />
+              <.eq_input
+                field={@form[:daily_withdrawal_limit]}
+                type="number"
+                label="Daily Withdrawal Limit (Minor Units)"
+                value="1000000"
+              />
+            </div>
 
-          <.input
-            field={@form[:bank_name]}
-            label="Partner Bank"
-            placeholder="Equinox Central Bank"
-            required
-          />
-          <.input field={@form[:iban]} label="IBAN / Account Number" required />
+            <div class="pt-2">
+              <.eq_checkbox
+                field={@form[:requires_multi_sig]}
+                label="Enable Multi-Signature Approval"
+              />
+            </div>
 
-          <.input
-            field={@form[:provider]}
-            type="select"
-            label="Settlement Provider"
-            options={["Stripe", "Modulr", "Internal"]}
-          />
-          <.input
-            field={@form[:daily_withdrawal_limit]}
-            type="number"
-            label="Daily Withdrawal Limit (Minor Units)"
-            value="1000000"
-          />
+            <:actions>
+              <.eq_button full_width phx-disable-with="Establishing...">
+                Initialize Vault
+              </.eq_button>
+            </:actions>
+          </.eq_form>
         </div>
-
-        <div class="mt-4">
-          <.input
-            field={@form[:requires_multi_sig]}
-            type="checkbox"
-            label="Enable Multi-Signature Approval"
-          />
-        </div>
-
-        <:actions>
-          <.button phx-disable-with="Establishing..." class="w-full sm:w-auto">
-            Initialize Vault
-          </.button>
-        </:actions>
-      </.simple_form>
-    </div>
+      </div>
+    </Layouts.app>
     """
   end
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
-     assign(socket, form: to_form(%{"currency" => "USD", "provider" => "Stripe"}, as: "vault"))}
+     assign(socket,
+       form: to_form(%{"currency" => "USD", "provider" => "Stripe"}, as: "vault"),
+       page_title: "New Vault",
+       breadcrumb_section: "Treasury"
+     )}
   end
 
   @impl true

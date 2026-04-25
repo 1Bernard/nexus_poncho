@@ -46,6 +46,7 @@ defmodule Nexus.Identity.Aggregates.User do
       email: cmd.email,
       name: cmd.name,
       role: cmd.role,
+      status: if(cmd.credential_id, do: "registered", else: "invited"),
       credential_id: cmd.credential_id,
       cose_key: cmd.cose_key
     }
@@ -122,8 +123,6 @@ defmodule Nexus.Identity.Aggregates.User do
   # ── State Transitions ─────────────────────────────────────────────────────
 
   def apply(%User{} = state, %UserRegistered{} = event) do
-    status = if event.credential_id, do: "registered", else: "invited"
-
     %User{
       state
       | user_id: event.user_id,
@@ -131,7 +130,7 @@ defmodule Nexus.Identity.Aggregates.User do
         email: event.email,
         name: event.name,
         role: event.role,
-        status: status,
+        status: event.status,
         credential_id: event.credential_id,
         cose_key: event.cose_key
     }

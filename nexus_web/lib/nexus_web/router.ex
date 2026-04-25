@@ -23,6 +23,10 @@ defmodule NexusWeb.Router do
     get "/", PageController, :home
     get "/health", PageController, :health
 
+    live_session :marketing, layout: {NexusWeb.Layouts, :marketing} do
+      live "/request-access", Marketing.RequestAccessLive, :new
+    end
+
     live_session :public,
       on_mount: [{NexusWeb.UserAuth, :fetch_current_user}] do
       live "/login", Identity.LoginLive, :index
@@ -37,6 +41,7 @@ defmodule NexusWeb.Router do
       on_mount: [{NexusWeb.UserAuth, :require_authenticated}] do
       live "/vaults", Treasury.VaultDashboardLive, :index
       live "/vaults/new", Treasury.VaultRegistrationLive, :new
+      live "/admin/access-requests", Admin.RequestAccessAdminLive, :index
     end
   end
 

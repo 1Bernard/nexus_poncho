@@ -104,10 +104,11 @@ defmodule Nexus.Identity.WebAuthn.WaxAdapter do
   end
 
   defp do_verify_authentication(params, challenge_id, user_credentials, challenge) do
+    response = params["response"]
     raw_id = Base.decode64!(params["rawId"])
-    auth_data = Base.decode64!(params["authenticatorData"])
-    signature = Base.decode64!(params["signature"])
-    client_data = Base.decode64!(params["clientDataJSON"])
+    auth_data = Base.decode64!(response["authenticatorData"])
+    signature = Base.decode64!(response["signature"])
+    client_data = Base.decode64!(response["clientDataJSON"])
 
     case Wax.authenticate(raw_id, auth_data, signature, client_data, challenge, user_credentials) do
       {:ok, authenticator} ->

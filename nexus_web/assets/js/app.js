@@ -25,6 +25,11 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/nexus_web"
 import topbar from "../vendor/topbar"
 import OnboardingLive from "./hooks/onboarding_live"
+import LoginLive from "./hooks/login_live"
+import AppShell from "./hooks/app_shell"
+import AdminLedger from "./hooks/admin_ledger"
+import AdminSearch from "./hooks/admin_search"
+import {AccessProtocol} from "./hooks/access_protocol"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -32,6 +37,11 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {
     OnboardingLive,
+    LoginLive,
+    AppShell,
+    AdminLedger,
+    AdminSearch,
+    AccessProtocol,
     ...colocatedHooks
   },
 })
@@ -41,6 +51,17 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+window.addEventListener("phx:copy-to-clipboard", (e) => {
+  navigator.clipboard.writeText(e.detail.text).catch(() => {
+    const el = document.createElement("textarea")
+    el.value = e.detail.text
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand("copy")
+    document.body.removeChild(el)
+  })
+})
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 
@@ -49,6 +70,11 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+if (document.getElementById('globe-container') || document.getElementById('cursor-dot')) {
+  import("./marketing_scripts").then(({ Marketing }) => Marketing.init());
+}
+
 
 // The lines below enable quality of life phoenix_live_reload
 // development features:

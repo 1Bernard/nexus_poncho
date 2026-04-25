@@ -34,7 +34,10 @@ config :nexus,
   start_compliance_projections: false,
   start_accounting_projections: false,
   start_treasury_projections: false,
-  start_messaging_projections: false
+  start_messaging_projections: false,
+  start_onboarding_pm: false,
+  start_marketing_projections: false,
+  start_marketing_pm: false
 
 # Decrease Logger noise for clean audit output
 config :logger, level: :info

@@ -37,6 +37,16 @@ defmodule Nexus.Router do
   alias Nexus.Compliance.Aggregates.Screening
   alias Nexus.Compliance.Commands.{CompletePEPCheck, PerformPEPCheck}
 
+  alias Nexus.Marketing.Aggregates.AccessRequest, as: MarketingAccessRequest
+
+  alias Nexus.Marketing.Commands.{
+    ApproveAccessRequest,
+    ArchiveAccessRequest,
+    RejectAccessRequest,
+    ReviewAccessRequest,
+    SubmitAccessRequest
+  }
+
   # ==================== ACCOUNTING ====================
 
   dispatch(OpenAccount,
@@ -70,5 +80,19 @@ defmodule Nexus.Router do
   dispatch([PerformPEPCheck, CompletePEPCheck],
     to: Screening,
     identity: :screening_id
+  )
+
+  # ==================== MARKETING — Access request lifecycle ====================
+
+  dispatch(
+    [
+      SubmitAccessRequest,
+      ReviewAccessRequest,
+      ApproveAccessRequest,
+      RejectAccessRequest,
+      ArchiveAccessRequest
+    ],
+    to: MarketingAccessRequest,
+    identity: :request_id
   )
 end

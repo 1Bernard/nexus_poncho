@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <title>EQUINOX | Institutional Digital Asset Infrastructure</title>
+
+    <%!-- Fonts --%>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <%!-- Import Map for Three.js --%>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/assets/vendor/three.module.js",
+          "three/examples/jsm/": "/assets/vendor/"
+        }
+      }
+    </script>
+
+    <%!-- Vendor Scripts (GSAP, Lucide, Topbar) --%>
+    <script src={~p"/assets/vendor/gsap.min.js"}>
+    </script>
+    <script src={~p"/assets/vendor/ScrollTrigger.min.js"}>
+    </script>
+    <script src={~p"/assets/vendor/lucide.min.js"}>
+    </script>
+    <script src={~p"/assets/vendor/topbar.js"}>
+    </script>
+
+    <%!-- Asset Bundles --%>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
+    <script defer phx-track-static type="module" src={~p"/assets/js/app.js"}>
+    </script>
+  </head>
+  <body class="bg-obsidian text-white antialiased overflow-x-hidden">
+    <%!-- Global UI Elements --%>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+    <div class="noise-overlay"></div>
+    <div class="fixed inset-0 bg-grid pointer-events-none z-0"></div>
+
+    <%!-- Enhanced Navigation Bar --%>
+    <nav
+      id="main-nav"
+      class="fixed top-0 left-1/2 -translate-x-1/2 mt-6 w-[90%] max-w-7xl z-50 transition-all duration-500 rounded-full border border-white/10 glass-nav px-8 py-3.5 flex items-center justify-between"
+    >
+      <.link navigate={~p"/"} class="flex items-center gap-3 group">
+        <div class="w-8 h-8 bg-emerald-400 rotate-45 flex items-center justify-center transition-all duration-300 group-hover:rotate-90">
+          <div class="w-4 h-4 border-2 border-obsidian rotate-45"></div>
+        </div>
+        <span class="font-mono text-[11px] tracking-[0.3em] uppercase font-bold bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">
+          Equinox
+        </span>
+      </.link>
+
+      <div class="hidden md:flex items-center gap-10 font-mono text-[10px] tracking-widest uppercase">
+        <a
+          href="/#features"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
+          Infrastructure
+        </a>
+        <a
+          href="/#carousel"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
+          Testimonials
+        </a>
+        <a
+          href="/#accordions"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
+          Technology
+        </a>
+        <a
+          href="/#pricing"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
+          Pricing
+        </a>
+        <a
+          href="/#roadmap"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
+          Roadmap
+        </a>
+        <a
+          href="/#resources"
+          class="nav-link text-zinc-400 hover:text-emerald-400 transition-colors"
+        >
+          Resources
+        </a>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a
+          href={~p"/login"}
+          class="btn-liquid px-6 py-2 text-[10px] font-mono tracking-widest uppercase text-zinc-400 hover:text-white transition-colors"
+        >
+          <span class="relative z-10">Login</span>
+          <div class="liquid-bg bg-white/10"></div>
+        </a>
+        <a
+          href={~p"/request-access"}
+          class="btn-liquid bg-emerald-400 text-obsidian px-6 py-2 text-[10px] font-mono tracking-widest uppercase font-bold transition-all shadow-[0_0_15px_rgba(52,211,153,0.2)]"
+        >
+          <span class="relative z-10">Get Access</span>
+          <div class="liquid-bg"></div>
+        </a>
+      </div>
+    </nav>
+
+    <%!-- Main Content --%>
+    {@inner_content}
+
+    <%!-- Institutional Footer --%>
+    <footer class="bg-zinc-950 border-t border-white/5 pt-32 pb-12 px-6 relative z-10">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16">
+        <div class="col-span-1 md:col-span-1">
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-8 h-8 bg-emerald-400 rotate-45 flex items-center justify-center transition-all duration-300 hover:rotate-90">
+              <div class="w-4 h-4 bg-obsidian rotate-45"></div>
+            </div>
+            <span class="font-mono text-xs tracking-[0.3em] uppercase font-bold">Equinox</span>
+          </div>
+          <p class="text-zinc-500 text-sm leading-relaxed max-w-xs font-light">
+            Institutional-grade digital asset infrastructure and capital market solutions.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-mono text-[10px] tracking-widest uppercase text-white mb-8">Product</h4>
+          <ul class="space-y-4 text-sm text-zinc-500 font-light">
+            <li>
+              <a href="#features" class="hover:text-emerald-400 transition-colors">
+                Infrastructure
+              </a>
+            </li>
+            <li><a href="#" class="hover:text-emerald-400 transition-colors">MPC Vaults</a></li>
+            <li>
+              <a href="#" class="hover:text-emerald-400 transition-colors">Settlement Engine</a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-mono text-[10px] tracking-widest uppercase text-white mb-8">
+            Resources
+          </h4>
+          <ul class="space-y-4 text-sm text-zinc-500 font-light">
+            <li>
+              <a href="#resources" class="hover:text-emerald-400 transition-colors">
+                Documentation
+              </a>
+            </li>
+            <li><a href="#" class="hover:text-emerald-400 transition-colors">Whitepapers</a></li>
+            <li>
+              <a href="#" class="hover:text-emerald-400 transition-colors">Audit Reports</a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-mono text-[10px] tracking-widest uppercase text-white mb-8">
+            Stay Informed
+          </h4>
+          <p class="text-xs text-zinc-500 mb-6 font-light">
+            Receive institutional market insights and system updates.
+          </p>
+          <div class="relative mb-8">
+            <input
+              type="email"
+              placeholder="Email Address"
+              class="w-full bg-white/5 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-emerald-400/50 transition-all font-mono"
+            />
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-400 hover:text-white transition-colors">
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="flex gap-4 items-center opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all">
+            <span class="text-[9px] font-bold border border-white/30 px-1 text-zinc-400">
+              SOC2
+            </span>
+            <span class="text-[9px] font-bold border border-white/30 px-1 text-zinc-400">
+              ISO 27001
+            </span>
+            <span class="text-[9px] font-bold border border-white/30 px-1 text-zinc-400">
+              FIPS 140-3
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto pt-20 mt-20 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5">
+        <div class="text-zinc-600 font-mono text-[9px] tracking-widest uppercase italic">
+          © 2025 Equinox Infrastructure Ltd
+        </div>
+        <div class="flex gap-8 text-[9px] font-mono tracking-widest uppercase text-zinc-600">
+          <a href="#" class="hover:text-emerald-400 transition-colors">Privacy Policy</a>
+          <a href="#" class="hover:text-emerald-400 transition-colors">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

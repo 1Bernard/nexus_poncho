@@ -4,6 +4,7 @@
 
 # 🧪 Elixir & Phoenix
 **/_build/
+_build_docker/
 **/deps/
 **/cover/
 **/doc/
@@ -16,6 +17,10 @@
 **/node_modules/
 **/.parcel-cache/
 **/npm-debug.log
+
+# 🔧 Platform build tool binaries (downloaded by Mix for the host/container OS)
+esbuild-*
+tailwind-*
 
 # 🏗 Infrastructure & Docker
 .env

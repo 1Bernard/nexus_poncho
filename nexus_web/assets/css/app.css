@@ -1,4 +1,18 @@
 @import "tailwindcss";
+@import "./marketing.css";
+@import "./admin.css";
+
+@theme {
+  --color-obsidian: #030303;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #059669;
+  --color-zinc-950: #09090b;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
 
 /* Local app sources */
 @source "../../lib/nexus_web";
@@ -13,6 +27,8 @@
 /* A Tailwind plugin that makes "hero-#{ICON}" classes available.
    The heroicons installation itself is managed by your mix.exs */
 @plugin "../vendor/heroicons";
+
+
 
 /* === NEXUS DESIGN TOKENS === */
 :root {
@@ -112,9 +128,259 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* ── Biometric Login ──────────────────────────────────────────────────────── */
+
+.ambient-glow-auth {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70vw;
+  height: 70vh;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(100px);
+}
+
+.prestige-card {
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 45px 100px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+}
+
+@keyframes scan-premium {
+  0%   { top: 0%;   opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.animate-scan-line { animation: scan-premium 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+@keyframes emerald-glint { to { background-position: 200% center; } }
+
+.emerald-glint {
+  background: linear-gradient(135deg, #34d399 20%, #a7f3d0 50%, #34d399 80%);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: emerald-glint 5s linear infinite;
+}
+
+.cta-primary {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta-primary::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 100%; height: 0;
+  background: #ffffff;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: -1;
+}
+
+.cta-primary:hover:not(:disabled) { color: #000000; }
+.cta-primary:hover:not(:disabled)::before { height: 100%; }
+
+.arrow-wrap {
+  display: inline-flex;
+  overflow: hidden;
+  width: 16px; height: 16px;
+  position: relative;
+}
+
+.arrow-icon { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.cta-primary:hover .arrow-icon { transform: translate(140%, -140%); }
+
+.arrow-clone {
+  position: absolute;
+  top: 140%; left: -140%;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta-primary:hover .arrow-clone { transform: translate(140%, -140%); }
+
 /* Progress Ring Component */
 .progress-ring__circle {
   transition: stroke-dashoffset 0.35s;
   transform: rotate(-90deg);
   transform-origin: 50% 50%;
+}
+
+/* ── Authenticated App Shell ──────────────────────────────────────────────── */
+
+body:has(#app-shell) { overflow: hidden; }
+
+.tech-label {
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: #d4d4d8;
+  font-weight: 700;
+}
+
+/* Sidebar collapse transition */
+#main-sidebar {
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Nav item base */
+.sidebar-item {
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+
+/* Active nav item */
+.sidebar-item.active {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.sidebar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%; width: 3px;
+  background: #34d399;
+  box-shadow: 4px 0 15px rgba(52, 211, 153, 0.4);
+  border-radius: 0 2px 2px 0;
+}
+
+.sidebar-item .active-tag {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-item.active .active-tag {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Sidebar text collapse */
+.sidebar-text {
+  transition: opacity 0.25s ease, transform 0.25s ease, width 0.25s ease;
+}
+
+#main-sidebar.collapsed .sidebar-text {
+  opacity: 0;
+  transform: translateX(-8px);
+  pointer-events: none;
+  width: 0;
+  overflow: hidden;
+  flex: none;
+}
+
+#main-sidebar.collapsed .sidebar-header-text {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Tooltip — only visible when sidebar is collapsed; position set by JS */
+.sidebar-tooltip {
+  position: fixed;
+  transform: translateX(-6px);
+  padding: 8px 14px;
+  background: #000;
+  border: 1px solid #34d399;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #fff;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 10000;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+}
+
+.sidebar-tooltip::after {
+  content: '';
+  position: absolute;
+  right: 100%; top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent #34d399 transparent transparent;
+}
+
+#main-sidebar.collapsed .sidebar-item:hover .sidebar-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Command palette trigger */
+.command-trigger {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  width: 460px;
+}
+
+.command-trigger:hover {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.05);
+}
+
+/* Dashboard stat cards */
+.stat-card {
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(4px);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.stat-card:hover {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.02);
+  transform: translateY(-2px);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Vault card (dark design system) */
+.vault-card {
+  background: rgba(10, 10, 15, 0.8);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.vault-card:hover {
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(52, 211, 153, 0.02);
+}
+
+/* Entry animations */
+@keyframes aura-sidebar-in {
+  from { transform: translateX(-50px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+@keyframes aura-topbar-in {
+  from { transform: translateY(-30px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+.aura-entry-sidebar {
+  animation: aura-sidebar-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.aura-entry-topbar {
+  animation: aura-topbar-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
