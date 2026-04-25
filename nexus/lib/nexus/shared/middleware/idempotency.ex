@@ -73,6 +73,26 @@ defmodule Nexus.Shared.Middleware.Idempotency do
     Repo.get(Nexus.Accounting.Idempotency.IdempotencyKey, id)
   end
 
+  defp find_idempotency_key(%Nexus.Marketing.Commands.SubmitAccessRequest{}, id) do
+    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Marketing.Commands.ReviewAccessRequest{}, id) do
+    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Marketing.Commands.ApproveAccessRequest{}, id) do
+    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Marketing.Commands.RejectAccessRequest{}, id) do
+    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Marketing.Commands.ArchiveAccessRequest{}, id) do
+    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+  end
+
   # Fallback
   defp find_idempotency_key(_, _), do: nil
 end
