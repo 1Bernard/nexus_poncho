@@ -57,8 +57,12 @@ defmodule Nexus.Compliance.Projectors.ScreeningProjector do
   end)
 
   defp track_idempotency(multi, metadata, command_name) do
+    id_key =
+      Map.get(metadata, "idempotency_key") || Map.get(metadata, :idempotency_key) ||
+        metadata.causation_id || metadata.event_id
+
     attrs = %{
-      id: metadata.causation_id || metadata.event_id,
+      id: id_key,
       command_name: command_name,
       executed_at: Nexus.Schema.utc_now()
     }
