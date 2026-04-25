@@ -40,6 +40,16 @@ defmodule Nexus.Router do
   alias Nexus.Organization.Aggregates.Tenant
   alias Nexus.Organization.Commands.ProvisionTenant
 
+  alias Nexus.Marketing.Aggregates.AccessRequest, as: MarketingAccessRequest
+
+  alias Nexus.Marketing.Commands.{
+    ApproveAccessRequest,
+    ArchiveAccessRequest,
+    RejectAccessRequest,
+    ReviewAccessRequest,
+    SubmitAccessRequest
+  }
+
   # ==================== ACCOUNTING ====================
 
   dispatch(OpenAccount,
@@ -80,5 +90,19 @@ defmodule Nexus.Router do
   dispatch(ProvisionTenant,
     to: Tenant,
     identity: :org_id
+  )
+
+  # ==================== MARKETING — Access request lifecycle ====================
+
+  dispatch(
+    [
+      SubmitAccessRequest,
+      ReviewAccessRequest,
+      ApproveAccessRequest,
+      RejectAccessRequest,
+      ArchiveAccessRequest
+    ],
+    to: MarketingAccessRequest,
+    identity: :request_id
   )
 end

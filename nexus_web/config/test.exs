@@ -24,3 +24,5 @@ config :nexus, Nexus.App, registry: :local
 # Projectors use pooled DB connections; nexus_web tests run with manual sandbox.
 # Disable the audit projector here — it is covered by the nexus Soul Audit suite.
 config :nexus, start_platform_audit: false
+config :nexus, start_marketing_projections: false
+config :nexus, start_marketing_pm: false

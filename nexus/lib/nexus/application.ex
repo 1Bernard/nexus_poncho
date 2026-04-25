@@ -64,7 +64,9 @@ defmodule Nexus.Application do
       {:start_messaging_projections,
        [Nexus.Messaging.Producers.EmailDispatcher, Nexus.Messaging.Workers.EmailWorker]},
       {:start_onboarding_pm, [Nexus.Onboarding.ProcessManagers.OnboardingProcessManager]},
-      {:start_platform_audit, [Nexus.Audit.Projectors.PlatformAuditProjector]}
+      {:start_platform_audit, [Nexus.Audit.Projectors.PlatformAuditProjector]},
+      {:start_marketing_projections, [Nexus.Marketing.Projectors.AccessRequestProjector]},
+      {:start_marketing_pm, [Nexus.Marketing.ProcessManagers.AccessRequestProcessManager]}
     ]
 
     domain_children =

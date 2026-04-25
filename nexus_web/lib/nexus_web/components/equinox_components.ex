@@ -349,15 +349,56 @@ defmodule NexusWeb.EquinoxComponents do
     ~H"""
     <span class={[
       "text-[9px] font-mono font-bold uppercase tracking-widest px-2 py-1 rounded-sm border",
-      @status == "active" && "text-emerald-400 border-emerald-400/30 bg-emerald-400/10",
+      @status in ~w(active approved) && "text-emerald-400 border-emerald-400/30 bg-emerald-400/10",
       @status == "pending" && "text-amber-400 border-amber-400/30 bg-amber-400/10",
-      @status == "registered" && "text-sky-400 border-sky-400/30 bg-sky-400/10",
-      @status not in ~w(active pending registered) &&
+      @status in ~w(registered under_review) && "text-sky-400 border-sky-400/30 bg-sky-400/10",
+      @status == "rejected" && "text-red-400 border-red-400/30 bg-red-400/10",
+      @status not in ~w(active approved pending registered under_review rejected) &&
         "text-zinc-500 border-zinc-700 bg-zinc-900",
       @class
     ]}>
       {@status}
     </span>
+    """
+  end
+
+  # ── status_pill ───────────────────────────────────────────────────────────────
+
+  attr :status, :string, required: true
+  attr :class, :string, default: nil
+
+  def status_pill(assigns) do
+    ~H"""
+    <span class={[
+      "status-pill border",
+      @status == "approved" && "bg-emerald-400/10 text-emerald-400 border-emerald-400/20",
+      @status == "pending" && "bg-amber-400/10 text-amber-400 border-amber-400/20",
+      @status == "rejected" && "bg-rose-400/10 text-rose-400 border-rose-400/20",
+      @status == "under_review" && "bg-sky-400/10 text-sky-400 border-sky-400/20",
+      @status == "archived" && "bg-zinc-800/60 text-zinc-500 border-zinc-700/50",
+      @status not in ~w(approved pending rejected under_review archived) &&
+        "bg-zinc-800/60 text-zinc-500 border-zinc-700/50",
+      @class
+    ]}>
+      <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
+      {String.upcase(@status)}
+    </span>
+    """
+  end
+
+  # ── eq_drawer_field ───────────────────────────────────────────────────────────
+
+  attr :label, :string, required: true
+  attr :value, :string, required: true
+
+  def eq_drawer_field(assigns) do
+    ~H"""
+    <div class="space-y-1">
+      <span class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+        {@label}
+      </span>
+      <p class="text-sm text-zinc-200 font-medium">{@value}</p>
+    </div>
     """
   end
 

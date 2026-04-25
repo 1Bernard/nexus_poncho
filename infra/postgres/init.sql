@@ -26,7 +26,9 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 DO $$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = 'ledger') THEN
-      CREATE USER ledger WITH PASSWORD 'ledger_password';
+      CREATE USER ledger WITH PASSWORD 'ledger_password' CREATEDB;
+   ELSE
+      ALTER USER ledger CREATEDB;
    END IF;
 END
 $$;

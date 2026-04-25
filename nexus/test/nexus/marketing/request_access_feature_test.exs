@@ -4,7 +4,7 @@ defmodule Nexus.Marketing.RequestAccessFeatureTest do
 
   @moduletag :feature
 
-  alias Nexus.Marketing.AccessRequest
+  alias Nexus.Marketing.Projections.AccessRequest
   alias Nexus.Repo
 
   # ══════════════════════════════════════════════════════════════════════════════
@@ -14,7 +14,7 @@ defmodule Nexus.Marketing.RequestAccessFeatureTest do
   defgiven ~r/^a prospective client submits an access request with:$/,
            %{table: table},
            state do
-    params = parse_table(table)
+    params = Map.put_new(parse_table(table), "id", Uniq.UUID.uuid7())
     changeset = AccessRequest.changeset(%AccessRequest{}, params)
     result = Repo.insert(changeset)
     {:ok, Map.merge(state, %{params: params, result: result, changeset: changeset})}
