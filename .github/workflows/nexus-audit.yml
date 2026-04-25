@@ -54,9 +54,9 @@ jobs:
           path: |
             **/deps
             **/_build
-          key: ${{ runner.os }}-mix-${{ hashFiles('nexus/mix.lock', 'nexus_web/mix.lock', 'nexus_shared/mix.lock') }}
+          key: ${{ runner.os }}-mix-v2-${{ hashFiles('nexus/mix.lock', 'nexus_web/mix.lock', 'nexus_shared/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-
+            ${{ runner.os }}-mix-v2-
 
       - name: Build Global Stack
         run: docker compose build
