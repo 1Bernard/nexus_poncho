@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./marketing.css";
+@import "./admin.css";
 
 @theme {
   --color-obsidian: #030303;
@@ -12,8 +13,6 @@
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
-
-@import "./marketing.css";
 
 /* Local app sources */
 @source "../../lib/nexus_web";
@@ -221,10 +220,11 @@
 body:has(#app-shell) { overflow: hidden; }
 
 .tech-label {
-  font-size: 8px;
-  letter-spacing: 0.3em;
+  font-size: 9px;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
   font-family: 'JetBrains Mono', monospace;
+  color: #d4d4d8;
   font-weight: 700;
 }
 
@@ -293,9 +293,9 @@ body:has(#app-shell) { overflow: hidden; }
   padding: 8px 14px;
   background: #000;
   border: 1px solid #34d399;
-  border-radius: 2px;
+  border-radius: 4px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 11px;
   color: #fff;
   white-space: nowrap;
   pointer-events: none;

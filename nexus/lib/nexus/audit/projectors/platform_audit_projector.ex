@@ -57,18 +57,6 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
     insert(multi, e, meta, "identity", "session_expired", e.user_id)
   end)
 
-  # ── Compliance ────────────────────────────────────────────────────────────
-
-  alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
-
-  project(%PEPCheckInitiated{} = e, meta, fn multi ->
-    insert(multi, e, meta, "compliance", "pep_check_initiated", e.user_id)
-  end)
-
-  project(%PEPCheckCompleted{} = e, meta, fn multi ->
-    insert(multi, e, meta, "compliance", "pep_check_completed", e.user_id)
-  end)
-
   # ── Organization ──────────────────────────────────────────────────────────
 
   alias Nexus.Organization.Events.TenantProvisioned

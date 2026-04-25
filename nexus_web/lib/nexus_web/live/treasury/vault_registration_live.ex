@@ -6,72 +6,79 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="p-8 max-w-3xl mx-auto">
-      <.eq_page_header
-        section="Treasury"
-        title="Register Vault"
-        subtitle="Establish a new asset vault with institutional-grade controls"
-      />
+    <Layouts.app
+      flash={@flash}
+      current_user={@current_user}
+      current_scope={:treasury}
+      page_title={@page_title}
+    >
+      <div class="p-8 max-w-3xl mx-auto">
+        <.eq_page_header
+          section="Treasury"
+          title="Register Vault"
+          subtitle="Establish a new asset vault with institutional-grade controls"
+        />
 
-      <div class="vault-card rounded-2xl p-8">
-        <.eq_form
-          for={@form}
-          id="vault_form"
-          phx-submit="save"
-          phx-change="validate"
-        >
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <.eq_input
-              field={@form[:name]}
-              label="Vault Display Name"
-              placeholder="e.g. Primary Operating"
-              required
-            />
-            <.eq_select
-              field={@form[:currency]}
-              label="Currency"
-              options={["USD", "EUR", "GBP", "SGD"]}
-            />
-            <.eq_input
-              field={@form[:bank_name]}
-              label="Partner Bank"
-              placeholder="e.g. Equinox Central Bank"
-              required
-            />
-            <.eq_input
-              field={@form[:iban]}
-              label="IBAN / Account Number"
-              placeholder="e.g. GB29 NWBK 6016 1331 9268 19"
-              required
-            />
-            <.eq_select
-              field={@form[:provider]}
-              label="Settlement Provider"
-              options={["Stripe", "Modulr", "Internal"]}
-            />
-            <.eq_input
-              field={@form[:daily_withdrawal_limit]}
-              type="number"
-              label="Daily Withdrawal Limit (Minor Units)"
-              value="1000000"
-            />
-          </div>
+        <div class="vault-card rounded-2xl p-8">
+          <.eq_form
+            for={@form}
+            id="vault_form"
+            phx-submit="save"
+            phx-change="validate"
+          >
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <.eq_input
+                field={@form[:name]}
+                label="Vault Display Name"
+                placeholder="e.g. Primary Operating"
+                required
+              />
+              <.eq_select
+                field={@form[:currency]}
+                label="Currency"
+                options={["USD", "EUR", "GBP", "SGD"]}
+              />
+              <.eq_input
+                field={@form[:bank_name]}
+                label="Partner Bank"
+                placeholder="e.g. Equinox Central Bank"
+                required
+              />
+              <.eq_input
+                field={@form[:iban]}
+                label="IBAN / Account Number"
+                placeholder="e.g. GB29 NWBK 6016 1331 9268 19"
+                required
+              />
+              <.eq_select
+                field={@form[:provider]}
+                label="Settlement Provider"
+                options={["Stripe", "Modulr", "Internal"]}
+              />
+              <.eq_input
+                field={@form[:daily_withdrawal_limit]}
+                type="number"
+                label="Daily Withdrawal Limit (Minor Units)"
+                value="1000000"
+              />
+            </div>
 
-          <div class="pt-2">
-            <.eq_checkbox
-              field={@form[:requires_multi_sig]}
-              label="Enable Multi-Signature Approval"
-            />
-          </div>
+            <div class="pt-2">
+              <.eq_checkbox
+                field={@form[:requires_multi_sig]}
+                label="Enable Multi-Signature Approval"
+              />
+            </div>
 
-          <:actions>
-            <.eq_button full_width phx-disable-with="Establishing...">
-              Initialize Vault
-            </.eq_button>
-          </:actions>
-        </.eq_form>
+            <:actions>
+              <.eq_button full_width phx-disable-with="Establishing...">
+                Initialize Vault
+              </.eq_button>
+            </:actions>
+          </.eq_form>
+        </div>
       </div>
-    </div>
+    </Layouts.app>
     """
   end
 
