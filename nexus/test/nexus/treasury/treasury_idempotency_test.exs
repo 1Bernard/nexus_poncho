@@ -5,6 +5,8 @@ defmodule Nexus.Treasury.TreasuryIdempotencyTest do
   """
   use Nexus.DataCase
 
+  @moduletag :no_sandbox
+
   alias Nexus.Treasury.Commands.RegisterVault
   alias Nexus.Treasury.Idempotency.IdempotencyKey
   alias Nexus.Treasury.Projections.Vault
