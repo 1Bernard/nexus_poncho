@@ -6,7 +6,7 @@
   <%!-- ═══ SIDEBAR ═══════════════════════════════════════════════════════════ --%>
   <aside
     id="main-sidebar"
-    class="relative flex flex-col border-r border-white/5 bg-black/40 backdrop-blur-3xl"
+    class="relative z-40 flex flex-col border-r border-white/5 bg-black/40 backdrop-blur-3xl"
     style="width: 288px;"
   >
     <%!-- Collapse Toggle --%>
@@ -46,7 +46,7 @@
             class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
           >
             <.icon name="hero-squares-2x2-mini" class="size-4 flex-shrink-0" />
-            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+            <span class="sidebar-text text-[12px] font-bold uppercase tracking-[0.2em] italic flex-1">
               Command Center
             </span>
             <span class="sidebar-tooltip">COMMAND_CENTER</span>
@@ -57,7 +57,7 @@
             class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
           >
             <.icon name="hero-chart-bar-mini" class="size-4 flex-shrink-0" />
-            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+            <span class="sidebar-text text-[12px] font-bold uppercase tracking-[0.2em] italic flex-1">
               Network State
             </span>
             <span class="sidebar-tooltip">NETWORK_STATE</span>
@@ -68,7 +68,7 @@
             class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
           >
             <.icon name="hero-shield-check-mini" class="size-4 flex-shrink-0" />
-            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+            <span class="sidebar-text text-[12px] font-bold uppercase tracking-[0.2em] italic flex-1">
               Security
             </span>
             <span class="sidebar-tooltip">SECURITY</span>
@@ -79,11 +79,28 @@
             class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
           >
             <.icon name="hero-command-line-mini" class="size-4 flex-shrink-0" />
-            <span class="sidebar-text text-[11px] font-bold uppercase tracking-[0.2em] italic flex-1">
+            <span class="sidebar-text text-[12px] font-bold uppercase tracking-[0.2em] italic flex-1">
               Terminal
             </span>
             <span class="sidebar-tooltip">TERMINAL</span>
           </a>
+        </nav>
+      </div>
+
+      <div class="space-y-1 mt-6">
+        <p class="tech-label px-4 mb-6 opacity-40 sidebar-text text-zinc-400">Administration</p>
+        <nav class="space-y-1">
+          <.link
+            navigate={~p"/admin/access-requests"}
+            data-nav-path="/admin"
+            class="sidebar-item flex items-center gap-5 px-4 py-3.5 rounded-xl group text-zinc-500 hover:text-white"
+          >
+            <.icon name="hero-user-plus-mini" class="size-4 flex-shrink-0" />
+            <span class="sidebar-text text-[12px] font-bold uppercase tracking-[0.2em] italic flex-1">
+              Access Requests
+            </span>
+            <span class="sidebar-tooltip">ACCESS_REQUESTS</span>
+          </.link>
         </nav>
       </div>
     </div>
@@ -92,7 +109,7 @@
     <div class="p-6 border-t border-white/5 space-y-4 flex-shrink-0">
       <div class="sidebar-text p-4 bg-zinc-950/50 border border-white/5 rounded-2xl overflow-hidden">
         <p class="tech-label text-emerald-400 mb-2 italic">Institutional Profile</p>
-        <p class="text-[10px] font-mono text-zinc-300 truncate uppercase">
+        <p class="text-[11px] font-mono text-zinc-300 truncate uppercase">
           <%= case assigns[:current_user] do %>
             <% nil -> %>
               UNAUTHORIZED
@@ -104,7 +121,7 @@
       <div class="flex items-center justify-between px-2">
         <div class="flex items-center gap-3">
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></div>
-          <span class="sidebar-text text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+          <span class="sidebar-text text-[11px] font-mono text-zinc-400 uppercase tracking-widest">
             Connection: Synchronized
           </span>
         </div>
@@ -129,8 +146,8 @@
     >
       <div class="grid grid-cols-[1fr_auto_1fr] items-center h-full px-8">
         <%!-- Left: Breadcrumb --%>
-        <div class="flex justify-start items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em]">
-          <span class="text-zinc-600">{assigns[:breadcrumb_section] || "Equinox"}</span>
+        <div class="flex justify-start items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em]">
+          <span class="text-zinc-500">{assigns[:breadcrumb_section] || "Equinox"}</span>
           <span class="text-zinc-700">›</span>
           <span class="text-white font-bold">{assigns[:page_title] || "Dashboard"}</span>
         </div>
@@ -144,14 +161,14 @@
           >
             <div class="flex items-center gap-3 flex-1">
               <.icon name="hero-command-line-mini" class="size-3.5 text-zinc-500" />
-              <span class="text-[10px] font-mono text-zinc-400 tracking-wider">
+              <span class="text-[12px] font-mono text-zinc-300 tracking-wider">
                 Type a command or search...
               </span>
             </div>
             <div class="w-px h-6 bg-white/10 mx-3"></div>
-            <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/30 rounded border border-white/5">
-              <span class="font-mono text-[9px] text-zinc-600">⌘</span>
-              <span class="font-mono text-[9px] text-zinc-600 ml-0.5">K</span>
+            <div class="flex items-center gap-1 px-1.5 py-0.5 bg-black/30 rounded border border-white/10">
+              <span class="font-mono text-[11px] text-zinc-400">⌘</span>
+              <span class="font-mono text-[11px] text-zinc-400 ml-0.5">K</span>
             </div>
           </button>
         </div>
@@ -174,14 +191,18 @@
 
     <%!-- PAGE CONTENT --%>
     <main class="flex-1 overflow-y-auto">
-      {@inner_content}
+      <%= if assigns[:inner_block] do %>
+        {render_slot(@inner_block)}
+      <% else %>
+        {@inner_content}
+      <% end %>
     </main>
   </div>
 
   <%!-- ═══ COMMAND PALETTE ════════════════════════════════════════════════════ --%>
   <div
     id="app-command-palette"
-    class="hidden fixed inset-0 z-[200] flex items-start justify-center pt-[10vh] px-4"
+    class="hidden fixed inset-0 z-[200] items-start justify-center pt-[10vh] px-4"
     style="background: rgba(3,3,3,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"
   >
     <div data-backdrop class="absolute inset-0"></div>
@@ -194,7 +215,7 @@
           placeholder="Type a command or search..."
           class="flex-1 bg-transparent text-base font-mono text-white focus:outline-none placeholder:text-zinc-700"
         />
-        <span class="tech-label text-zinc-500 flex-shrink-0">ESC to close</span>
+        <span class="tech-label text-zinc-400 flex-shrink-0">ESC to close</span>
       </div>
       <div class="p-4 max-h-[60vh] overflow-y-auto">
         <p class="tech-label px-4 mb-4 opacity-50 text-zinc-500">Quick Actions</p>
@@ -209,7 +230,7 @@
             />
             <div class="flex-1 text-left">
               <p class="text-sm font-bold text-white">Register New Vault</p>
-              <p class="text-[10px] text-zinc-500 font-mono">Establish a treasury vault</p>
+              <p class="text-[11px] text-zinc-400 font-mono">Establish a treasury vault</p>
             </div>
             <span class="tech-label text-zinc-700">⌘N</span>
           </.link>
@@ -223,7 +244,7 @@
             />
             <div class="flex-1 text-left">
               <p class="text-sm font-bold text-white">View All Vaults</p>
-              <p class="text-[10px] text-zinc-500 font-mono">Treasury vault dashboard</p>
+              <p class="text-[11px] text-zinc-500 font-mono">Treasury vault dashboard</p>
             </div>
           </.link>
           <button class="w-full flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent hover:bg-emerald-400/10 hover:border-emerald-400/30 transition-all group text-left">
@@ -233,7 +254,7 @@
             />
             <div class="flex-1">
               <p class="text-sm font-bold text-white">Export Audit Log</p>
-              <p class="text-[10px] text-zinc-500 font-mono">Compliance JSON / CSV export</p>
+              <p class="text-[11px] text-zinc-500 font-mono">Compliance JSON / CSV export</p>
             </div>
           </button>
         </div>
@@ -264,7 +285,7 @@
                 |> String.upcase()}
             <% end %>
           </p>
-          <p class="text-[10px] font-mono text-zinc-500">Biometric Auth · Active</p>
+          <p class="text-[11px] font-mono text-zinc-400">Biometric Auth · Active</p>
         </div>
       </div>
     </div>
@@ -290,7 +311,7 @@
           <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" /> Terminate Session
         </.link>
       </div>
-      <div class="p-4 bg-black rounded-2xl border border-white/5 font-mono text-[9px] text-zinc-600 space-y-1">
+      <div class="p-4 bg-black rounded-2xl border border-white/5 font-mono text-[11px] text-zinc-500 space-y-1">
         <p>SESSION: BIOMETRIC_FIDO2</p>
         <p>ENCRYPTION: AES_256_GCM</p>
         <p>STANDARD: FIPS_140-3</p>
