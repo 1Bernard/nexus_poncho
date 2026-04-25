@@ -17,8 +17,8 @@ defmodule Nexus.Application do
     children =
       if System.get_env("STANDALONE_GATEWAY") == "true" do
         [
-          Nexus.Repo,
           Nexus.PromEx,
+          Nexus.Repo,
           Nexus.App,
           Nexus.Telemetry.Heartbeat,
           # Periodically prune expired challenges
@@ -30,8 +30,8 @@ defmodule Nexus.Application do
         ]
       else
         [
-          Nexus.Repo,
           Nexus.PromEx,
+          Nexus.Repo,
           {Cluster.Supervisor, [topologies, [name: Nexus.ClusterSupervisor]]},
           {Horde.Registry, [name: Nexus.HordeRegistry, keys: :unique, members: :auto]},
           {Horde.DynamicSupervisor,

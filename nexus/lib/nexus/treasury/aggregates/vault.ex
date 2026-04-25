@@ -26,6 +26,10 @@ defmodule Nexus.Treasury.Aggregates.Vault do
 
   # --- Command Handlers ---
 
+  def execute(%Vault{vault_id: existing}, %RegisterVault{}) when not is_nil(existing) do
+    {:error, :vault_already_exists}
+  end
+
   def execute(%Vault{vault_id: nil}, %RegisterVault{} = command) do
     %VaultRegistered{
       vault_id: command.vault_id,

@@ -3,6 +3,7 @@ defmodule Nexus.Marketing.RequestAccessFeatureTest do
   use Nexus.DataCase
 
   @moduletag :feature
+  @moduletag :no_sandbox
 
   alias Nexus.Marketing.Projections.AccessRequest
   alias Nexus.Repo
@@ -62,7 +63,7 @@ defmodule Nexus.Marketing.RequestAccessFeatureTest do
   defthen ~r/^an access request exists for email "(?<email>[^"]+)"$/,
           %{email: email},
           state do
-    assert Repo.get_by(AccessRequest, email: email),
+    assert Repo.exists?(from(a in AccessRequest, where: a.email == ^email)),
            "Expected an access request for #{email} to exist in the database"
 
     {:ok, state}
@@ -71,7 +72,7 @@ defmodule Nexus.Marketing.RequestAccessFeatureTest do
   defthen ~r/^no access request exists for email "(?<email>[^"]+)"$/,
           %{email: email},
           state do
-    refute Repo.get_by(AccessRequest, email: email),
+    refute Repo.exists?(from(a in AccessRequest, where: a.email == ^email)),
            "Expected no access request for #{email} but one was found"
 
     {:ok, state}

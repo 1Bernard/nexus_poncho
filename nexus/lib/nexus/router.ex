@@ -37,6 +37,9 @@ defmodule Nexus.Router do
   alias Nexus.Compliance.Aggregates.Screening
   alias Nexus.Compliance.Commands.{CompletePEPCheck, PerformPEPCheck}
 
+  alias Nexus.Organization.Aggregates.Tenant
+  alias Nexus.Organization.Commands.ProvisionTenant
+
   alias Nexus.Marketing.Aggregates.AccessRequest, as: MarketingAccessRequest
 
   alias Nexus.Marketing.Commands.{
@@ -80,6 +83,13 @@ defmodule Nexus.Router do
   dispatch([PerformPEPCheck, CompletePEPCheck],
     to: Screening,
     identity: :screening_id
+  )
+
+  # ==================== ORGANIZATION ====================
+
+  dispatch(ProvisionTenant,
+    to: Tenant,
+    identity: :org_id
   )
 
   # ==================== MARKETING — Access request lifecycle ====================
