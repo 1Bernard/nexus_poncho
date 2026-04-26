@@ -136,6 +136,12 @@ jobs:
 
       - name: Face Audit (Isolated Gateway)
         run: |
+          # Force-recompile nexus path dep before face audit.
+          # Mix incremental compilation does not detect new source files added to a path
+          # dependency since the last full build, so the cached _build may be missing
+          # modules (e.g. marketing domain added after the cache was created). Passing
+          # --force rebuilds the path dep fully, ensuring all modules are present.
+          docker compose run --no-deps -e MIX_ENV=test --rm web sh -c "cd nexus_web && mix deps.compile nexus --force"
           # Enforce STANDALONE_GATEWAY during the face audit to ensure production parity
           docker compose run --no-deps -e STANDALONE_GATEWAY=true -e MIX_ENV=test --rm web sh -c "cd nexus_web && mix compile --warnings-as-errors && mix test --warnings-as-errors"
 
