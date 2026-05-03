@@ -7,7 +7,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
   alias Nexus.Identity.WebAuthn.BiometricInvitation
   require Logger
 
-  @max_projection_retries 15
+  @max_projection_retries 50
   @projection_retry_ms 200
 
   @impl true
@@ -23,8 +23,8 @@ defmodule NexusWeb.Identity.OnboardingLive do
           |> assign(:user_id, user_id)
           |> assign(:user, user)
           |> assign(token: token)
+          |> assign(step: :welcome)
           |> assign(status: if(user, do: :idle, else: :loading))
-          |> assign(progress: 0)
           |> assign(current_origin: nil)
           |> assign(error: nil)
           |> assign(:retry_count, 0)
@@ -49,7 +49,6 @@ defmodule NexusWeb.Identity.OnboardingLive do
 
   @impl true
   def handle_params(_params, uri, socket) do
-    # Elite Standard: Detect current origin at runtime from the request URI
     uri_struct = URI.parse(uri)
 
     origin =
@@ -57,7 +56,6 @@ defmodule NexusWeb.Identity.OnboardingLive do
 
     socket = assign(socket, current_origin: origin)
 
-    # If the LiveView connected before the projection arrived, kick off the retry loop now
     if socket.assigns.status == :loading do
       Process.send_after(self(), :await_projection, @projection_retry_ms)
     end
@@ -94,154 +92,238 @@ defmodule NexusWeb.Identity.OnboardingLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-md mt-20">
-      <div class="relative p-8 overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+    <div class="fixed inset-0 bg-[#030303]"></div>
+    <div class="ambient-glow-auth"></div>
+    <div class="noise-overlay"></div>
+    <div class="bg-grid opacity-50"></div>
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
 
-        <div class="relative z-10 text-center">
-          <.header>
-            Secure Enrollment
-            <:subtitle>
-              Securely anchoring your biometric identity to
-              <span class="font-mono text-xs font-bold text-indigo-500">SecureFlow ID</span>
-            </:subtitle>
-          </.header>
+    <div class="min-h-screen flex items-center justify-center px-4 relative z-10">
+      <div
+        id="onboarding-container"
+        phx-hook="OnboardingLive"
+        data-user-id={@user_id}
+        class="w-full max-w-[460px] prestige-card rounded-[2.5rem] relative overflow-hidden"
+      >
+        <%!-- Step Progress Indicators --%>
+        <div class="flex gap-2 p-8 pb-0">
+          <span class={[
+            "h-1 rounded-full transition-all duration-500",
+            @step == :welcome && "w-10 bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.9)]",
+            @step != :welcome && "w-4 bg-white/10"
+          ]}>
+          </span>
+          <span class={[
+            "h-1 rounded-full transition-all duration-500",
+            @step == :biometric && "w-10 bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.9)]",
+            @step != :biometric && "w-4 bg-white/10"
+          ]}>
+          </span>
+        </div>
 
-          <div class="mt-12 flex flex-col items-center">
-            <%!-- Biometric Scanner UI --%>
-            <div
-              id="biometric-trigger"
-              phx-hook="OnboardingLive"
-              data-user-id={@user_id}
-              class="relative group cursor-pointer no-select"
-            >
-              <%!-- SVG Progress Ring --%>
-              <svg class="w-48 h-48">
-                <circle
-                  class="text-zinc-100 dark:text-zinc-800 stroke-current"
-                  stroke-width="4"
-                  fill="transparent"
-                  r="90"
-                  cx="96"
-                  cy="96"
-                />
-                <circle
-                  class="text-indigo-500 progress-ring__circle stroke-current"
-                  stroke-width="4"
-                  stroke-dasharray="565.48"
-                  stroke-dashoffset={565.48 * (1 - @progress / 100)}
-                  stroke-linecap="round"
-                  fill="transparent"
-                  r="90"
-                  cx="96"
-                  cy="96"
-                />
-              </svg>
+        <div class="px-7 pb-10 pt-4 min-h-[520px] flex flex-col justify-center">
+          <%= case @step do %>
+            <% :welcome -> %>
+              <.welcome_step user={@user} status={@status} />
+            <% :biometric -> %>
+              <.biometric_step status={@status} error={@error} />
+          <% end %>
+        </div>
 
-              <%!-- Fingerprint Icon & Scan Beam --%>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class={[
-                  "w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500",
-                  @status == :scanning && "bg-indigo-500/10 scale-110",
-                  @status == :complete && "bg-emerald-500/10 scale-110",
-                  @status in [:idle, :loading] &&
-                    "bg-zinc-50 dark:bg-zinc-800 group-hover:bg-indigo-500/5"
-                ]}>
-                  <div class="relative overflow-hidden w-20 h-20">
-                    <.icon
-                      name="hero-finger-print"
-                      class={
-                        [
-                          "w-20 h-20 transition-colors duration-500",
-                          @status == :complete && "text-emerald-500",
-                          @status == :scanning && "text-indigo-500 pulse-soft",
-                          @status in [:idle, :loading] &&
-                            "text-zinc-400 dark:text-zinc-600 group-hover:text-indigo-400"
-                        ]
-                        |> Enum.filter(& &1)
-                        |> Enum.join(" ")
-                      }
-                    />
-
-                    <%= if @status == :scanning do %>
-                      <div class="absolute inset-0 bg-indigo-500/30 animate-scan-beam" />
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-8 space-y-2">
-              <h3 class={[
-                "text-lg font-semibold tracking-tight transition-colors duration-500",
-                @status == :complete && "text-emerald-500",
-                @status == :scanning && "text-indigo-500",
-                @status in [:idle, :loading] && "text-zinc-900 dark:text-zinc-100"
-              ]}>
-                <%= case @status do %>
-                  <% :idle -> %>
-                    Scan Biometric
-                  <% :loading -> %>
-                    Preparing Identity...
-                  <% :scanning -> %>
-                    Hardware Handshake in Progress...
-                  <% :complete -> %>
-                    Neural profile secured
-                  <% :error -> %>
-                    Handshake Aborted
-                <% end %>
-              </h3>
-
-              <p class="text-sm text-zinc-500 dark:text-zinc-400 max-w-[280px] mx-auto leading-relaxed">
-                <%= case @status do %>
-                  <% :idle -> %>
-                    Please prepare your biometric authenticator (TouchID, FaceID, or YubiKey).
-                  <% :loading -> %>
-                    Anchoring your identity record. This takes just a moment...
-                  <% :scanning -> %>
-                    Holding secure tunnel to authenticator. Please provide biometric verification.
-                  <% :complete -> %>
-                    Biometric vault synchronized.
-                  <% :error -> %>
-                    {@error}
-                <% end %>
-              </p>
-            </div>
-
-            <%= if @status == :idle do %>
-              <.button
-                id="enroll-button"
-                phx-click={
-                  JS.push("biometric_start")
-                  |> JS.dispatch("nx:biometric-start", to: "#biometric-trigger")
-                }
-                class="mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
-              >
-                Enroll Biometrics
-              </.button>
-            <% end %>
-
-            <%= if @status == :complete do %>
-              <.button
-                navigate={~p"/"}
-                class="mt-10 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
-              >
-                Identity Verified - Enter
-              </.button>
-            <% end %>
-          </div>
+        <div class="border-t border-white/5 px-7 py-5 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
+          <span>EQUINOX · IDENTITY ANCHOR</span>
+          <span>256-BIT WEBAUTHN</span>
         </div>
       </div>
     </div>
     """
   end
 
+  defp welcome_step(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-6">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-400/10 flex items-center justify-center border border-emerald-400/20">
+        <.icon name="hero-key" class="w-8 h-8 text-emerald-400" />
+      </div>
+
+      <div>
+        <h1 class="text-3xl font-serif italic font-black tracking-tight text-white mb-2">
+          Access<br /><span class="emerald-glint">Granted.</span>
+        </h1>
+
+        <p class="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em]">
+          Anchor your identity to complete onboarding
+        </p>
+      </div>
+
+      <%= if @user do %>
+        <div class="space-y-3 mb-10">
+          <div class="group relative flex justify-between items-center p-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl transition-all duration-300 hover:bg-white/[0.05] opacity-0">
+            <%!-- Elite Grid Guides --%>
+            <div class="grid-guide-v left-10"></div>
+            <div class="grid-guide-h top-0"></div>
+            <div class="grid-guide-h bottom-0"></div>
+
+            <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.25em]">Name</span>
+            <span class="text-[11px] font-mono font-bold text-white/90">{@user.name}</span>
+          </div>
+
+          <div class="group relative flex justify-between items-center p-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl transition-all duration-300 hover:bg-white/[0.05] opacity-0">
+            <%!-- Elite Grid Guides --%>
+            <div class="grid-guide-v left-10"></div>
+            <div class="grid-guide-h top-0"></div>
+            <div class="grid-guide-h bottom-0"></div>
+
+            <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.25em]">Email</span>
+            <span class="text-[11px] font-mono font-bold text-white/80">{@user.email}</span>
+          </div>
+
+          <div class="group relative flex justify-between items-center p-5 bg-white/[0.03] border border-white/[0.06] rounded-2xl transition-all duration-300 hover:bg-white/[0.05] opacity-0">
+            <%!-- Elite Grid Guides --%>
+            <div class="grid-guide-v left-10"></div>
+            <div class="grid-guide-h top-0"></div>
+            <div class="grid-guide-h bottom-0"></div>
+
+            <span class="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.25em]">Role</span>
+            <span class="text-[11px] font-mono font-bold text-emerald-400 uppercase tracking-widest">
+              {@user.role}
+            </span>
+          </div>
+        </div>
+
+        <button
+          phx-click="advance_to_biometric"
+          class="cta-primary w-full py-5 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
+        >
+          <span class="relative z-10 flex items-center gap-3">
+            Anchor Biometric Identity
+            <span class="arrow-wrap">
+              <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-icon" />
+              <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-clone" />
+            </span>
+          </span>
+        </button>
+      <% else %>
+        <div class="flex flex-col items-center py-8">
+          <div class="w-8 h-8 rounded-full border-2 border-t-emerald-400 border-white/10 animate-spin mb-4">
+          </div>
+          <p class="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+            Resolving identity record...
+          </p>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
+  defp biometric_step(assigns) do
+    ~H"""
+    <%= if @status == :scanning do %>
+      <div class="flex flex-col items-center py-8">
+        <div class="relative w-28 h-28 mb-10">
+          <div class="absolute inset-0 border-4 border-emerald-400/10 rounded-full"></div>
+          <div class="absolute inset-0 border-4 border-t-emerald-400 rounded-full animate-spin"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <.icon name="hero-signal" class="w-8 h-8 text-emerald-400" />
+          </div>
+        </div>
+        <h3 class="text-2xl font-serif italic font-black uppercase tracking-wide text-white">
+          Anchoring Identity
+        </h3>
+        <p class="text-[9px] text-zinc-500 font-mono mt-2 uppercase tracking-widest">
+          Binding credential to hardware
+        </p>
+        <div class="w-full mt-10 space-y-3 font-mono text-[9px]">
+          <div class="flex justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+            <span class="text-zinc-500 uppercase">Credential Type</span>
+            <span class="text-emerald-400">WEBAUTHN PASSKEY</span>
+          </div>
+          <div class="flex justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+            <span class="text-zinc-500 uppercase">Binding Status</span>
+            <span class="text-emerald-400 animate-pulse">ENROLLING...</span>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="flex flex-col items-center">
+        <h2 class="text-2xl font-serif font-bold uppercase tracking-wide text-white">
+          Identity Anchor
+        </h2>
+        <p class="text-[9px] text-zinc-500 mt-2 font-mono uppercase tracking-[0.25em]">
+          Liveness 3.0 · Press & Hold
+        </p>
+
+        <div class="relative my-12 flex justify-center items-center">
+          <div class="absolute w-72 h-72 rounded-full border border-emerald-500/5"></div>
+          <div class="absolute w-60 h-60 rounded-full border border-emerald-500/10"></div>
+
+          <button
+            id="biometric-sensor"
+            class="relative w-52 h-52 rounded-full bg-emerald-500/[0.03] border border-emerald-500/20 flex items-center justify-center overflow-hidden touch-none group"
+          >
+            <svg class="absolute inset-0 w-full h-full -rotate-90">
+              <circle
+                id="scan-ring"
+                cx="104"
+                cy="104"
+                r="100"
+                fill="none"
+                stroke="#34d399"
+                stroke-width="2"
+                stroke-dasharray="628"
+                stroke-dashoffset="628"
+                class="transition-none"
+              />
+            </svg>
+            <div
+              id="scan-line"
+              class="absolute left-0 right-0 w-full h-[2px] bg-emerald-400 shadow-[0_0_15px_#34d399] opacity-0 pointer-events-none z-10"
+            >
+            </div>
+            <.icon
+              name="hero-finger-print"
+              class="w-16 h-16 text-emerald-400/20 group-active:text-emerald-400 transition-colors duration-500"
+            />
+          </button>
+        </div>
+
+        <div
+          id="sensor-status"
+          class="h-10 text-[9px] font-mono text-zinc-500 uppercase tracking-widest"
+        >
+          <%= if @status == :error do %>
+            <span class="text-rose-400">{@error}</span>
+          <% else %>
+            ⬇ Press & hold sensor ⬇
+          <% end %>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/10" id="scan-l1"></div>
+          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/10" id="scan-l2"></div>
+          <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/10" id="scan-l3"></div>
+        </div>
+
+        <button
+          phx-click="back_to_welcome"
+          class="mt-8 text-zinc-500 text-[10px] uppercase tracking-widest hover:text-white transition-colors"
+        >
+          ← Back
+        </button>
+      </div>
+    <% end %>
+    """
+  end
+
   @impl true
-  def handle_event("verify_identity", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:status, :complete)
-     |> assign(:progress, 100)}
+  def handle_event("advance_to_biometric", _params, socket) do
+    {:noreply, assign(socket, step: :biometric, status: :idle)}
+  end
+
+  @impl true
+  def handle_event("back_to_welcome", _params, socket) do
+    {:noreply, assign(socket, step: :welcome, status: :idle, error: nil)}
   end
 
   @impl true
@@ -249,19 +331,15 @@ defmodule NexusWeb.Identity.OnboardingLive do
     user = socket.assigns[:user]
 
     if user do
-      Logger.info("[OnboardingUI] Biometric start requested for user: #{socket.assigns.user_id}")
+      Logger.info("[OnboardingUI] Biometric anchor requested for user: #{socket.assigns.user_id}")
 
-      # 1. Generate challenge via WebAuthn adapter with dynamic origin support
       case WebAuthn.register_begin(socket.assigns.user_id, user.email,
              origin: socket.assigns.current_origin
            ) do
         {:ok, challenge} ->
-          # 2. Push challenge to client JS hook
-          # We must encode the challenge binary to Base64 for the JS hook
           {:noreply,
            socket
            |> assign(:status, :scanning)
-           |> assign(:progress, 33)
            |> push_event("biometric_challenge", %{challenge: Base.encode64(challenge.bytes)})}
 
         {:error, reason} ->
@@ -276,17 +354,13 @@ defmodule NexusWeb.Identity.OnboardingLive do
       {:noreply,
        socket
        |> put_flash(:error, "Session expired or invalid. Please reload.")
-       |> push_navigate(to: "/register")}
+       |> push_navigate(to: "/")}
     end
   end
 
   @impl true
   def handle_event("biometric_complete", %{"attestation" => attestation}, socket) do
     Logger.info("[OnboardingUI] Biometric attestation received. Verifying...")
-
-    Logger.debug(
-      "[OnboardingUI] Attestation ID length: #{String.length(attestation["id"] || "")}"
-    )
 
     try do
       case WebAuthn.register_finish(attestation, socket.assigns.user_id, socket.assigns.user_id) do
@@ -324,10 +398,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
         "Handshake failed: #{reason}"
       end
 
-    {:noreply,
-     socket
-     |> assign(:status, :error)
-     |> assign(:error, clean_reason)}
+    {:noreply, socket |> assign(:status, :error) |> assign(:error, clean_reason)}
   end
 
   defp enroll_credential(credential_id, cose_key, socket) do
@@ -338,17 +409,13 @@ defmodule NexusWeb.Identity.OnboardingLive do
       cose_key: Base.encode64(:erlang.term_to_binary(cose_key), padding: false)
     }
 
-    case Nexus.App.dispatch(command) do
+    case Nexus.App.dispatch(command, metadata: %{"idempotency_key" => socket.assigns.user_id}) do
       result when result == :ok or (is_tuple(result) and elem(result, 0) == :ok) ->
-        Logger.info(
-          "[OnboardingUI] Identity anchored to hardware for user: #{socket.assigns.user_id}"
-        )
+        Logger.info("[OnboardingUI] Identity anchored for user: #{socket.assigns.user_id}")
 
         {:noreply,
          socket
          |> assign(:status, :complete)
-         |> assign(:progress, 100)
-         |> put_flash(:info, "Identity successfully anchored!")
          |> push_navigate(to: ~p"/onboarding/success")}
 
       {:error, reason} ->
@@ -358,7 +425,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
   end
 
   defp format_webauthn_error(%Wax.InvalidClientDataError{reason: :origin_mismatch}) do
-    "Address mismatch: Please ensure you are using the same URL that provided your invitation (check Port 4000 vs 4001)."
+    "Address mismatch: Please ensure you are using the same URL that provided your invitation."
   end
 
   defp format_webauthn_error(reason), do: "Verification failed: #{inspect(reason)}"

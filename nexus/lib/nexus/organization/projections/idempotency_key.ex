@@ -1,11 +1,11 @@
-defmodule Nexus.Marketing.Idempotency.IdempotencyKey do
+defmodule Nexus.Organization.Projections.IdempotencyKey do
   @moduledoc """
-  Read model for Marketing idempotency tracking.
+  Read model for Organization idempotency tracking.
   Follows Standard Chapter 8: Idempotency.
   """
   use Nexus.Schema
 
-  schema "marketing_idempotency_keys" do
+  schema "organization_idempotency_keys" do
     field(:command_name, :string)
     field(:execution_result, :map)
     field(:executed_at, :utc_datetime_usec)
@@ -17,6 +17,5 @@ defmodule Nexus.Marketing.Idempotency.IdempotencyKey do
     idempotency_key
     |> cast(attrs, [:id, :command_name, :execution_result, :executed_at])
     |> validate_required([:id, :command_name, :executed_at])
-    |> unique_constraint(:id)
   end
 end

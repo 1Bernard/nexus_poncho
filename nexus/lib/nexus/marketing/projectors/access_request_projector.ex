@@ -21,7 +21,7 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
     AccessRequestSubmitted
   }
 
-  alias Nexus.Marketing.Idempotency.IdempotencyKey
+  alias Nexus.Marketing.Projections.IdempotencyKey
   alias Nexus.Marketing.Projections.AccessRequest
 
   require Logger

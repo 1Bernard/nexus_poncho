@@ -13,8 +13,12 @@ defmodule NexusWeb.UserAuth do
 
   alias Nexus.Identity.Projections.{Session, User}
   alias Nexus.Repo
+  alias NexusShared.Identity.Statuses
 
   require Logger
+
+  @user_active Statuses.active()
+  @session_active Statuses.session_active()
 
   # ── Plugs ────────────────────────────────────────────────────────────────
 
@@ -79,7 +83,7 @@ defmodule NexusWeb.UserAuth do
 
   defp resolve_user(session_id) do
     case Repo.get(Session, session_id) do
-      %Session{status: "active", expires_at: expires_at, user_id: user_id} ->
+      %Session{status: @session_active, expires_at: expires_at, user_id: user_id} ->
         if DateTime.compare(expires_at, DateTime.utc_now()) == :gt do
           resolve_active_user(user_id)
         else
@@ -93,11 +97,18 @@ defmodule NexusWeb.UserAuth do
       _ ->
         nil
     end
+  rescue
+    RuntimeError ->
+      Logger.warning(
+        "[UserAuth] Repo unavailable during session resolution — treating as unauthenticated"
+      )
+
+      nil
   end
 
   defp resolve_active_user(user_id) do
     case Repo.get(User, user_id) do
-      %User{status: "active"} = user ->
+      %User{status: @user_active} = user ->
         user
 
       %User{status: status} ->

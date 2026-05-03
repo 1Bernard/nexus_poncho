@@ -5,11 +5,15 @@ defmodule Nexus.Identity.Events.UserActivated do
   """
   use TypedStruct
 
+  alias NexusShared.Identity.Statuses
+
   @derive Jason.Encoder
+
+  @active_status Statuses.active()
 
   typedstruct enforce: true do
     field(:user_id, String.t(), doc: "A unique user identifier")
     field(:org_id, String.t(), doc: "Organization identifier")
-    field(:status, String.t(), doc: "Status after activation", default: "active")
+    field(:status, String.t(), doc: "Status after activation", default: @active_status)
   end
 end

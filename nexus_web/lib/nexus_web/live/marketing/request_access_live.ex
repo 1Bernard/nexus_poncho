@@ -34,15 +34,22 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
   @impl true
   def handle_event("next_step", _params, socket) do
     current_step = socket.assigns.current_step
+    step_fields = step_required_fields(current_step)
 
-    # Advance and push event for animations
-    if current_step < length(@steps) do
-      {:noreply,
-       socket
-       |> assign(current_step: current_step + 1)
-       |> push_event("step_changed", %{step: current_step + 1})}
+    changeset = socket.assigns.form.source |> Map.put(:action, :validate)
+    step_has_errors = Enum.any?(step_fields, &Keyword.has_key?(changeset.errors, &1))
+
+    if step_has_errors do
+      {:noreply, assign(socket, form: to_form(changeset))}
     else
-      {:noreply, socket}
+      if current_step < length(@steps) do
+        {:noreply,
+         socket
+         |> assign(current_step: current_step + 1)
+         |> push_event("step_changed", %{step: current_step + 1})}
+      else
+        {:noreply, socket}
+      end
     end
   end
 
@@ -236,9 +243,8 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   class="flex-1 flex flex-col"
                 >
                   <div
-                    :if={@current_step == 1}
                     data-step="1"
-                    class="space-y-8"
+                    class={["space-y-8", @current_step != 1 && "hidden"]}
                   >
                     <div class="mb-10">
                       <p class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase mb-3">
@@ -276,9 +282,8 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   </div>
 
                   <div
-                    :if={@current_step == 2}
                     data-step="2"
-                    class="space-y-8"
+                    class={["space-y-8", @current_step != 2 && "hidden"]}
                   >
                     <div class="mb-10">
                       <p class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase mb-3">
@@ -316,9 +321,8 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   </div>
 
                   <div
-                    :if={@current_step == 3}
                     data-step="3"
-                    class="space-y-8"
+                    class={["space-y-8", @current_step != 3 && "hidden"]}
                   >
                     <div class="mb-10">
                       <p class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase mb-3">
@@ -446,4 +450,8 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
     </section>
     """
   end
+
+  defp step_required_fields(1), do: [:name, :email]
+  defp step_required_fields(2), do: [:organization, :job_title]
+  defp step_required_fields(_), do: []
 end

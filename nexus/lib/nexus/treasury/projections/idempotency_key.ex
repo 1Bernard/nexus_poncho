@@ -1,4 +1,4 @@
-defmodule Nexus.Treasury.Idempotency.IdempotencyKey do
+defmodule Nexus.Treasury.Projections.IdempotencyKey do
   @moduledoc """
   Ecto Schema for tracking Treasury Idempotency.
   Ensures financial commands are processed only once.

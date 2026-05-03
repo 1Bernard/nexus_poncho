@@ -85,6 +85,48 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
     insert(multi, e, meta, "treasury", "vault_credited", nil)
   end)
 
+  # ── Compliance ────────────────────────────────────────────────────────────
+
+  alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
+
+  project(%PEPCheckInitiated{} = e, meta, fn multi ->
+    insert(multi, e, meta, "compliance", "pep_check_initiated", e.user_id)
+  end)
+
+  project(%PEPCheckCompleted{} = e, meta, fn multi ->
+    insert(multi, e, meta, "compliance", "pep_check_completed", e.user_id)
+  end)
+
+  # ── Marketing ─────────────────────────────────────────────────────────────
+
+  alias Nexus.Marketing.Events.{
+    AccessRequestApproved,
+    AccessRequestArchived,
+    AccessRequestRejected,
+    AccessRequestReviewed,
+    AccessRequestSubmitted
+  }
+
+  project(%AccessRequestSubmitted{} = e, meta, fn multi ->
+    insert(multi, e, meta, "marketing", "access_request_submitted", nil)
+  end)
+
+  project(%AccessRequestReviewed{} = e, meta, fn multi ->
+    insert(multi, e, meta, "marketing", "access_request_reviewed", e.reviewed_by)
+  end)
+
+  project(%AccessRequestApproved{} = e, meta, fn multi ->
+    insert(multi, e, meta, "marketing", "access_request_approved", e.approved_by)
+  end)
+
+  project(%AccessRequestRejected{} = e, meta, fn multi ->
+    insert(multi, e, meta, "marketing", "access_request_rejected", e.rejected_by)
+  end)
+
+  project(%AccessRequestArchived{} = e, meta, fn multi ->
+    insert(multi, e, meta, "marketing", "access_request_archived", e.archived_by)
+  end)
+
   # ── Private ───────────────────────────────────────────────────────────────
 
   defp insert(multi, event, metadata, domain, event_type, actor_id) do

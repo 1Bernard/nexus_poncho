@@ -35,7 +35,15 @@ defmodule Nexus.Identity.Aggregates.User do
     UserRoleChanged
   }
 
+  alias NexusShared.Identity.Statuses
+
   require Logger
+
+  # Compile-time constants — required for use in guards and pattern matches
+  @invited Statuses.invited()
+  @registered Statuses.registered()
+  @active Statuses.active()
+  @deactivated Statuses.deactivated()
 
   # ── Command Handlers ──────────────────────────────────────────────────────
 
@@ -46,7 +54,7 @@ defmodule Nexus.Identity.Aggregates.User do
       email: cmd.email,
       name: cmd.name,
       role: cmd.role,
-      status: if(cmd.credential_id, do: "registered", else: "invited"),
+      status: if(cmd.credential_id, do: @registered, else: @invited),
       credential_id: cmd.credential_id,
       cose_key: cmd.cose_key
     }
@@ -62,7 +70,7 @@ defmodule Nexus.Identity.Aggregates.User do
   end
 
   def execute(%User{status: status}, %EnrollBiometric{} = cmd)
-      when status in ["invited", "registered", "active"] do
+      when status in [@invited, @registered, @active] do
     %BiometricEnrolled{
       user_id: cmd.user_id,
       org_id: cmd.org_id,
@@ -72,20 +80,20 @@ defmodule Nexus.Identity.Aggregates.User do
   end
 
   def execute(%User{status: status}, %ActivateUser{} = cmd)
-      when status in ["registered", "invited"] do
+      when status in [@registered, @invited] do
     %UserActivated{
       user_id: cmd.user_id,
       org_id: cmd.org_id,
-      status: "active"
+      status: @active
     }
   end
 
-  def execute(%User{status: "deactivated"}, %DeactivateUser{}) do
+  def execute(%User{status: @deactivated}, %DeactivateUser{}) do
     {:error, :user_already_deactivated}
   end
 
   def execute(%User{status: status}, %DeactivateUser{} = cmd)
-      when status in ["invited", "registered", "active"] do
+      when status in [@invited, @registered, @active] do
     %UserDeactivated{
       user_id: cmd.user_id,
       org_id: cmd.org_id,
@@ -94,7 +102,7 @@ defmodule Nexus.Identity.Aggregates.User do
     }
   end
 
-  def execute(%User{status: "active"} = user, %UpdateUserRole{} = cmd) do
+  def execute(%User{status: @active} = user, %UpdateUserRole{} = cmd) do
     if user.role == cmd.new_role do
       {:error, :role_unchanged}
     else
@@ -139,7 +147,7 @@ defmodule Nexus.Identity.Aggregates.User do
   def apply(%User{} = state, %BiometricEnrolled{} = event) do
     %User{
       state
-      | status: "registered",
+      | status: @registered,
         credential_id: event.credential_id,
         cose_key: event.cose_key
     }
@@ -150,7 +158,7 @@ defmodule Nexus.Identity.Aggregates.User do
   end
 
   def apply(%User{} = state, %UserDeactivated{}) do
-    %User{state | status: "deactivated"}
+    %User{state | status: @deactivated}
   end
 
   def apply(%User{} = state, %UserRoleChanged{} = event) do

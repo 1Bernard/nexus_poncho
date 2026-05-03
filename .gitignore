@@ -44,3 +44,6 @@ Mnesia.*/
 .DS_Store
 .vscode/
 .idea/
+
+# 📝 Documentation & Marketing
+docs/blog_drafts/

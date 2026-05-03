@@ -48,49 +48,82 @@ defmodule Nexus.Shared.Middleware.Idempotency do
   @spec after_failure(Pipeline.t()) :: Pipeline.t()
   def after_failure(%Pipeline{} = pipeline), do: pipeline
 
-  # Domain specific mapping to Idempotency tables
+  # Identity
   defp find_idempotency_key(%Nexus.Identity.Commands.RegisterUser{}, id) do
-    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Identity.Commands.ActivateUser{}, id) do
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Identity.Commands.EnrollBiometric{}, id) do
-    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Identity.Commands.DeactivateUser{}, id) do
-    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Identity.Commands.UpdateUserRole{}, id) do
-    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Identity.Commands.StartSession{}, id) do
-    Repo.get(Nexus.Identity.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
   end
 
+  defp find_idempotency_key(%Nexus.Identity.Commands.ExpireSession{}, id) do
+    Repo.get(Nexus.Identity.Projections.IdempotencyKey, id)
+  end
+
+  # Organization
+  defp find_idempotency_key(%Nexus.Organization.Commands.ProvisionTenant{}, id) do
+    Repo.get(Nexus.Organization.Projections.IdempotencyKey, id)
+  end
+
+  # Compliance
+  defp find_idempotency_key(%Nexus.Compliance.Commands.PerformPEPCheck{}, id) do
+    Repo.get(Nexus.Compliance.Projections.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Compliance.Commands.CompletePEPCheck{}, id) do
+    Repo.get(Nexus.Compliance.Projections.IdempotencyKey, id)
+  end
+
+  # Accounting
   defp find_idempotency_key(%Nexus.Accounting.Commands.OpenAccount{}, id) do
-    Repo.get(Nexus.Accounting.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Accounting.Projections.IdempotencyKey, id)
   end
 
+  # Treasury
+  defp find_idempotency_key(%Nexus.Treasury.Commands.RegisterVault{}, id) do
+    Repo.get(Nexus.Treasury.Projections.IdempotencyKey, id)
+  end
+
+  defp find_idempotency_key(%Nexus.Treasury.Commands.CreditVault{}, id) do
+    Repo.get(Nexus.Treasury.Projections.IdempotencyKey, id)
+  end
+
+  # Marketing
   defp find_idempotency_key(%Nexus.Marketing.Commands.SubmitAccessRequest{}, id) do
-    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Marketing.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Marketing.Commands.ReviewAccessRequest{}, id) do
-    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Marketing.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Marketing.Commands.ApproveAccessRequest{}, id) do
-    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Marketing.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Marketing.Commands.RejectAccessRequest{}, id) do
-    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Marketing.Projections.IdempotencyKey, id)
   end
 
   defp find_idempotency_key(%Nexus.Marketing.Commands.ArchiveAccessRequest{}, id) do
-    Repo.get(Nexus.Marketing.Idempotency.IdempotencyKey, id)
+    Repo.get(Nexus.Marketing.Projections.IdempotencyKey, id)
   end
 
   # Fallback

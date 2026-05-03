@@ -4,8 +4,8 @@ defmodule Nexus.Router do
   """
   use Commanded.Commands.Router
 
-  middleware(Nexus.Shared.Middleware.OpenTelemetry)
   middleware(Nexus.Shared.Middleware.CorrelationId)
+  middleware(Nexus.Shared.Middleware.OpenTelemetry)
   middleware(Nexus.Shared.Middleware.Idempotency)
   middleware(Nexus.Shared.Middleware.TenantGate)
 

@@ -1,4 +1,4 @@
-defmodule Nexus.Organization.Audit.AuditLog do
+defmodule Nexus.Organization.Projections.AuditLog do
   @moduledoc """
   Read model for Organization business audits.
   Follows Standard Chapter 18: The Audit Log.

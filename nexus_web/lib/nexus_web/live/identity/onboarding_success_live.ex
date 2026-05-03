@@ -1,8 +1,6 @@
 defmodule NexusWeb.Identity.OnboardingSuccessLive do
   use NexusWeb, :live_view
 
-  require Logger
-
   @impl true
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -11,72 +9,99 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-md mt-32">
-      <div class="relative p-10 overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-2xl">
-        <%!-- World-Class Background Gradients --%>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.1),transparent)] pointer-events-none" />
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(79,70,229,0.05),transparent)] pointer-events-none" />
+    <div class="min-h-screen bg-[#010101] flex items-center justify-center px-4 relative">
+      <div class="absolute inset-0 bg-grid-elite pointer-events-none"></div>
 
-        <div class="relative z-10 text-center">
-          <%!-- Success Icon with Outer Glow --%>
-          <div class="mb-8 relative inline-block">
-            <div class="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full" />
-            <div class="relative bg-emerald-500/10 p-4 rounded-full border border-emerald-500/20">
-              <.icon name="hero-check-badge" class="w-16 h-16 text-emerald-500" />
-            </div>
-            <%!-- Micro-interaction Sparkles --%>
-            <div class="absolute -top-1 -right-1">
-              <.icon name="hero-sparkles" class="w-6 h-6 text-indigo-400 animate-pulse" />
-            </div>
+      <div class="w-full max-w-[460px] prestige-card rounded-[2.5rem] relative overflow-hidden">
+        <%!-- Top accent bar --%>
+        <div class="flex gap-2 p-8 pb-0">
+          <span class="h-1 w-10 rounded-full bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.9)]">
+          </span>
+          <span class="h-1 w-10 rounded-full bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.9)]">
+          </span>
+        </div>
+
+        <div class="px-10 pb-10 pt-8 flex flex-col items-center text-center">
+          <%!-- Icon --%>
+          <div class="w-20 h-20 rounded-2xl bg-emerald-400/10 flex items-center justify-center border border-emerald-400/20 mb-6 relative">
+            <.icon name="hero-check-badge" class="w-10 h-10 text-emerald-400" />
+            <div class="absolute inset-0 rounded-2xl shadow-[0_0_30px_rgba(52,211,153,0.15)]"></div>
           </div>
 
-          <.header class="space-y-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-[10px] font-bold tracking-widest text-indigo-600 dark:text-indigo-400 uppercase border border-indigo-100 dark:border-indigo-900/50">
-              Hardware Root of Trust established
-            </span>
-            <div class="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
-              Identity Sovereignly Anchored
-            </div>
-            <:subtitle>
-              Your biometric profile has been successfully cryptographically bound to this hardware node.
-            </:subtitle>
-          </.header>
+          <h1 class="text-3xl font-serif italic font-black tracking-tight text-white mb-2">
+            Identity<br /><span class="emerald-glint">Anchored.</span>
+          </h1>
 
-          <div class="mt-10 p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-left space-y-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                <.icon name="hero-shield-check" class="w-5 h-5" />
-              </div>
-              <div class="text-sm">
-                <p class="font-bold text-zinc-900 dark:text-zinc-100">Hardware Bound</p>
-                <p class="text-zinc-500 dark:text-zinc-400 text-xs">
-                  Credential verified and signed by platform TPM.
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                <.icon name="hero-finger-print" class="w-5 h-5" />
-              </div>
-              <div class="text-sm">
-                <p class="font-bold text-zinc-900 dark:text-zinc-100">Biometric Verification</p>
-                <p class="text-zinc-500 dark:text-zinc-400 text-xs">
-                  TouchID/FaceID configured for instant access.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <.button
-            navigate={~p"/vaults"}
-            class="mt-12 w-full py-4 bg-zinc-900 dark:bg-indigo-600 hover:bg-zinc-800 dark:hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-xl shadow-indigo-500/10 transition-all hover:-translate-y-0.5"
-          >
-            Enter Network Dashboard
-          </.button>
-
-          <p class="mt-6 text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
-            Nexus Poncho Identity Service v1.0.3 • Sovereign Flow
+          <p class="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-10">
+            Hardware root of trust established
           </p>
+
+          <%!-- Status rows --%>
+          <div class="w-full space-y-2 mb-10 text-left">
+            <div class="flex items-center gap-4 p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+              <div class="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center shrink-0">
+                <.icon name="hero-shield-check" class="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <p class="text-[10px] font-mono font-bold text-white/80 uppercase tracking-widest">
+                  Hardware Bound
+                </p>
+                <p class="text-[9px] font-mono text-zinc-600 mt-0.5">
+                  Credential signed by platform TPM
+                </p>
+              </div>
+              <span class="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-widest">
+                OK
+              </span>
+            </div>
+
+            <div class="flex items-center gap-4 p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+              <div class="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center shrink-0">
+                <.icon name="hero-finger-print" class="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <p class="text-[10px] font-mono font-bold text-white/80 uppercase tracking-widest">
+                  Biometric Enrolled
+                </p>
+                <p class="text-[9px] font-mono text-zinc-600 mt-0.5">
+                  TouchID / FaceID configured
+                </p>
+              </div>
+              <span class="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-widest">
+                OK
+              </span>
+            </div>
+
+            <div class="flex items-center gap-4 p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+              <div class="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center shrink-0">
+                <.icon name="hero-key" class="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <p class="text-[10px] font-mono font-bold text-white/80 uppercase tracking-widest">
+                  256-bit WebAuthn
+                </p>
+                <p class="text-[9px] font-mono text-zinc-600 mt-0.5">
+                  Passkey bound to this device
+                </p>
+              </div>
+              <span class="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-widest">
+                OK
+              </span>
+            </div>
+          </div>
+
+          <.link
+            navigate={~p"/vaults"}
+            class="cta-primary w-full py-5 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
+          >
+            <.icon name="hero-arrow-right" class="w-4 h-4" />
+            <span>Enter the Network</span>
+          </.link>
+        </div>
+
+        <div class="border-t border-white/5 px-7 py-5 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
+          <span>EQUINOX · IDENTITY ANCHOR</span>
+          <span>256-BIT WEBAUTHN</span>
         </div>
       </div>
     </div>

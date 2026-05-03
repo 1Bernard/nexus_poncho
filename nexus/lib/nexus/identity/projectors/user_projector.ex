@@ -32,8 +32,9 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     UserRoleChanged
   }
 
-  alias Nexus.Identity.Idempotency.IdempotencyKey
+  alias Nexus.Identity.Projections.IdempotencyKey
   alias Nexus.Identity.Projections.User
+  alias NexusShared.Identity.Statuses
 
   require Logger
 
@@ -47,14 +48,17 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     multi
     |> track_idempotency(metadata, "EnrollBiometric", %{
       user_id: event.user_id,
-      status: "registered"
+      status: Statuses.registered()
     })
     |> enroll_biometric(event, metadata)
   end)
 
   project(%UserActivated{} = event, metadata, fn multi ->
     multi
-    |> track_idempotency(metadata, "ActivateUser", %{user_id: event.user_id, status: "active"})
+    |> track_idempotency(metadata, "ActivateUser", %{
+      user_id: event.user_id,
+      status: Statuses.active()
+    })
     |> activate_user(event, metadata)
   end)
 
@@ -62,7 +66,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     multi
     |> track_idempotency(metadata, "DeactivateUser", %{
       user_id: event.user_id,
-      status: "deactivated"
+      status: Statuses.deactivated()
     })
     |> deactivate_user(event)
   end)
@@ -100,33 +104,26 @@ defmodule Nexus.Identity.Projectors.UserProjector do
   # --- Private Helpers ---
 
   defp create_user(multi, event, metadata) do
-    Multi.run(multi, :create_user, fn repo, _ ->
-      attrs = %{
-        id: event.user_id,
-        org_id: event.org_id,
-        email: event.email,
-        name: event.name,
-        role: event.role,
-        status: event.status,
-        credential_id: event.credential_id,
-        cose_key: event.cose_key,
-        created_at: metadata.created_at,
-        updated_at: metadata.created_at
-      }
+    attrs = %{
+      id: event.user_id,
+      org_id: event.org_id,
+      email: event.email,
+      name: event.name,
+      role: event.role,
+      status: event.status,
+      credential_id: event.credential_id,
+      cose_key: event.cose_key,
+      created_at: metadata.created_at,
+      updated_at: metadata.created_at
+    }
 
-      changeset = User.changeset(%User{}, attrs)
+    changeset = User.changeset(%User{}, attrs)
 
-      case repo.insert(changeset, on_conflict: :nothing, conflict_target: :id) do
-        {:ok, user} ->
-          {:ok, user}
-
-        {:error, %Ecto.Changeset{} = cs} ->
-          # A unique constraint other than :id fired (email or credential_id already exists
-          # under a different user). Log for investigation — do not crash the projector.
-          Logger.warning("[Identity] UserRegistered skipped: #{inspect(cs.errors)}")
-          {:ok, :constraint_conflict}
-      end
-    end)
+    # ON CONFLICT DO NOTHING (no conflict_target) silently skips on ANY unique violation
+    # (id, email, credential_id) without aborting the Postgres transaction.
+    # The previous Multi.run + repo.insert approach left the transaction in an aborted
+    # state when the email constraint fired, crashing the projector.
+    Multi.insert(multi, :create_user, changeset, on_conflict: :nothing)
   end
 
   defp enroll_biometric(multi, event, _metadata) do
@@ -136,7 +133,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
     Multi.update_all(multi, :enroll_biometric, query,
       set: [
-        status: "registered",
+        status: Statuses.registered(),
         credential_id: event.credential_id,
         cose_key: event.cose_key,
         updated_at: DateTime.utc_now()
@@ -149,7 +146,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
     Multi.update_all(multi, :activate_user, query,
       set: [
-        status: "active",
+        status: Statuses.active(),
         updated_at: DateTime.utc_now()
       ]
     )
@@ -160,7 +157,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
     Multi.update_all(multi, :deactivate_user, query,
       set: [
-        status: "deactivated",
+        status: Statuses.deactivated(),
         updated_at: DateTime.utc_now()
       ]
     )

@@ -212,6 +212,7 @@ services:
       START_METRICS_SERVER: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       OTEL_SERVICE_NAME: node1
+      WEB_HOST: "http://localhost:4000"
 
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
@@ -237,6 +238,9 @@ services:
       START_TREASURY_PROJECTIONS: "false"
       START_MESSAGING_PROJECTIONS: "false"
       START_ONBOARDING_PM: "true"
+      START_MARKETING_PROJECTIONS: "true"
+      START_MARKETING_PM: "true"
+      START_PLATFORM_AUDIT: "true"
       ERL_COOKIE: ${ERL_COOKIE}
     tty: true
     stdin_open: true
@@ -265,6 +269,7 @@ services:
       START_METRICS_SERVER: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       OTEL_SERVICE_NAME: node2
+      WEB_HOST: "http://localhost:4000"
 
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
@@ -290,6 +295,9 @@ services:
       START_TREASURY_PROJECTIONS: "true"
       START_MESSAGING_PROJECTIONS: "true"
       START_ONBOARDING_PM: "false"
+      START_MARKETING_PROJECTIONS: "false"
+      START_MARKETING_PM: "false"
+      START_PLATFORM_AUDIT: "false"
       ERL_COOKIE: ${ERL_COOKIE}
     tty: true
     stdin_open: true
@@ -328,6 +336,9 @@ services:
       START_TREASURY_PROJECTIONS: "false"
       START_MESSAGING_PROJECTIONS: "false"
       START_ONBOARDING_PM: "false"
+      START_MARKETING_PROJECTIONS: "false"
+      START_MARKETING_PM: "false"
+      START_PLATFORM_AUDIT: "false"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       OTEL_SERVICE_NAME: web
       MIX_BUILD_PATH: /app/_build_docker

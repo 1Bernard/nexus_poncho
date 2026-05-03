@@ -4,6 +4,7 @@ defmodule NexusWeb.Identity.LoginLive do
   alias Nexus.Identity.Commands.StartSession
   alias Nexus.Identity.Queries.GetUserByCredentialId
   alias Nexus.Identity.WebAuthn
+  alias Nexus.Shared.Tracing
 
   require Logger
 
@@ -509,7 +510,11 @@ defmodule NexusWeb.Identity.LoginLive do
       user_agent: params["user_agent"]
     }
 
-    case Nexus.App.dispatch(command) do
+    tracing_metadata = Tracing.inject_context(%{})
+
+    case Nexus.App.dispatch(command,
+           metadata: Map.put(tracing_metadata, "idempotency_key", session_id)
+         ) do
       :ok -> :ok
       {:ok, _} -> :ok
       {:error, reason} -> {:error, reason}

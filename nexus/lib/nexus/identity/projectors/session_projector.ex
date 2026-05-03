@@ -11,6 +11,7 @@ defmodule Nexus.Identity.Projectors.SessionProjector do
   alias Ecto.Multi
   alias Nexus.Identity.Events.{SessionExpired, SessionStarted}
   alias Nexus.Identity.Projections.Session
+  alias NexusShared.Identity.Statuses
 
   import Ecto.Query
 
@@ -22,7 +23,7 @@ defmodule Nexus.Identity.Projectors.SessionProjector do
       user_id: event.user_id,
       org_id: event.org_id,
       credential_id: event.credential_id,
-      status: "active",
+      status: Statuses.session_active(),
       ip_address: event.ip_address,
       user_agent: event.user_agent,
       expires_at: event.expires_at,
@@ -43,7 +44,7 @@ defmodule Nexus.Identity.Projectors.SessionProjector do
 
     Multi.update_all(multi, :expire_session, query,
       set: [
-        status: "expired",
+        status: Statuses.session_expired(),
         expired_at: DateTime.utc_now()
       ]
     )

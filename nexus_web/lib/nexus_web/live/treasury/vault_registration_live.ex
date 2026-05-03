@@ -88,7 +88,8 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
      assign(socket,
        form: to_form(%{"currency" => "USD", "provider" => "Stripe"}, as: "vault"),
        page_title: "New Vault",
-       breadcrumb_section: "Treasury"
+       breadcrumb_section: "Treasury",
+       vault_id: Uniq.UUID.uuid7()
      )}
   end
 
@@ -99,7 +100,7 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
 
   @impl true
   def handle_event("save", %{"vault" => vault_params}, socket) do
-    vault_id = Uniq.UUID.uuid7()
+    vault_id = socket.assigns.vault_id
     org_id = Uniq.UUID.uuid7()
 
     command = %RegisterVault{
@@ -115,7 +116,7 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
       requires_multi_sig: vault_params["requires_multi_sig"] == "true"
     }
 
-    case Nexus.App.dispatch(command) do
+    case Nexus.App.dispatch(command, metadata: %{"idempotency_key" => vault_id}) do
       :ok ->
         {:noreply,
          socket

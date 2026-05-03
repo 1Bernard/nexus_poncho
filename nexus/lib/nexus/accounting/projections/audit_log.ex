@@ -1,4 +1,4 @@
-defmodule Nexus.Accounting.Audit.AuditLog do
+defmodule Nexus.Accounting.Projections.AuditLog do
   @moduledoc """
   Immutable factual record of business events for the Accounting domain.
   Follows Standard Chapter 18: The Audit Log.

@@ -1,4 +1,4 @@
-defmodule Nexus.Identity.Audit.AuditLogProjector do
+defmodule Nexus.Identity.Projectors.AuditLogProjector do
   @moduledoc """
   Audit projector for the Identity domain.
   Projects all significant identity events into the identity_audit_logs table.
@@ -19,7 +19,7 @@ defmodule Nexus.Identity.Audit.AuditLogProjector do
     name: "Identity.AuditLogProjector"
 
   alias Ecto.Multi
-  alias Nexus.Identity.Audit.AuditLog
+  alias Nexus.Identity.Projections.AuditLog
 
   alias Nexus.Identity.Events.{
     BiometricEnrolled,

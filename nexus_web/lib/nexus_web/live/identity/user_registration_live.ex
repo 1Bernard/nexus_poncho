@@ -5,6 +5,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
   alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Identity.WebAuthn.BiometricInvitation
   alias Nexus.Shared.Tracing
+  alias NexusShared.Identity.Roles
 
   @impl true
   def render(assigns) do
@@ -54,7 +55,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
             field={@form[:role]}
             type="select"
             label="Initial Role"
-            options={["admin", "treasurer", "viewer"]}
+            options={Roles.all()}
           />
 
           <:actions>
@@ -74,7 +75,8 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
      socket
      |> assign(form: to_form(%{}, as: "user"))
      |> assign(current_host: nil)
-     |> assign(success_link: nil)}
+     |> assign(success_link: nil)
+     |> assign(user_id: Uniq.UUID.uuid7())}
   end
 
   @impl true
@@ -87,7 +89,8 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
     {:noreply,
      socket
      |> assign(current_host: base_url)
-     |> assign(success_link: nil)}
+     |> assign(success_link: nil)
+     |> assign(user_id: Uniq.UUID.uuid7())}
   end
 
   @impl true
@@ -97,8 +100,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
 
   @impl true
   def handle_event("save", %{"user" => user_params}, socket) do
-    user_id = Uniq.UUID.uuid7()
-    # In a real flow, this might be picked from session
+    user_id = socket.assigns.user_id
     org_id = Uniq.UUID.uuid7()
 
     command = %RegisterUser{
@@ -117,7 +119,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
     OpenTelemetry.Tracer.with_span "Identity.RegisterUser" do
       tracing_metadata = Tracing.inject_context(%{})
 
-      case App.dispatch(command, metadata: tracing_metadata) do
+      case App.dispatch(command, metadata: Map.put(tracing_metadata, "idempotency_key", user_id)) do
         result when result == :ok or (is_tuple(result) and elem(result, 0) == :ok) ->
           token = BiometricInvitation.generate_token(user_id)
           link = BiometricInvitation.magic_link(token, base_url: socket.assigns.current_host)
@@ -125,7 +127,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
           {:noreply,
            socket
            |> put_flash(:info, "User registered successfully!")
-           |> assign(success_link: link)}
+           |> assign(success_link: link, user_id: Uniq.UUID.uuid7())}
 
         {:error, reason} ->
           Logger.error("[Registration] Dispatch failed: #{inspect(reason)}")
