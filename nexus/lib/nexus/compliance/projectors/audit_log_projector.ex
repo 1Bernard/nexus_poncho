@@ -19,8 +19,8 @@ defmodule Nexus.Compliance.Projectors.AuditLogProjector do
     name: "Compliance.AuditLogProjector"
 
   alias Ecto.Multi
-  alias Nexus.Compliance.Projections.AuditLog
   alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
+  alias Nexus.Compliance.Projections.AuditLog
 
   project(%PEPCheckInitiated{} = event, metadata, fn multi ->
     insert_audit(multi, event, metadata, event.user_id, "pep_check_initiated")

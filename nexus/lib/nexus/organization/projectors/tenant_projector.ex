@@ -10,8 +10,8 @@ defmodule Nexus.Organization.Projectors.TenantProjector do
     name: "Organization.TenantProjector"
 
   alias Ecto.Multi
-  alias Nexus.Organization.Projections.AuditLog
   alias Nexus.Organization.Events.TenantProvisioned
+  alias Nexus.Organization.Projections.AuditLog
   alias Nexus.Organization.Projections.IdempotencyKey
   alias Nexus.Organization.Projections.Tenant
   alias Nexus.Shared.Tracing

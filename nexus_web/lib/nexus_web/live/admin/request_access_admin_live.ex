@@ -1191,7 +1191,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     |> then(fn w ->
       if org_match,
         do: [
-          "Organization \"#{request.organization}\" already approved under account \"#{org_match}\""
+          ~s(Organization "#{request.organization}" already approved under account "#{org_match}")
           | w
         ],
         else: w
