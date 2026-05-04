@@ -19,6 +19,31 @@ case Nexus.Repo.start_link() do
   _ -> :ok
 end
 
+# 3b. Reset EventStore BEFORE starting it — projection DB is wiped by the host
+# before mix test runs, but EventStore events persist across runs in its own DB.
+# Without this reset, projectors replay thousands of accumulated events on startup,
+# exhausting the connection pool before the first test begins.
+# `:schema` is set in config.exs but test.exs replaces the EventStore config entirely,
+# so we pin it here explicitly before using the initializer.
+event_store_config =
+  Application.get_env(:nexus, Nexus.EventStore)
+  |> Keyword.put_new(:schema, "event_store")
+
+case Postgrex.start_link(event_store_config) do
+  {:ok, reset_conn} ->
+    try do
+      EventStore.Storage.Initializer.reset!(reset_conn, event_store_config)
+    rescue
+      # Tables don't exist yet (first boot) — initialize the schema instead
+      _ -> EventStore.Storage.Initializer.run!(reset_conn, event_store_config)
+    end
+
+    GenServer.stop(reset_conn)
+
+  {:error, reason} ->
+    IO.puts("==> [EventStore] Reset skipped — could not connect: #{inspect(reason)}")
+end
+
 case Nexus.EventStore.start_link() do
   {:ok, _} -> :ok
   {:error, {:already_started, _}} -> :ok

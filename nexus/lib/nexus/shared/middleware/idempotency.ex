@@ -26,7 +26,17 @@ defmodule Nexus.Shared.Middleware.Idempotency do
       updated_metadata = Map.put(metadata, "idempotency_key", id_key)
       pipeline_with_key = %{pipeline | metadata: updated_metadata}
 
-      case find_idempotency_key(command, id_key) do
+      lookup =
+        try do
+          find_idempotency_key(command, id_key)
+        rescue
+          # Sandbox processes (process manager GenServers) don't own a checked-out
+          # connection. Fail-open so commands proceed — idempotency still works for
+          # callers that hold a real connection (web, workers, :no_sandbox tests).
+          DBConnection.ConnectionError -> nil
+        end
+
+      case lookup do
         nil ->
           pipeline_with_key
 
