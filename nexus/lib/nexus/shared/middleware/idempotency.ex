@@ -30,13 +30,13 @@ defmodule Nexus.Shared.Middleware.Idempotency do
         nil ->
           pipeline_with_key
 
-        %{execution_result: result} ->
+        _found ->
           Logger.info(
-            "[Idempotency] Duplicate command intercepted. Returning cached result for key: #{id_key}"
+            "[Idempotency] Duplicate command intercepted. Halting pipeline for key: #{id_key}"
           )
 
           pipeline_with_key
-          |> Pipeline.respond({:ok, result})
+          |> Pipeline.respond(:ok)
           |> Pipeline.halt()
       end
     end

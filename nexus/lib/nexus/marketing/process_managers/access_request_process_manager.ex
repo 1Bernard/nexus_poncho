@@ -67,13 +67,6 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
         :ok ->
           []
 
-        {:ok, _cached} ->
-          Logger.debug(
-            "[AccessRequestPM] RegisterUser idempotent — user #{event.provisioned_user_id} already provisioned"
-          )
-
-          []
-
         {:error, reason} ->
           Logger.error(
             "[AccessRequestPM] Failed to provision user #{event.provisioned_user_id}: #{inspect(reason)}"

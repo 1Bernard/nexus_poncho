@@ -51,8 +51,8 @@ defmodule Nexus.Treasury.TreasuryIdempotencyTest do
 
     assert %IdempotencyKey{command_name: "RegisterVault"} = Repo.get(IdempotencyKey, causation_id)
 
-    # Second dispatch — echo — aggregate rejects, projector never fires
-    assert {:error, :vault_already_exists} = Nexus.App.dispatch(command, opts)
+    # Second dispatch — echo — middleware intercepts, returns :ok (already processed)
+    assert :ok = Nexus.App.dispatch(command, opts)
 
     count = Repo.one(from(v in Vault, where: v.id == ^vault_id, select: count(v.id)))
     assert count == 1
