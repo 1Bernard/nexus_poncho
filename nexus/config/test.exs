@@ -10,7 +10,7 @@ config :nexus, Nexus.Repo,
   hostname: System.get_env("DB_HOSTNAME") || "postgres",
   port: String.to_integer(System.get_env("DB_PORT") || "5432"),
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10,
+  pool_size: 20,
   show_sensitive_data_on_connection_error: true
 
 config :nexus, Nexus.EventStore,
@@ -37,7 +37,8 @@ config :nexus,
   start_messaging_projections: false,
   start_onboarding_pm: false,
   start_marketing_projections: false,
-  start_marketing_pm: false
+  start_marketing_pm: false,
+  start_platform_audit: false
 
 # Decrease Logger noise for clean audit output
 config :logger, level: :info

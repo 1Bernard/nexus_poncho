@@ -61,7 +61,11 @@ defmodule Nexus.Compliance.Workers.PEPWorker do
 
       # Dispatch back into the Nexus.App
       # Elite Logic: We MERGE the incoming metadata to preserve the traceparent and correlation IDs.
-      metadata = Map.merge(metadata, %{"causation_id" => event.screening_id})
+      metadata =
+        Map.merge(metadata, %{
+          "causation_id" => event.screening_id,
+          "idempotency_key" => event.screening_id
+        })
 
       case Nexus.dispatch(cmd, metadata: metadata) do
         {:ok, _} ->
