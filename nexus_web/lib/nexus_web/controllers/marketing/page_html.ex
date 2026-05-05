@@ -1,4 +1,4 @@
-defmodule NexusWeb.PageHTML do
+defmodule NexusWeb.Marketing.PageHTML do
   @moduledoc """
   This module contains pages rendered by PageController.
 

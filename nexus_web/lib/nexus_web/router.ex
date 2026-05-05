@@ -20,8 +20,8 @@ defmodule NexusWeb.Router do
   scope "/", NexusWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
-    get "/health", PageController, :health
+    get "/", Marketing.PageController, :home
+    get "/health", Marketing.PageController, :health
 
     live_session :marketing, layout: {NexusWeb.Layouts, :marketing} do
       live "/request-access", Marketing.RequestAccessLive, :new
@@ -35,7 +35,13 @@ defmodule NexusWeb.Router do
       live "/onboarding/success", Identity.OnboardingSuccessLive, :show
     end
 
-    # ── Protected routes (biometric session required) ──────────────────────
+    # ── Protected controller routes (biometric session required) ──────────
+    # Auth is enforced by each controller's ensure_authenticated plug.
+    # The :browser pipeline above sets current_user via UserAuth.
+
+    get "/admin/access-requests/export", Admin.ExportController, :export
+
+    # ── Protected LiveView routes (biometric session required) ─────────────
 
     live_session :authenticated,
       on_mount: [{NexusWeb.UserAuth, :require_authenticated}] do
@@ -50,8 +56,8 @@ defmodule NexusWeb.Router do
   scope "/auth", NexusWeb do
     pipe_through :browser
 
-    get "/finalise", AuthController, :finalise
-    delete "/logout", AuthController, :logout
+    get "/finalise", Identity.AuthController, :finalise
+    delete "/logout", Identity.AuthController, :logout
   end
 
   # ── Dev tools ─────────────────────────────────────────────────────────────

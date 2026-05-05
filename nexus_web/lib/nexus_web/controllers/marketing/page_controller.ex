@@ -1,4 +1,4 @@
-defmodule NexusWeb.PageController do
+defmodule NexusWeb.Marketing.PageController do
   use NexusWeb, :controller
 
   def home(conn, _params) do
