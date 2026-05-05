@@ -11,8 +11,8 @@ defmodule Nexus.Organization.Projectors.TenantProjector do
 
   alias Ecto.Multi
   alias Nexus.Organization.Events.TenantProvisioned
-  alias Nexus.Organization.Projections.AuditLog
-  alias Nexus.Organization.Projections.IdempotencyKey
+  alias Nexus.Organization.Audit.AuditLog
+  alias Nexus.Organization.Idempotency.IdempotencyKey
   alias Nexus.Organization.Projections.Tenant
   alias Nexus.Shared.Tracing
 
