@@ -10,7 +10,7 @@ defmodule Nexus.Marketing.Idempotency.IdempotencyKey do
     field(:execution_result, :map)
     field(:executed_at, :utc_datetime_usec)
 
-    timestamps(type: :utc_datetime_usec, inserted_at: :created_at)
+    timestamps(type: :utc_datetime_usec, inserted_at: :created_at, updated_at: false)
   end
 
   def changeset(idempotency_key, attrs) do
