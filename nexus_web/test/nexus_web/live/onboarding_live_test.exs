@@ -24,10 +24,8 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/onboarding/enroll?token=#{token}")
 
-      assert html =~ "Secure Enrollment"
-      assert html =~ "Securely anchoring your biometric identity"
-      assert html =~ "Scan Biometric"
-      assert html =~ "Enroll Biometrics"
+      assert html =~ "Anchor your identity to complete onboarding"
+      assert html =~ "Anchor Biometric Identity"
     end
 
     test "shows loading state when user projection is not yet in the DB", %{conn: conn} do
@@ -38,8 +36,7 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
       {:ok, _view, html} = live(conn, ~p"/onboarding/enroll?token=#{token}")
 
       # Must render the loading state — not crash, not hard-redirect.
-      assert html =~ "Secure Enrollment"
-      assert html =~ "Preparing Identity"
+      assert html =~ "Resolving identity record"
     end
   end
 
@@ -49,10 +46,9 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
       token = BiometricInvitation.generate_token(user.user_id)
 
       {:ok, view, _html} = live(conn, ~p"/onboarding/enroll?token=#{token}")
-
+      render_click(view, "advance_to_biometric")
       html = render_hook(view, "biometric_error", %{"reason" => "hardware error: sensor timeout"})
 
-      assert html =~ "Handshake Aborted"
       assert html =~ "Handshake failed: hardware error: sensor timeout"
     end
 
@@ -61,7 +57,7 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
       token = BiometricInvitation.generate_token(user.user_id)
 
       {:ok, view, _html} = live(conn, ~p"/onboarding/enroll?token=#{token}")
-
+      render_click(view, "advance_to_biometric")
       html = render_hook(view, "biometric_error", %{"reason" => "document lost focus"})
 
       assert html =~ "Security focus lost"
