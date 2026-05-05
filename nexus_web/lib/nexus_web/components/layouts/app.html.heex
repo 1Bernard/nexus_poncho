@@ -125,14 +125,17 @@
             Connection: Synchronized
           </span>
         </div>
-        <.link
-          href={~p"/auth/logout"}
-          method="delete"
-          class="text-zinc-600 hover:text-red-400 transition-colors"
-          title="Terminate Session"
-        >
-          <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" />
-        </.link>
+        <form action={~p"/auth/logout"} method="post" class="inline">
+          <input type="hidden" name="_method" value="delete" />
+          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <button
+            type="submit"
+            class="text-zinc-600 hover:text-red-400 transition-colors"
+            title="Terminate Session"
+          >
+            <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" />
+          </button>
+        </form>
       </div>
     </div>
   </aside>
@@ -303,13 +306,16 @@
         >
           <.icon name="hero-key-mini" class="size-4" /> Manage Keys (HSM)
         </a>
-        <.link
-          href={~p"/auth/logout"}
-          method="delete"
-          class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 border border-transparent hover:border-red-500/20 transition-all text-xs font-bold uppercase tracking-widest"
-        >
-          <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" /> Terminate Session
-        </.link>
+        <form action={~p"/auth/logout"} method="post">
+          <input type="hidden" name="_method" value="delete" />
+          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <button
+            type="submit"
+            class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 border border-transparent hover:border-red-500/20 transition-all text-xs font-bold uppercase tracking-widest"
+          >
+            <.icon name="hero-arrow-right-on-rectangle-mini" class="size-4" /> Terminate Session
+          </button>
+        </form>
       </div>
       <div class="p-4 bg-black rounded-2xl border border-white/5 font-mono text-[11px] text-zinc-500 space-y-1">
         <p>SESSION: BIOMETRIC_FIDO2</p>
