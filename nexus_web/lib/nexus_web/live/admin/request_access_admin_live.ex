@@ -133,13 +133,13 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 phx-click="bulk_under_review"
                 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-300 hover:text-emerald-400 transition-all"
               >
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Validate
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Review
               </button>
               <button
                 phx-click="show_bulk_reject_form"
                 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-300 hover:text-rose-400 transition-all"
               >
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reject
+                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Reject
               </button>
               <button
                 phx-click="clear_selection"
@@ -275,10 +275,37 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
               <div class="cluster-divider"></div>
 
-              <button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5 text-[10px] font-bold text-zinc-400 hover:text-white transition-all">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span class="uppercase tracking-widest hidden md:inline">Export</span>
-              </button>
+              <div class="relative">
+                <button
+                  phx-click={JS.toggle(to: "#export-dropdown")}
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5 text-[10px] font-bold text-zinc-400 hover:text-white transition-all"
+                >
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span class="uppercase tracking-widest hidden md:inline">Export</span>
+                  <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i>
+                </button>
+                <div
+                  id="export-dropdown"
+                  class="hidden absolute right-0 top-full mt-2 w-44 rounded-xl bg-[#0a0a0f] border border-white/10 p-2 z-50 shadow-2xl"
+                >
+                  <a
+                    href={
+                      ~p"/admin/access-requests/export?format=csv&status=#{@filter_status}&search=#{@search}"
+                    }
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                  >
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV
+                  </a>
+                  <a
+                    href={
+                      ~p"/admin/access-requests/export?format=xlsx&status=#{@filter_status}&search=#{@search}"
+                    }
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                  >
+                    <i data-lucide="sheet" class="w-3.5 h-3.5"></i> Excel (.xlsx)
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -419,7 +446,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 per_page={@per_page}
                 total_count={@total_count}
                 total_pages={@total_pages}
-                validated_count={@validated_count}
+                approved_count={@approved_count}
               />
             </div>
           </div>
@@ -501,7 +528,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 per_page={@per_page}
                 total_count={@total_count}
                 total_pages={@total_pages}
-                validated_count={@validated_count}
+                approved_count={@approved_count}
               />
             </div>
           </div>
@@ -658,6 +685,18 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
               {@drawer_request.rejection_reason}
             </p>
           </div>
+
+          <%!-- Archive action (approved or rejected — moves to terminal archived state) --%>
+          <%= if @drawer_request && @drawer_request.status in ["approved", "rejected"] do %>
+            <button
+              phx-click="transition_status"
+              phx-value-id={@drawer_request.id}
+              phx-value-to="archived"
+              class="w-full py-4 border border-white/10 text-zinc-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-amber-400/30 hover:text-amber-400 transition-all flex items-center justify-center gap-2"
+            >
+              <i data-lucide="archive" class="w-4 h-4"></i> Archive Request
+            </button>
+          <% end %>
 
           <%!-- Review & authorization actions (pending and under_review) --%>
           <%= if @drawer_request && @drawer_request.status in ["pending", "under_review"] do %>
@@ -1022,17 +1061,19 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     require OpenTelemetry.Tracer
     tracing_metadata = Tracing.inject_context(%{})
 
-    socket.assigns.selected_ids
-    |> MapSet.to_list()
-    |> Enum.each(fn id ->
+    ids = MapSet.to_list(socket.assigns.selected_ids)
+
+    from(r in AccessRequest, where: r.id in ^ids and r.status == "pending")
+    |> Repo.all()
+    |> Enum.each(fn request ->
       command = %ReviewAccessRequest{
-        request_id: id,
+        request_id: request.id,
         reviewed_by: socket.assigns.current_user.id
       }
 
       OpenTelemetry.Tracer.with_span "Admin.BulkReview" do
         App.dispatch(command,
-          metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
+          metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:review")
         )
       end
     end)
@@ -1061,26 +1102,44 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
       require OpenTelemetry.Tracer
       tracing_metadata = Tracing.inject_context(%{})
 
-      socket.assigns.selected_ids
-      |> MapSet.to_list()
-      |> Enum.each(fn id ->
-        command = %RejectAccessRequest{
-          request_id: id,
-          rejected_by: socket.assigns.current_user.id,
-          reason: reason
-        }
+      ids = MapSet.to_list(socket.assigns.selected_ids)
 
-        OpenTelemetry.Tracer.with_span "Admin.BulkReject" do
-          App.dispatch(command,
-            metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:reject")
-          )
-        end
-      end)
+      reviewer_id = socket.assigns.current_user.id
+
+      from(r in AccessRequest, where: r.id in ^ids and r.status in ["pending", "under_review"])
+      |> Repo.all()
+      |> Enum.each(&bulk_reject_request(&1, reviewer_id, reason, tracing_metadata))
 
       {:noreply,
        socket
        |> assign(selected_ids: MapSet.new(), show_bulk_reject_form: false, bulk_reject_reason: "")
        |> load_requests()}
+    end
+  end
+
+  defp bulk_reject_request(request, reviewer_id, reason, tracing_metadata) do
+    require OpenTelemetry.Tracer
+
+    if request.status == "pending" do
+      review_cmd = %ReviewAccessRequest{request_id: request.id, reviewed_by: reviewer_id}
+
+      OpenTelemetry.Tracer.with_span "Admin.BulkReview" do
+        App.dispatch(review_cmd,
+          metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:review")
+        )
+      end
+    end
+
+    reject_cmd = %RejectAccessRequest{
+      request_id: request.id,
+      rejected_by: reviewer_id,
+      reason: reason
+    }
+
+    OpenTelemetry.Tracer.with_span "Admin.BulkReject" do
+      App.dispatch(reject_cmd,
+        metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:reject")
+      )
     end
   end
 
@@ -1129,7 +1188,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     total = Repo.aggregate(searched, :count, :id)
     total_pages = max(1, ceil(total / socket.assigns.per_page))
 
-    validated_count =
+    approved_count =
       searched
       |> where([r], r.status == "approved")
       |> Repo.aggregate(:count, :id)
@@ -1144,7 +1203,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     |> assign(
       total_count: total,
       total_pages: total_pages,
-      validated_count: validated_count,
+      approved_count: approved_count,
       current_page_ids: Enum.map(requests, & &1.id)
     )
     |> stream(:requests, requests, reset: true)
@@ -1269,7 +1328,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
         </span>
         <div class="h-3 w-px bg-white/10 hidden sm:block"></div>
         <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider hidden sm:inline">
-          Validated: <span class="text-emerald-400">{@validated_count}</span>
+          Approved: <span class="text-emerald-400">{@approved_count}</span>
         </span>
       </div>
       <div class="flex items-center gap-3">
