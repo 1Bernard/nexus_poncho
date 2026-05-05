@@ -49,18 +49,31 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
 
       tracing_metadata = Tracing.inject_context(%{})
 
-      App.dispatch(
-        %RegisterUser{
-          user_id: event.provisioned_user_id,
-          org_id: event.provisioned_org_id,
-          email: event.email,
-          name: event.name,
-          role: event.role,
-          credential_id: nil,
-          cose_key: nil
-        },
-        metadata: Map.put(tracing_metadata, "idempotency_key", event.provisioned_user_id)
-      )
+      result =
+        App.dispatch(
+          %RegisterUser{
+            user_id: event.provisioned_user_id,
+            org_id: event.provisioned_org_id,
+            email: event.email,
+            name: event.name,
+            role: event.role,
+            credential_id: nil,
+            cose_key: nil
+          },
+          metadata: Map.put(tracing_metadata, "idempotency_key", event.provisioned_user_id)
+        )
+
+      case result do
+        :ok ->
+          []
+
+        {:error, reason} ->
+          Logger.error(
+            "[AccessRequestPM] Failed to provision user #{event.provisioned_user_id}: #{inspect(reason)}"
+          )
+
+          {:error, reason}
+      end
     end
   end
 

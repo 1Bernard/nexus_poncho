@@ -1,4 +1,4 @@
-defmodule NexusWeb.AuthController do
+defmodule NexusWeb.Identity.AuthController do
   @moduledoc """
   Finalises a biometric login by exchanging a short-lived signed token
   (produced by LoginLive) for a durable Phoenix session cookie.

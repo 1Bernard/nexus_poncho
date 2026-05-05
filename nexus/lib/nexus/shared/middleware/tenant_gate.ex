@@ -20,12 +20,24 @@ defmodule Nexus.Shared.Middleware.TenantGate do
   end
 
   def before_dispatch(%Pipeline{command: command} = pipeline) do
-    if Map.has_key?(command, :org_id) and is_binary(Map.get(command, :org_id)) do
-      pipeline
-    else
-      Pipeline.respond(pipeline, {:error, :missing_tenant_context})
-      |> Pipeline.halt()
+    cond do
+      # Marketing is a pre-tenant bootstrap pipeline — access requests exist before
+      # any org is provisioned, so tenant context does not apply to this domain.
+      marketing_command?(command) ->
+        pipeline
+
+      Map.has_key?(command, :org_id) and is_binary(Map.get(command, :org_id)) ->
+        pipeline
+
+      true ->
+        pipeline
+        |> Pipeline.respond({:error, :missing_tenant_context})
+        |> Pipeline.halt()
     end
+  end
+
+  defp marketing_command?(cmd) do
+    cmd.__struct__ |> Module.split() |> Enum.take(3) == ~w(Nexus Marketing Commands)
   end
 
   @spec after_dispatch(Pipeline.t()) :: Pipeline.t()

@@ -51,6 +51,17 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+// Show the success toast purely from a push_event — no server-side @flash dependency.
+// Using push_event avoids the LiveView re-render fighting JS over the "visible" class.
+window.addEventListener("phx:toast:show:success", (e) => {
+  const toast = document.getElementById("toast-success")
+  const msgEl = document.getElementById("toast-success-msg")
+  if (!toast) return
+  if (msgEl && e.detail.message) msgEl.textContent = e.detail.message
+  toast.classList.add("visible")
+  setTimeout(() => toast.classList.remove("visible"), e.detail.duration || 5000)
+})
+
 window.addEventListener("phx:copy-to-clipboard", (e) => {
   navigator.clipboard.writeText(e.detail.text).catch(() => {
     const el = document.createElement("textarea")

@@ -8,7 +8,7 @@ defmodule Nexus.Identity.IdentityIdempotencyTest do
   @moduletag :no_sandbox
 
   alias Nexus.Identity.Commands.RegisterUser
-  alias Nexus.Identity.Idempotency.IdempotencyKey
+  alias Nexus.Identity.Projections.IdempotencyKey
   alias Nexus.Identity.Projections.User
 
   @tag :idempotency

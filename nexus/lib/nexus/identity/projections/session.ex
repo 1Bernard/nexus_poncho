@@ -6,11 +6,15 @@ defmodule Nexus.Identity.Projections.Session do
   """
   use Nexus.Schema
 
+  alias NexusShared.Identity.Statuses
+
+  @session_active_default Statuses.session_active()
+
   schema "identity_sessions" do
     field(:user_id, :binary_id)
     field(:org_id, :binary_id)
     field(:credential_id, :string)
-    field(:status, :string, default: "active")
+    field(:status, :string, default: @session_active_default)
     field(:ip_address, :string)
     field(:user_agent, :string)
     field(:expires_at, :utc_datetime_usec)

@@ -199,6 +199,7 @@
 }
 
 .floating-toast.visible { bottom: 32px; }
+.floating-toast--error { border-color: rgba(251, 113, 133, 0.4); }
 
 .edit-btn {
     opacity: 0;

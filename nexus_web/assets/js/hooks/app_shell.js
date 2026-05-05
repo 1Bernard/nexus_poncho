@@ -98,6 +98,7 @@ const AppShell = {
     const open = () => {
       palette.style.opacity = "0";
       palette.classList.remove("hidden");
+      palette.classList.add("flex");
       requestAnimationFrame(() => {
         palette.style.transition = "opacity 0.2s ease";
         palette.style.opacity = "1";
@@ -110,6 +111,7 @@ const AppShell = {
       palette.style.opacity = "0";
       setTimeout(() => {
         palette.classList.add("hidden");
+        palette.classList.remove("flex");
         if (input) input.value = "";
       }, 200);
     };

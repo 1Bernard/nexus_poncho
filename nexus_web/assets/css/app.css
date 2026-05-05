@@ -384,3 +384,41 @@ body:has(#app-shell) { overflow: hidden; }
 .aura-entry-topbar {
   animation: aura-topbar-in 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
+
+/* ── Elite Institutional Components ────────────────────────────────────────── */
+
+.grid-guide-v {
+  @apply absolute top-0 bottom-0 w-px border-l border-dashed border-emerald-400/5 pointer-events-none opacity-0 transition-opacity duration-300;
+}
+
+.grid-guide-h {
+  @apply absolute left-0 right-0 h-px border-t border-dashed border-emerald-400/5 pointer-events-none opacity-0 transition-opacity duration-300;
+}
+
+.group:hover .grid-guide-v,
+.group:hover .grid-guide-h {
+  @apply opacity-100;
+}
+
+/* Hardened Row Typography */
+.row-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #52525b;
+  letter-spacing: -0.02em;
+}
+
+.ledger-table th {
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.ledger-row {
+  @apply transition-all duration-300 border-b border-white/[0.02];
+}
+
+.ledger-row:hover {
+  background: linear-gradient(90deg, rgba(52, 211, 153, 0.02) 0%, transparent 100%);
+}

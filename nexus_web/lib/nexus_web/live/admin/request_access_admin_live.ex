@@ -46,7 +46,8 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
        per_page: @per_page,
        statuses: @statuses,
        current_page_ids: [],
-       view_mode: "list"
+       view_mode: "list",
+       duplicate_warnings: []
      )
      |> load_requests()}
   end
@@ -64,11 +65,25 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
       <div class="min-h-full p-8 flex flex-col relative bg-[#010101]">
         <div class="bg-grid-elite"></div>
 
-        <%!-- TOAST NOTIFICATION --%>
-        <div id="toast" class={["floating-toast", @flash[:info] && "visible"]}>
+        <%!-- TOAST NOTIFICATIONS --%>
+        <%!-- Success: shown/hidden purely by JS via push_event("toast:show:success") --%>
+        <div id="toast-success" class="floating-toast">
           <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
-          <span class="text-[10px] font-bold uppercase tracking-widest text-white/90">
-            {@flash[:info] || "Operation successful"}
+          <span
+            id="toast-success-msg"
+            class="text-[10px] font-bold uppercase tracking-widest text-white/90"
+          >
+            Operation successful
+          </span>
+        </div>
+        <%!-- Error: server-driven via @flash so it persists until explicitly dismissed --%>
+        <div
+          id="toast-error"
+          class={["floating-toast floating-toast--error", @flash[:error] && "visible"]}
+        >
+          <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i>
+          <span class="text-[10px] font-bold uppercase tracking-widest text-rose-300">
+            {@flash[:error] || "An error occurred"}
           </span>
         </div>
 
@@ -118,13 +133,13 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 phx-click="bulk_under_review"
                 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-300 hover:text-emerald-400 transition-all"
               >
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Validate
+                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Review
               </button>
               <button
                 phx-click="show_bulk_reject_form"
                 class="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-300 hover:text-rose-400 transition-all"
               >
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reject
+                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Reject
               </button>
               <button
                 phx-click="clear_selection"
@@ -260,10 +275,37 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
               <div class="cluster-divider"></div>
 
-              <button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5 text-[10px] font-bold text-zinc-400 hover:text-white transition-all">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span class="uppercase tracking-widest hidden md:inline">Export</span>
-              </button>
+              <div class="relative">
+                <button
+                  phx-click={JS.toggle(to: "#export-dropdown")}
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5 text-[10px] font-bold text-zinc-400 hover:text-white transition-all"
+                >
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span class="uppercase tracking-widest hidden md:inline">Export</span>
+                  <i data-lucide="chevron-down" class="w-3 h-3 opacity-50"></i>
+                </button>
+                <div
+                  id="export-dropdown"
+                  class="hidden absolute right-0 top-full mt-2 w-44 rounded-xl bg-[#0a0a0f] border border-white/10 p-2 z-50 shadow-2xl"
+                >
+                  <a
+                    href={
+                      ~p"/admin/access-requests/export?format=csv&status=#{@filter_status}&search=#{@search}"
+                    }
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                  >
+                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV
+                  </a>
+                  <a
+                    href={
+                      ~p"/admin/access-requests/export?format=xlsx&status=#{@filter_status}&search=#{@search}"
+                    }
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                  >
+                    <i data-lucide="sheet" class="w-3.5 h-3.5"></i> Excel (.xlsx)
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -304,7 +346,13 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                   </thead>
                   <tbody id="requests" phx-update="stream">
                     <%= for {id, request} <- @streams.requests do %>
-                      <tr id={id} class="ledger-row group">
+                      <tr id={id} class="ledger-row group relative">
+                        <%!-- Elite Grid Guides --%>
+                        <div class="grid-guide-v left-8"></div>
+                        <div class="grid-guide-v left-[calc(8rem+48px)]"></div>
+                        <div class="grid-guide-h top-0"></div>
+                        <div class="grid-guide-h bottom-0"></div>
+
                         <td class="pl-8 pr-4 py-5">
                           <input
                             type="checkbox"
@@ -393,6 +441,13 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                   </button>
                 </div>
               </div>
+              <.ledger_pagination
+                page={@page}
+                per_page={@per_page}
+                total_count={@total_count}
+                total_pages={@total_pages}
+                approved_count={@approved_count}
+              />
             </div>
           </div>
 
@@ -468,60 +523,13 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                   <% end %>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <%!-- SHARED PAGINATION FOOTER --%>
-          <div class="flex-shrink-0 px-8 py-5 border-t border-white/10 bg-black/30 flex flex-wrap items-center justify-between gap-4 rounded-b-3xl">
-            <div class="flex items-center gap-5">
-              <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
-                Range:
-                <span class="text-white">
-                  {(@page - 1) * @per_page + 1} - {min(@page * @per_page, @total_count)}
-                </span>
-              </span>
-              <div class="h-3 w-px bg-white/10"></div>
-              <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
-                Total: <span class="text-white">{@total_count}</span>
-              </span>
-              <div class="h-3 w-px bg-white/10 hidden sm:block"></div>
-              <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider hidden sm:inline">
-                Validated: <span class="text-emerald-400">{@validated_count}</span>
-              </span>
-            </div>
-            <div class="flex items-center gap-3">
-              <form phx-change="change_page_size">
-                <select
-                  name="page_size"
-                  class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-[9px] font-mono text-white focus:outline-none focus:border-emerald-400/40"
-                >
-                  <%= for size <- [10, 25, 50, 100] do %>
-                    <option value={size} selected={@per_page == size}>{size} / page</option>
-                  <% end %>
-                </select>
-              </form>
-
-              <button
-                phx-click="paginate"
-                phx-value-page={@page - 1}
-                disabled={@page == 1}
-                class="flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:border-emerald-400/50 transition-all disabled:opacity-30"
-              >
-                <i data-lucide="chevron-left" class="w-3 h-3"></i> Prev
-              </button>
-
-              <span class="text-[9px] font-mono text-zinc-500">
-                Page {@page} of {@total_pages}
-              </span>
-
-              <button
-                phx-click="paginate"
-                phx-value-page={@page + 1}
-                disabled={@page >= @total_pages}
-                class="flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:border-emerald-400/50 transition-all disabled:opacity-30"
-              >
-                Next <i data-lucide="chevron-right" class="w-3 h-3"></i>
-              </button>
+              <.ledger_pagination
+                page={@page}
+                per_page={@per_page}
+                total_count={@total_count}
+                total_pages={@total_pages}
+                approved_count={@approved_count}
+              />
             </div>
           </div>
         </div>
@@ -597,7 +605,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
               </div>
               <div class="space-y-1">
                 <span class="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
-                  Audit Score
+                  Confidence Score
                 </span>
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-1 rounded-full bg-white/5 overflow-hidden">
@@ -613,6 +621,24 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 </div>
               </div>
             </div>
+          </div>
+
+          <%!-- Duplicate entity warning --%>
+          <div
+            :if={@duplicate_warnings != []}
+            class="rounded-2xl border border-amber-400/20 bg-amber-400/[0.03] p-5 space-y-3"
+          >
+            <div class="flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400/80">
+                Duplicate Detected
+              </span>
+            </div>
+            <ul class="space-y-1.5">
+              <%= for warning <- @duplicate_warnings do %>
+                <li class="text-[10px] font-mono text-zinc-400 leading-relaxed">{warning}</li>
+              <% end %>
+            </ul>
           </div>
 
           <div
@@ -660,8 +686,20 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
             </p>
           </div>
 
-          <%!-- Under review actions --%>
-          <%= if @drawer_request && @drawer_request.status == "under_review" do %>
+          <%!-- Archive action (approved or rejected — moves to terminal archived state) --%>
+          <%= if @drawer_request && @drawer_request.status in ["approved", "rejected"] do %>
+            <button
+              phx-click="transition_status"
+              phx-value-id={@drawer_request.id}
+              phx-value-to="archived"
+              class="w-full py-4 border border-white/10 text-zinc-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-amber-400/30 hover:text-amber-400 transition-all flex items-center justify-center gap-2"
+            >
+              <i data-lucide="archive" class="w-4 h-4"></i> Archive Request
+            </button>
+          <% end %>
+
+          <%!-- Review & authorization actions (pending and under_review) --%>
+          <%= if @drawer_request && @drawer_request.status in ["pending", "under_review"] do %>
             <%!-- Reject form --%>
             <div :if={@show_reject_form} class="space-y-4">
               <div class="space-y-2">
@@ -730,17 +768,6 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
               </div>
             </div>
           <% end %>
-
-          <%!-- Pending: move to review --%>
-          <button
-            :if={@drawer_request && @drawer_request.status == "pending"}
-            phx-click="transition_status"
-            phx-value-id={@drawer_request.id}
-            phx-value-to="under_review"
-            class="w-full py-5 bg-zinc-900 border border-emerald-400/20 text-emerald-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-400 hover:text-black transition-all"
-          >
-            Start Digital Review
-          </button>
         </div>
       </div>
     </Layouts.app>
@@ -815,14 +842,17 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
         BiometricInvitation.magic_link(token)
       end
 
+    default_role = Roles.all() |> List.first() || ""
+
     {:noreply,
      assign(socket,
        show_drawer: true,
        drawer_request: request,
-       approve_role: "",
+       approve_role: default_role,
        show_reject_form: false,
        reject_reason: "",
-       invitation_link: invitation_link
+       invitation_link: invitation_link,
+       duplicate_warnings: find_duplicate_warnings(request)
      )}
   end
 
@@ -842,7 +872,8 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
        approve_role: "",
        show_reject_form: false,
        reject_reason: "",
-       invitation_link: nil
+       invitation_link: nil,
+       duplicate_warnings: []
      )}
   end
 
@@ -866,6 +897,21 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     else
       require OpenTelemetry.Tracer
 
+      if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
+        review_cmd = %ReviewAccessRequest{
+          request_id: id,
+          reviewed_by: socket.assigns.current_user.id
+        }
+
+        tracing_metadata = Tracing.inject_context(%{})
+
+        OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
+          App.dispatch(review_cmd,
+            metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
+          )
+        end
+      end
+
       command = %RejectAccessRequest{
         request_id: id,
         rejected_by: socket.assigns.current_user.id,
@@ -876,7 +922,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
       OpenTelemetry.Tracer.with_span "Admin.RejectAccessRequest" do
         case App.dispatch(command,
-               metadata: Map.put(tracing_metadata, "idempotency_key", Uniq.UUID.uuid7())
+               metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:reject")
              ) do
           :ok ->
             {:noreply,
@@ -884,7 +930,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
              |> assign(show_reject_form: false, reject_reason: "")
              |> load_requests()
              |> refresh_drawer(id)
-             |> put_flash(:info, "Request rejected.")}
+             |> push_event("toast:show:success", %{message: "Request rejected", duration: 4_000})}
 
           {:error, reason_err} ->
             {:noreply, put_flash(socket, :error, "Failed to reject: #{inspect(reason_err)}")}
@@ -921,14 +967,17 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
       OpenTelemetry.Tracer.with_span "Admin.TransitionAccessRequest" do
         case App.dispatch(command,
-               metadata: Map.put(tracing_metadata, "idempotency_key", Uniq.UUID.uuid7())
+               metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:#{to_status}")
              ) do
           :ok ->
             {:noreply,
              socket
              |> load_requests()
              |> refresh_drawer(id)
-             |> put_flash(:info, "Request marked as #{to_status}.")}
+             |> push_event("toast:show:success", %{
+               message: "Request marked as #{String.replace(to_status, "_", " ")}",
+               duration: 4_000
+             })}
 
           {:error, reason} ->
             {:noreply, put_flash(socket, :error, "Transition failed: #{inspect(reason)}")}
@@ -948,6 +997,21 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
       require OpenTelemetry.Tracer
       require Logger
 
+      if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
+        review_cmd = %ReviewAccessRequest{
+          request_id: id,
+          reviewed_by: socket.assigns.current_user.id
+        }
+
+        tracing_metadata = Tracing.inject_context(%{})
+
+        OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
+          App.dispatch(review_cmd,
+            metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
+          )
+        end
+      end
+
       user_id = Uniq.UUID.uuid7()
       org_id = Uniq.UUID.uuid7()
 
@@ -963,18 +1027,27 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
         tracing_metadata = Tracing.inject_context(%{})
 
         case App.dispatch(command,
-               metadata: Map.put(tracing_metadata, "idempotency_key", Uniq.UUID.uuid7())
+               metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
              ) do
           :ok ->
             token = BiometricInvitation.generate_token(user_id)
             link = BiometricInvitation.magic_link(token)
 
+            Process.send_after(self(), :refresh_after_approval, 1_000)
+
             {:noreply,
              socket
-             |> assign(approve_role: "", invitation_link: link)
-             |> load_requests()
-             |> refresh_drawer(id)
-             |> put_flash(:info, "Access approved. Invitation link generated.")}
+             |> assign(
+               approve_role: "",
+               invitation_link: link,
+               drawer_request:
+                 socket.assigns.drawer_request &&
+                   %{socket.assigns.drawer_request | status: "approved"}
+             )
+             |> push_event("toast:show:success", %{
+               message: "Access approved — invitation link generated",
+               duration: 5_000
+             })}
 
           {:error, reason} ->
             Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
@@ -988,17 +1061,19 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     require OpenTelemetry.Tracer
     tracing_metadata = Tracing.inject_context(%{})
 
-    socket.assigns.selected_ids
-    |> MapSet.to_list()
-    |> Enum.each(fn id ->
+    ids = MapSet.to_list(socket.assigns.selected_ids)
+
+    from(r in AccessRequest, where: r.id in ^ids and r.status == "pending")
+    |> Repo.all()
+    |> Enum.each(fn request ->
       command = %ReviewAccessRequest{
-        request_id: id,
+        request_id: request.id,
         reviewed_by: socket.assigns.current_user.id
       }
 
       OpenTelemetry.Tracer.with_span "Admin.BulkReview" do
         App.dispatch(command,
-          metadata: Map.put(tracing_metadata, "idempotency_key", Uniq.UUID.uuid7())
+          metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:review")
         )
       end
     end)
@@ -1027,21 +1102,13 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
       require OpenTelemetry.Tracer
       tracing_metadata = Tracing.inject_context(%{})
 
-      socket.assigns.selected_ids
-      |> MapSet.to_list()
-      |> Enum.each(fn id ->
-        command = %RejectAccessRequest{
-          request_id: id,
-          rejected_by: socket.assigns.current_user.id,
-          reason: reason
-        }
+      ids = MapSet.to_list(socket.assigns.selected_ids)
 
-        OpenTelemetry.Tracer.with_span "Admin.BulkReject" do
-          App.dispatch(command,
-            metadata: Map.put(tracing_metadata, "idempotency_key", Uniq.UUID.uuid7())
-          )
-        end
-      end)
+      reviewer_id = socket.assigns.current_user.id
+
+      from(r in AccessRequest, where: r.id in ^ids and r.status in ["pending", "under_review"])
+      |> Repo.all()
+      |> Enum.each(&bulk_reject_request(&1, reviewer_id, reason, tracing_metadata))
 
       {:noreply,
        socket
@@ -1050,7 +1117,47 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     end
   end
 
+  defp bulk_reject_request(request, reviewer_id, reason, tracing_metadata) do
+    require OpenTelemetry.Tracer
+
+    if request.status == "pending" do
+      review_cmd = %ReviewAccessRequest{request_id: request.id, reviewed_by: reviewer_id}
+
+      OpenTelemetry.Tracer.with_span "Admin.BulkReview" do
+        App.dispatch(review_cmd,
+          metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:review")
+        )
+      end
+    end
+
+    reject_cmd = %RejectAccessRequest{
+      request_id: request.id,
+      rejected_by: reviewer_id,
+      reason: reason
+    }
+
+    OpenTelemetry.Tracer.with_span "Admin.BulkReject" do
+      App.dispatch(reject_cmd,
+        metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:reject")
+      )
+    end
+  end
+
+  # ── Info Handlers ─────────────────────────────────────────────────────────────
+
+  @impl true
+  def handle_info(:refresh_after_approval, socket) do
+    {:noreply, socket |> load_requests() |> refresh_drawer_if_open()}
+  end
+
   # ── Private ───────────────────────────────────────────────────────────────────
+
+  defp refresh_drawer_if_open(socket) do
+    case socket.assigns.drawer_request do
+      nil -> socket
+      req -> refresh_drawer(socket, req.id)
+    end
+  end
 
   defp load_requests(socket) do
     %{page: page, filter_status: filter_status, search: search} = socket.assigns
@@ -1081,7 +1188,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     total = Repo.aggregate(searched, :count, :id)
     total_pages = max(1, ceil(total / socket.assigns.per_page))
 
-    validated_count =
+    approved_count =
       searched
       |> where([r], r.status == "approved")
       |> Repo.aggregate(:count, :id)
@@ -1096,7 +1203,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     |> assign(
       total_count: total,
       total_pages: total_pages,
-      validated_count: validated_count,
+      approved_count: approved_count,
       current_page_ids: Enum.map(requests, & &1.id)
     )
     |> stream(:requests, requests, reset: true)
@@ -1111,6 +1218,43 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     else
       socket
     end
+  end
+
+  defp find_duplicate_warnings(request) do
+    email_match =
+      Repo.one(
+        from(r in AccessRequest,
+          where: r.email == ^request.email and r.status == "approved" and r.id != ^request.id,
+          select: r.name,
+          limit: 1
+        )
+      )
+
+    org_match =
+      Repo.one(
+        from(r in AccessRequest,
+          where:
+            r.organization == ^request.organization and r.status == "approved" and
+              r.id != ^request.id,
+          select: r.name,
+          limit: 1
+        )
+      )
+
+    []
+    |> then(fn w ->
+      if email_match,
+        do: ["Email #{request.email} already approved under account \"#{email_match}\"" | w],
+        else: w
+    end)
+    |> then(fn w ->
+      if org_match,
+        do: [
+          ~s(Organization "#{request.organization}" already approved under account "#{org_match}")
+          | w
+        ],
+        else: w
+    end)
   end
 
   defp confidence_score(request) do
@@ -1167,4 +1311,61 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   defp format_volume("500m_1b"), do: "$500M – $1B"
   defp format_volume("gt_1b"), do: "> $1B"
   defp format_volume(v), do: v
+
+  defp ledger_pagination(assigns) do
+    ~H"""
+    <div class="flex-shrink-0 px-8 py-5 border-t border-white/10 bg-black/30 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-5">
+        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+          Range:
+          <span class="text-white">
+            {(@page - 1) * @per_page + 1} - {min(@page * @per_page, @total_count)}
+          </span>
+        </span>
+        <div class="h-3 w-px bg-white/10"></div>
+        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
+          Total: <span class="text-white">{@total_count}</span>
+        </span>
+        <div class="h-3 w-px bg-white/10 hidden sm:block"></div>
+        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider hidden sm:inline">
+          Approved: <span class="text-emerald-400">{@approved_count}</span>
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
+        <form phx-change="change_page_size">
+          <select
+            name="page_size"
+            class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-[9px] font-mono text-white focus:outline-none focus:border-emerald-400/40"
+          >
+            <%= for size <- [10, 25, 50, 100] do %>
+              <option value={size} selected={@per_page == size}>{size} / page</option>
+            <% end %>
+          </select>
+        </form>
+
+        <button
+          phx-click="paginate"
+          phx-value-page={@page - 1}
+          disabled={@page == 1}
+          class="flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:border-emerald-400/50 transition-all disabled:opacity-30"
+        >
+          <i data-lucide="chevron-left" class="w-3 h-3"></i> Prev
+        </button>
+
+        <span class="text-[9px] font-mono text-zinc-500">
+          Page {@page} of {@total_pages}
+        </span>
+
+        <button
+          phx-click="paginate"
+          phx-value-page={@page + 1}
+          disabled={@page >= @total_pages}
+          class="flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:border-emerald-400/50 transition-all disabled:opacity-30"
+        >
+          Next <i data-lucide="chevron-right" class="w-3 h-3"></i>
+        </button>
+      </div>
+    </div>
+    """
+  end
 end

@@ -71,6 +71,7 @@ defmodule NexusWeb.MixProject do
       {:opentelemetry_ecto, "~> 1.2"},
       {:opentelemetry_liveview, "~> 1.0.0-rc.4"},
       {:number, "~> 1.0"},
+      {:elixlsx, "~> 0.6"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:nexus, path: "../nexus"},

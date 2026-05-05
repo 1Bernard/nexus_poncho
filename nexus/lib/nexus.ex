@@ -9,7 +9,11 @@ defmodule Nexus do
   """
   def dispatch(command, opts \\ []) do
     opts = Keyword.put_new(opts, :include_execution_result, true)
-    Nexus.App.dispatch(command, opts)
+
+    case Nexus.App.dispatch(command, opts) do
+      :ok -> {:ok, :cached}
+      other -> other
+    end
   end
 
   @doc """

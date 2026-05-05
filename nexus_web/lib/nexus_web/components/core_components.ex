@@ -204,7 +204,13 @@ defmodule NexusWeb.CoreComponents do
                 multiple pattern placeholder readonly required rows size step)
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
-    errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
+    # Show errors when the user has interacted with the field (incremental validation)
+    # OR when the changeset action is explicitly set (e.g. next_step forcing step validation).
+    errors =
+      if Phoenix.Component.used_input?(field) or
+           field.form.source.action in [:validate, :insert, :update],
+         do: field.errors,
+         else: []
 
     assigns
     |> assign(field: nil, id: assigns.id || field.id)

@@ -11,8 +11,13 @@ defmodule Nexus.Identity.Aggregates.Session do
   alias __MODULE__, as: Session
   alias Nexus.Identity.Commands.{ExpireSession, StartSession}
   alias Nexus.Identity.Events.{SessionExpired, SessionStarted}
+  alias NexusShared.Identity.Statuses
 
   require Logger
+
+  # Compile-time constants — required for use in pattern matches
+  @session_active Statuses.session_active()
+  @session_expired Statuses.session_expired()
 
   # ── Command Handlers ──────────────────────────────────────────────────────
 
@@ -32,11 +37,11 @@ defmodule Nexus.Identity.Aggregates.Session do
     {:error, :session_already_exists}
   end
 
-  def execute(%Session{status: "active"}, %ExpireSession{} = cmd) do
+  def execute(%Session{status: @session_active}, %ExpireSession{} = cmd) do
     %SessionExpired{session_id: cmd.session_id, user_id: cmd.user_id, org_id: cmd.org_id}
   end
 
-  def execute(%Session{status: "expired"}, %ExpireSession{}) do
+  def execute(%Session{status: @session_expired}, %ExpireSession{}) do
     {:error, :session_already_expired}
   end
 
@@ -60,11 +65,11 @@ defmodule Nexus.Identity.Aggregates.Session do
       | session_id: event.session_id,
         user_id: event.user_id,
         org_id: event.org_id,
-        status: "active"
+        status: @session_active
     }
   end
 
   def apply(%Session{} = state, %SessionExpired{}) do
-    %Session{state | status: "expired"}
+    %Session{state | status: @session_expired}
   end
 end

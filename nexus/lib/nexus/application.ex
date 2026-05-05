@@ -6,6 +6,12 @@ defmodule Nexus.Application do
 
   @impl true
   def start(_type, _args) do
+    # Attach Ecto telemetry → OTel spans. Called once here so it covers both
+    # worker nodes (nexus is the top-level app) and the web node (nexus is a dep).
+    if Code.ensure_loaded?(OpentelemetryEcto) do
+      OpentelemetryEcto.setup([:nexus, :repo])
+    end
+
     # Initialize Mnesia for distributed biometric challenges
     :ok = ensure_mnesia_setup()
 
@@ -54,18 +60,26 @@ defmodule Nexus.Application do
        [
          Nexus.Identity.Projectors.UserProjector,
          Nexus.Identity.Projectors.SessionProjector,
-         Nexus.Identity.Audit.AuditLogProjector
+         Nexus.Identity.Projectors.AuditLogProjector
        ]},
       {:start_organization_projections, [Nexus.Organization.Projectors.TenantProjector]},
       {:start_compliance_projections,
-       [Nexus.Compliance.Projectors.ScreeningProjector, Nexus.Compliance.Workers.PEPWorker]},
+       [
+         Nexus.Compliance.Projectors.ScreeningProjector,
+         Nexus.Compliance.Workers.PEPWorker,
+         Nexus.Compliance.Projectors.AuditLogProjector
+       ]},
       {:start_accounting_projections, [Nexus.Accounting.Projectors.AccountProjector]},
       {:start_treasury_projections, [Nexus.Treasury.Projectors.VaultProjector]},
       {:start_messaging_projections,
        [Nexus.Messaging.Producers.EmailDispatcher, Nexus.Messaging.Workers.EmailWorker]},
       {:start_onboarding_pm, [Nexus.Onboarding.ProcessManagers.OnboardingProcessManager]},
       {:start_platform_audit, [Nexus.Audit.Projectors.PlatformAuditProjector]},
-      {:start_marketing_projections, [Nexus.Marketing.Projectors.AccessRequestProjector]},
+      {:start_marketing_projections,
+       [
+         Nexus.Marketing.Projectors.AccessRequestProjector,
+         Nexus.Marketing.Projectors.AuditLogProjector
+       ]},
       {:start_marketing_pm, [Nexus.Marketing.ProcessManagers.AccessRequestProcessManager]}
     ]
 

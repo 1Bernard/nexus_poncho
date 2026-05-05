@@ -48,18 +48,20 @@ if config_env() != :test do
   end
 end
 
-# OpenTelemetry: W3C trace context propagation for distributed mesh
-node_name = System.get_env("NODE_NAME") || "web"
+if config_env() != :test do
+  # OpenTelemetry: W3C trace context propagation for distributed mesh
+  node_name = System.get_env("NODE_NAME") || "web"
 
-config :opentelemetry,
-  span_processor: :batch,
-  text_map_propagators: [:trace_context, :baggage],
-  traces_exporter: :otlp,
-  resource: [{"service.name", node_name}]
+  config :opentelemetry,
+    span_processor: :batch,
+    text_map_propagators: [:trace_context, :baggage],
+    traces_exporter: :otlp,
+    resource: [{"service.name", node_name}]
 
-config :opentelemetry_exporter,
-  otlp_protocol: :http_protobuf,
-  otlp_endpoint: "http://jaeger:4318"
+  config :opentelemetry_exporter,
+    otlp_protocol: :http_protobuf,
+    otlp_endpoint: "http://jaeger:4318"
+end
 
 # PromEx: web node runs on port 4003 to avoid conflict with Phoenix on 4000
 metrics_server_config =
@@ -72,6 +74,11 @@ metrics_server_config =
 config :nexus, NexusWeb.PromEx,
   metrics_server: metrics_server_config,
   grafana: [host: "http://grafana:3000", upload_dashboards: true, datasource_id: "prometheus"]
+
+# Nexus.PromEx (domain PromEx) runs on worker nodes where nexus/config/runtime.exs applies.
+# On the web node, NexusWeb.PromEx covers all metrics. Disabling Nexus.PromEx prevents
+# ETSCronFlusher from spawning here and crashing every ~17s due to ETS aggregation timeouts.
+config :nexus, Nexus.PromEx, disabled: true
 
 # Gateway Mode: web is a standalone command dispatcher — no Erlang distribution to workers.
 # Use :local Commanded registry since there is no shared cluster to synchronise with.
@@ -111,6 +118,9 @@ config :nexus,
   start_treasury_projections: get_bool.("START_TREASURY_PROJECTIONS", true),
   start_messaging_projections: get_bool.("START_MESSAGING_PROJECTIONS", true),
   start_onboarding_pm: get_bool.("START_ONBOARDING_PM", true),
+  start_platform_audit: get_bool.("START_PLATFORM_AUDIT", true),
+  start_marketing_projections: get_bool.("START_MARKETING_PROJECTIONS", true),
+  start_marketing_pm: get_bool.("START_MARKETING_PM", true),
   web_host: System.get_env("WEB_HOST") || "http://localhost:4000",
   token_secret_key_base: token_secret_key_base,
   loki_url: System.get_env("LOKI_URL")
