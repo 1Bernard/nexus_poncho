@@ -9,6 +9,8 @@ defmodule NexusWeb.Identity.AuthController do
   use NexusWeb, :controller
 
   alias Nexus.Identity.Commands.ExpireSession
+  alias Nexus.Identity.Projections.Session
+  alias Nexus.Repo
   alias NexusWeb.UserAuth
 
   require Logger
@@ -23,6 +25,8 @@ defmodule NexusWeb.Identity.AuthController do
   def finalise(conn, %{"token" => token}) do
     case Phoenix.Token.verify(NexusWeb.Endpoint, "session_auth", token, max_age: @token_max_age) do
       {:ok, session_id} ->
+        await_session_projection(session_id)
+
         conn
         |> put_session(:session_id, session_id)
         |> redirect(to: "/vaults")
@@ -54,5 +58,19 @@ defmodule NexusWeb.Identity.AuthController do
     conn
     |> UserAuth.log_out()
     |> redirect(to: "/login")
+  end
+
+  # SessionProjector is asynchronous — the session row may not exist in the
+  # read model by the time the browser hits /vaults. Poll until it appears
+  # (up to 2s) so require_authenticated never races against the projector.
+  defp await_session_projection(session_id, retries \\ 20) do
+    case Repo.get(Session, session_id) do
+      nil when retries > 0 ->
+        Process.sleep(100)
+        await_session_projection(session_id, retries - 1)
+
+      _ ->
+        :ok
+    end
   end
 end
