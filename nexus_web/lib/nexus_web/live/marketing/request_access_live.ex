@@ -9,9 +9,9 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
   require OpenTelemetry.Tracer
 
   @steps [
-    %{id: 1, title: "IDENTITY_ANCHOR", label: "Provide personal identity credentials"},
-    %{id: 2, title: "INSTITUTIONAL_MAPPING", label: "Define institutional affiliation"},
-    %{id: 3, title: "OPERATIONAL_SCOPE", label: "Analyze treasury requirements"}
+    %{id: 1, title: "Personal Details", label: "Basic identity and contact information"},
+    %{id: 2, title: "Organization Profile", label: "Professional affiliation and role"},
+    %{id: 3, title: "Treasury Requirements", label: "Overview of operational needs"}
   ]
 
   @impl true
@@ -128,14 +128,14 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
           <div class="inline-flex items-center gap-3 px-0 mb-6 group">
             <span class="w-1 h-1 rounded-full bg-emerald-400"></span>
             <span class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase">
-              Access Authorization
+              Request Access
             </span>
           </div>
           <h1 class="font-serif text-5xl md:text-7xl font-black text-white leading-[1.1] mb-6 tracking-tight">
-            Initialize Institutional <span class="emerald-glint">Deployment.</span>
+            Begin your Institutional <span class="emerald-glint">Journey.</span>
           </h1>
           <p class="text-zinc-500 text-lg max-w-2xl mx-auto font-medium">
-            Equinox is by invitation. Complete the multi-step anchoring protocol to begin your institutional journey.
+            Equinox is by invitation. Complete our brief application process to request access for your organization.
           </p>
         </div>
 
@@ -148,26 +148,26 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
           <div class="lg:col-span-2 space-y-10">
             <div>
               <p class="font-mono text-[10px] tracking-[0.3em] text-zinc-600 uppercase mb-8">
-                Deployment Protocol
+                Application Progress
               </p>
               <div class="space-y-6">
                 <%= for step <- @steps do %>
                   <div class={[
                     "protocol-step relative flex gap-6 transition-all duration-500",
-                    @current_step < step.id && "opacity-30 grayscale",
-                    @current_step == step.id && "opacity-100",
-                    @current_step > step.id && "opacity-60"
+                    if(@submitted or @current_step > step.id, do: "opacity-60"),
+                    if(!@submitted and @current_step == step.id, do: "opacity-100"),
+                    if(!@submitted and @current_step < step.id, do: "opacity-30 grayscale")
                   ]}>
                     <div class="flex flex-col items-center">
                       <div class={[
                         "w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-500",
-                        if(@current_step >= step.id,
+                        if(@submitted or @current_step >= step.id,
                           do:
                             "border-emerald-400/50 bg-emerald-400/10 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.1)]",
                           else: "border-white/10 text-zinc-700"
                         )
                       ]}>
-                        <%= if @current_step > step.id do %>
+                        <%= if @submitted or @current_step > step.id do %>
                           <.icon name="hero-check-mini" class="w-5 h-5" />
                         <% else %>
                           <span class="font-mono text-xs font-bold">{step.id}</span>
@@ -176,7 +176,10 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                       <%= if step.id < 3 do %>
                         <div class={[
                           "w-px h-12 my-2 transition-all duration-500",
-                          if(@current_step > step.id, do: "bg-emerald-400/40", else: "bg-white/5")
+                          if(@submitted or @current_step > step.id,
+                            do: "bg-emerald-400/40",
+                            else: "bg-white/5"
+                          )
                         ]}>
                         </div>
                       <% end %>
@@ -184,7 +187,11 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                     <div class="pt-2">
                       <p class={[
                         "font-mono text-[10px] tracking-[0.2em] uppercase transition-colors duration-500",
-                        if(@current_step == step.id, do: "text-emerald-400", else: "text-zinc-600")
+                        if(!@submitted and @current_step == step.id,
+                          do: "text-emerald-400",
+                          else: "text-zinc-600"
+                        ),
+                        if(@submitted, do: "text-emerald-400/60")
                       ]}>
                         {step.title}
                       </p>
@@ -200,10 +207,10 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
             <%!-- Trust note --%>
             <div class="pt-10 border-t border-white/5">
               <p class="font-mono text-[9px] tracking-[0.2em] text-zinc-700 uppercase mb-3">
-                Institutional Privacy Guarantee
+                Privacy & Confidentiality
               </p>
               <p class="text-zinc-600 text-[11px] leading-relaxed italic">
-                Your credentials are used solely to evaluate access eligibility. Equinox maintains strict ephemeral data life-cycles for all authorization requests.
+                Your information is used solely to evaluate eligibility. Equinox maintains strict data privacy standards for all institutional requests.
               </p>
             </div>
           </div>
@@ -216,13 +223,13 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   <.icon name="hero-check-circle" class="w-10 h-10 text-emerald-400" />
                 </div>
                 <p class="font-mono text-[10px] tracking-[0.3em] text-emerald-400/60 uppercase mb-4">
-                  Sovereign Request Logged
+                  Application Received
                 </p>
                 <h2 class="font-serif text-4xl font-black text-white mb-6 tracking-tight leading-tight">
-                  Awaiting Node <span class="emerald-glint">Authorization.</span>
+                  Review in <span class="emerald-glint">Progress.</span>
                 </h2>
                 <p class="text-zinc-500 max-w-sm mx-auto text-sm leading-relaxed font-medium">
-                  Our treasury onboarding team is currently validating your institutional profile. Authorization typically completes within 48 business hours.
+                  Our treasury team is currently reviewing your profile. We will contact you via email once your application has been processed, typically within 48 business hours.
                 </p>
                 <div class="mt-12 pt-8 border-t border-white/5">
                   <.link
@@ -248,10 +255,10 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   >
                     <div class="mb-10">
                       <p class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase mb-3">
-                        Phase I: Identity Anchor
+                        Step I: Personal Information
                       </p>
                       <h3 class="text-2xl font-serif font-black text-white tracking-tight">
-                        Establishing Presence.
+                        Who should we contact?
                       </h3>
                     </div>
 
@@ -269,7 +276,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                       </div>
                       <div>
                         <label class="block font-mono text-[9px] tracking-[0.25em] text-zinc-600 uppercase mb-3">
-                          Identity Anchor / Work Email
+                          Work Email Address
                         </label>
                         <.input
                           field={@form[:email]}
@@ -287,17 +294,17 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   >
                     <div class="mb-10">
                       <p class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase mb-3">
-                        Phase II: Institutional Mapping
+                        Step II: Organization Profile
                       </p>
                       <h3 class="text-2xl font-serif font-black text-white tracking-tight">
-                        Domain Affiliation.
+                        Your Institution.
                       </h3>
                     </div>
 
                     <div class="space-y-6">
                       <div>
                         <label class="block font-mono text-[9px] tracking-[0.25em] text-zinc-600 uppercase mb-3">
-                          Institutional Domain / Organisation
+                          Organization Name
                         </label>
                         <.input
                           field={@form[:organization]}
@@ -308,7 +315,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                       </div>
                       <div>
                         <label class="block font-mono text-[9px] tracking-[0.25em] text-zinc-600 uppercase mb-3">
-                          Operational Role / Job Title
+                          Professional Role / Job Title
                         </label>
                         <.input
                           field={@form[:job_title]}
@@ -326,10 +333,10 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   >
                     <div class="mb-10">
                       <p class="font-mono text-[10px] tracking-[0.4em] text-emerald-400/60 uppercase mb-3">
-                        Phase III: Operational Scope
+                        Step III: Treasury Requirements
                       </p>
                       <h3 class="text-2xl font-serif font-black text-white tracking-tight">
-                        Scale Analysis.
+                        Operational Overview.
                       </h3>
                     </div>
 
@@ -416,7 +423,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                       phx-click="next_step"
                       class="flex-1 py-5 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group"
                     >
-                      <span>Continue Protocol</span>
+                      <span>Next Step</span>
                       <.icon
                         name="hero-arrow-right"
                         class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform"
@@ -429,7 +436,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                       class="cta-primary flex-1 py-5 bg-emerald-400 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
                     >
                       <span class="relative z-10 flex items-center gap-3">
-                        Submit Authorization
+                        Submit Application
                         <span class="arrow-wrap">
                           <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-icon" />
                           <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-clone" />
@@ -439,7 +446,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                   </div>
 
                   <p class="text-center text-zinc-700 text-[9px] font-mono mt-8 uppercase tracking-[0.2em]">
-                    Secure handshake in progress · Node verification active
+                    Secure submission channel active
                   </p>
                 </.form>
               </div>
