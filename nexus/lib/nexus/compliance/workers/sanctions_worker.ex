@@ -47,7 +47,7 @@ defmodule Nexus.Compliance.Workers.SanctionsWorker do
         })
 
       case Nexus.dispatch(cmd, metadata: metadata) do
-        :ok ->
+        {:ok, _} ->
           :ok
 
         {:error, reason} ->

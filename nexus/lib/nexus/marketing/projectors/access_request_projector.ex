@@ -118,9 +118,13 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
   end
 
   defp track_idempotency(multi, metadata, command_name, result) do
+    raw_key =
+      Map.get(metadata, "idempotency_key") || Map.get(metadata, :idempotency_key)
+
     id_key =
-      Map.get(metadata, "idempotency_key") || Map.get(metadata, :idempotency_key) ||
-        metadata.causation_id || metadata.event_id
+      if uuid?(raw_key),
+        do: raw_key,
+        else: metadata.causation_id || metadata.event_id
 
     attrs = %{
       id: id_key,
@@ -136,4 +140,9 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
       conflict_target: :id
     )
   end
+
+  @uuid_pattern ~r/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  defp uuid?(nil), do: false
+  defp uuid?(s) when is_binary(s), do: String.match?(s, @uuid_pattern)
+  defp uuid?(_), do: false
 end

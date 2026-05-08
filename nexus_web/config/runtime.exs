@@ -64,8 +64,9 @@ if config_env() != :test do
 end
 
 # PromEx: web node runs on port 4003 to avoid conflict with Phoenix on 4000
+# Disabled in test to avoid port conflict with the running server.
 metrics_server_config =
-  if System.get_env("START_METRICS_SERVER") == "true" do
+  if config_env() != :test and System.get_env("START_METRICS_SERVER") == "true" do
     [port: 4003, path: "/metrics", adapter: Bandit, protocol: :http, ip: {0, 0, 0, 0}]
   else
     :disabled

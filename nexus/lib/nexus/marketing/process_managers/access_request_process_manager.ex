@@ -54,16 +54,30 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
       Logger.info("[AccessRequestPM] Initiating sanctions screening for #{event.email}")
       tracing_metadata = Tracing.inject_context(%{})
 
-      App.dispatch(
-        %InitiateSanctionsScreening{
-          request_id: event.request_id,
-          email: event.email,
-          name: event.name,
-          organization: event.organization
-        },
-        metadata:
-          Map.put(tracing_metadata, "idempotency_key", "#{event.request_id}:sanctions_screen")
-      )
+      case App.dispatch(
+             %InitiateSanctionsScreening{
+               request_id: event.request_id,
+               email: event.email,
+               name: event.name,
+               organization: event.organization
+             },
+             metadata:
+               Map.put(
+                 tracing_metadata,
+                 "idempotency_key",
+                 "#{event.request_id}:sanctions_screen"
+               )
+           ) do
+        :ok ->
+          []
+
+        {:error, reason} ->
+          Logger.error(
+            "[AccessRequestPM] Failed to initiate sanctions screening for #{event.request_id}: #{inspect(reason)}"
+          )
+
+          {:error, reason}
+      end
     end
   end
 
