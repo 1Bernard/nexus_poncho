@@ -1,6 +1,35 @@
 alias Nexus.Marketing.Projections.AccessRequest
 alias Nexus.Repo
 
+# ── Seed RBAC roles ──────────────────────────────────────────────────────────
+roles = [
+  # Org roles — customer-facing treasury operations
+  %{name: "group_treasurer", plane: "org", scope: "group"},
+  %{name: "treasury_manager", plane: "org", scope: "subsidiary"},
+  %{name: "treasury_analyst", plane: "org", scope: "subsidiary"},
+  %{name: "vault_manager", plane: "org", scope: "entity"},
+  %{name: "compliance_officer", plane: "org", scope: "group"},
+  %{name: "auditor", plane: "org", scope: "group"},
+  %{name: "org_admin", plane: "org", scope: "subsidiary"},
+  # Legacy org roles
+  %{name: "admin", plane: "org", scope: "subsidiary"},
+  %{name: "treasurer", plane: "org", scope: "subsidiary"},
+  %{name: "viewer", plane: "org", scope: "subsidiary"}
+]
+
+now = DateTime.utc_now()
+
+Enum.each(roles, fn attrs ->
+  Repo.insert_all(
+    "roles",
+    [Map.merge(attrs, %{id: Uniq.UUID.uuid7(), created_at: now})],
+    on_conflict: :nothing,
+    conflict_target: :name
+  )
+end)
+
+IO.puts("Seeded #{length(roles)} RBAC roles.")
+
 requests = [
   %{
     id: Uniq.UUID.uuid7(),

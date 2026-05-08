@@ -58,7 +58,13 @@ defmodule Nexus.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:timescale, "~> 0.1"},
       {:uuidv7, "~> 1.0"},
-      {:nexus_shared, path: "../nexus_shared"}
+      {:nexus_shared, path: "../nexus_shared"},
+      {:bodyguard, "~> 2.4"},
+      {:oban, "~> 2.18"},
+      {:req, "~> 0.5"},
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:sweet_xml, "~> 0.7"}
     ]
   end
 

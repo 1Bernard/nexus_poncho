@@ -1,17 +1,21 @@
 defmodule Nexus.Marketing.Aggregates.AccessRequest do
   @moduledoc """
   Access Request aggregate.
-  Owns the lifecycle: submitted → under_review → approved | rejected → archived.
-  Follows Standard: Deterministic Engine.
+  Lifecycle: submitted → (sanctions_screening: pending → clean) → under_review → approved | rejected → archived.
+
+  Cooling-off guard: ReviewAccessRequest is blocked while sanctions_screening is "pending".
+  A "flagged" result also blocks review — a compliance officer must manually override via archive.
   """
 
-  defstruct [:request_id, :status, :email, :name]
+  defstruct [:request_id, :status, :email, :name, :organization, :sanctions_screening]
 
   alias __MODULE__, as: AccessRequest
 
   alias Nexus.Marketing.Commands.{
     ApproveAccessRequest,
     ArchiveAccessRequest,
+    CompleteSanctionsScreening,
+    InitiateSanctionsScreening,
     RejectAccessRequest,
     ReviewAccessRequest,
     SubmitAccessRequest
@@ -22,7 +26,9 @@ defmodule Nexus.Marketing.Aggregates.AccessRequest do
     AccessRequestArchived,
     AccessRequestRejected,
     AccessRequestReviewed,
-    AccessRequestSubmitted
+    AccessRequestSubmitted,
+    SanctionsScreeningCompleted,
+    SanctionsScreeningInitiated
   }
 
   require Logger
@@ -44,6 +50,46 @@ defmodule Nexus.Marketing.Aggregates.AccessRequest do
 
   def execute(%AccessRequest{}, %SubmitAccessRequest{}) do
     {:error, :access_request_already_submitted}
+  end
+
+  def execute(%AccessRequest{status: "pending"}, %InitiateSanctionsScreening{} = cmd) do
+    %SanctionsScreeningInitiated{
+      request_id: cmd.request_id,
+      email: cmd.email,
+      name: cmd.name,
+      organization: cmd.organization
+    }
+  end
+
+  def execute(%AccessRequest{}, %InitiateSanctionsScreening{}) do
+    {:error, :cannot_initiate_screening_in_current_state}
+  end
+
+  def execute(%AccessRequest{sanctions_screening: "pending"}, %CompleteSanctionsScreening{} = cmd) do
+    %SanctionsScreeningCompleted{
+      request_id: cmd.request_id,
+      result: cmd.result,
+      matched_list: cmd.matched_list
+    }
+  end
+
+  def execute(%AccessRequest{}, %CompleteSanctionsScreening{}) do
+    {:error, :screening_not_in_progress}
+  end
+
+  # Cooling-off guard: block review while screening is active or flagged.
+  def execute(
+        %AccessRequest{status: "pending", sanctions_screening: "pending"},
+        %ReviewAccessRequest{}
+      ) do
+    {:error, :sanctions_screening_in_progress}
+  end
+
+  def execute(
+        %AccessRequest{status: "pending", sanctions_screening: "flagged"},
+        %ReviewAccessRequest{}
+      ) do
+    {:error, :sanctions_screening_flagged}
   end
 
   def execute(%AccessRequest{status: "pending"}, %ReviewAccessRequest{} = cmd) do
@@ -91,8 +137,17 @@ defmodule Nexus.Marketing.Aggregates.AccessRequest do
       | request_id: event.request_id,
         status: "pending",
         email: event.email,
-        name: event.name
+        name: event.name,
+        organization: event.organization
     }
+  end
+
+  def apply(%AccessRequest{} = state, %SanctionsScreeningInitiated{}) do
+    %AccessRequest{state | sanctions_screening: "pending"}
+  end
+
+  def apply(%AccessRequest{} = state, %SanctionsScreeningCompleted{result: result}) do
+    %AccessRequest{state | sanctions_screening: result}
   end
 
   def apply(%AccessRequest{} = state, %AccessRequestReviewed{}) do

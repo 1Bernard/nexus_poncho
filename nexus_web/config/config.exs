@@ -61,6 +61,13 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# ==================== SWOOSH ====================
+
+config :nexus_web, NexusWeb.Mailer, adapter: Swoosh.Adapters.Local
+
+# Finch HTTP client used by Swoosh for production adapters (SendGrid, SES, etc.)
+config :swoosh, :api_client, Swoosh.ApiClient.Finch
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

@@ -38,6 +38,7 @@ defmodule Nexus.Application do
         [
           Nexus.PromEx,
           Nexus.Repo,
+          {Oban, Application.fetch_env!(:nexus, Oban)},
           {Cluster.Supervisor, [topologies, [name: Nexus.ClusterSupervisor]]},
           {Horde.Registry, [name: Nexus.HordeRegistry, keys: :unique, members: :auto]},
           {Horde.DynamicSupervisor,
@@ -67,6 +68,7 @@ defmodule Nexus.Application do
        [
          Nexus.Compliance.Projectors.ScreeningProjector,
          Nexus.Compliance.Workers.PEPWorker,
+         Nexus.Compliance.Workers.SanctionsWorker,
          Nexus.Compliance.Projectors.AuditLogProjector
        ]},
       {:start_accounting_projections, [Nexus.Accounting.Projectors.AccountProjector]},

@@ -75,7 +75,10 @@ defmodule NexusWeb.MixProject do
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:nexus, path: "../nexus"},
-      {:nexus_shared, path: "../nexus_shared"}
+      {:nexus_shared, path: "../nexus_shared"},
+      {:bodyguard, "~> 2.4"},
+      {:swoosh, "~> 1.16"},
+      {:finch, "~> 0.19"}
     ]
   end
 

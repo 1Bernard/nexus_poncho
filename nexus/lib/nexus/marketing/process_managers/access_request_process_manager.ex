@@ -23,7 +23,14 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
 
   alias Nexus.App
   alias Nexus.Identity.Commands.RegisterUser
-  alias Nexus.Marketing.Events.AccessRequestApproved
+
+  alias Nexus.Marketing.Commands.InitiateSanctionsScreening
+
+  alias Nexus.Marketing.Events.{
+    AccessRequestApproved,
+    AccessRequestSubmitted
+  }
+
   alias Nexus.Shared.Tracing
 
   require Logger
@@ -34,10 +41,31 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
 
   # ── Process Routing ──────────────────────────────────────────────────────
 
-  def interested?(%AccessRequestApproved{request_id: id}), do: {:start, id}
+  def interested?(%AccessRequestSubmitted{request_id: id}), do: {:start, id}
+  def interested?(%AccessRequestApproved{request_id: id}), do: {:continue, id}
   def interested?(_event), do: false
 
   # ── Command Dispatch ─────────────────────────────────────────────────────
+
+  def handle(%__MODULE__{}, %AccessRequestSubmitted{} = event, metadata) do
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "AccessRequestPM.InitiateScreening" do
+      Logger.info("[AccessRequestPM] Initiating sanctions screening for #{event.email}")
+      tracing_metadata = Tracing.inject_context(%{})
+
+      App.dispatch(
+        %InitiateSanctionsScreening{
+          request_id: event.request_id,
+          email: event.email,
+          name: event.name,
+          organization: event.organization
+        },
+        metadata:
+          Map.put(tracing_metadata, "idempotency_key", "#{event.request_id}:sanctions_screen")
+      )
+    end
+  end
 
   def handle(%__MODULE__{}, %AccessRequestApproved{} = event, metadata) do
     Tracing.extract_and_set_context(metadata)
@@ -78,6 +106,10 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
   end
 
   # ── State Mutators ───────────────────────────────────────────────────────
+
+  def apply(%__MODULE__{} = state, %AccessRequestSubmitted{} = event) do
+    %__MODULE__{state | request_id: event.request_id}
+  end
 
   def apply(%__MODULE__{} = state, %AccessRequestApproved{} = event) do
     %__MODULE__{state | request_id: event.request_id}

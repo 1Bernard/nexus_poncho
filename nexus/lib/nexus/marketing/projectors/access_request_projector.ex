@@ -18,7 +18,9 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
     AccessRequestArchived,
     AccessRequestRejected,
     AccessRequestReviewed,
-    AccessRequestSubmitted
+    AccessRequestSubmitted,
+    SanctionsScreeningCompleted,
+    SanctionsScreeningInitiated
   }
 
   alias Nexus.Marketing.Idempotency.IdempotencyKey
@@ -30,6 +32,18 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
     multi
     |> track_idempotency(metadata, "SubmitAccessRequest", %{request_id: event.request_id})
     |> submit_request(event, metadata)
+  end)
+
+  project(%SanctionsScreeningInitiated{} = event, metadata, fn multi ->
+    multi
+    |> track_idempotency(metadata, "InitiateSanctionsScreening", %{request_id: event.request_id})
+    |> update_request(event.request_id, sanctions_screening: "pending")
+  end)
+
+  project(%SanctionsScreeningCompleted{} = event, metadata, fn multi ->
+    multi
+    |> track_idempotency(metadata, "CompleteSanctionsScreening", %{request_id: event.request_id})
+    |> update_request(event.request_id, sanctions_screening: event.result)
   end)
 
   project(%AccessRequestReviewed{} = event, metadata, fn multi ->

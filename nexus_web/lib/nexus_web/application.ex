@@ -35,6 +35,7 @@ defmodule NexusWeb.Application do
           NexusWeb.PromEx,
           NexusWeb.Telemetry,
           {Phoenix.PubSub, name: NexusWeb.PubSub},
+          {Finch, name: NexusWeb.Finch},
           NexusWeb.Endpoint
         ]
 

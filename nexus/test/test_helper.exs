@@ -32,6 +32,10 @@ end
   Nexus.Treasury.Projectors.VaultProjector,
   Nexus.Compliance.Projectors.ScreeningProjector,
   Nexus.Compliance.Workers.PEPWorker,
+  Nexus.Compliance.Workers.SanctionsWorker,
+  Nexus.Marketing.Projectors.AccessRequestProjector,
+  Nexus.Marketing.Projectors.AuditLogProjector,
+  Nexus.Marketing.ProcessManagers.AccessRequestProcessManager,
   Nexus.Onboarding.ProcessManagers.OnboardingProcessManager,
   Nexus.Audit.Projectors.PlatformAuditProjector
 ]
@@ -115,6 +119,10 @@ IO.puts("==> [Nexus] Starting Domain Projections and Side-Effects...")
   Nexus.Treasury.Projectors.VaultProjector,
   Nexus.Compliance.Projectors.ScreeningProjector,
   Nexus.Compliance.Workers.PEPWorker,
+  Nexus.Compliance.Workers.SanctionsWorker,
+  Nexus.Marketing.Projectors.AccessRequestProjector,
+  Nexus.Marketing.Projectors.AuditLogProjector,
+  Nexus.Marketing.ProcessManagers.AccessRequestProcessManager,
   Nexus.Onboarding.ProcessManagers.OnboardingProcessManager,
   Nexus.Audit.Projectors.PlatformAuditProjector
 ]

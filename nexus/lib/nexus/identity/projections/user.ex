@@ -11,6 +11,9 @@ defmodule Nexus.Identity.Projections.User do
     field(:name, :string)
     field(:role, :string)
     field(:status, :string)
+    # Equinox platform staff role — nil for all customer users.
+    # Values: "super_admin" | "platform_support" | nil
+    field(:platform_role, :string)
 
     # Biometric Credentials
     field(:credential_id, :string)
@@ -21,8 +24,21 @@ defmodule Nexus.Identity.Projections.User do
 
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :org_id, :email, :name, :role, :status, :credential_id, :cose_key])
+    |> cast(attrs, [
+      :id,
+      :org_id,
+      :email,
+      :name,
+      :role,
+      :status,
+      :platform_role,
+      :credential_id,
+      :cose_key
+    ])
     |> validate_required([:id, :org_id, :email, :role, :status])
+    |> validate_inclusion(:platform_role, ["super_admin", "platform_support"],
+      message: "must be a valid platform role"
+    )
     |> unique_constraint(:email)
     |> unique_constraint(:credential_id)
   end

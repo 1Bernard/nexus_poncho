@@ -5,6 +5,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
   alias Nexus.App
   alias Nexus.Identity.WebAuthn.BiometricInvitation
+  alias Nexus.Policy
 
   alias Nexus.Marketing.Commands.{
     ApproveAccessRequest,
@@ -23,33 +24,42 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     socket
-     |> assign(
-       page_title: "Access Requests",
-       breadcrumb_section: "Admin",
-       page: 1,
-       filter_status: "all",
-       search: "",
-       selected_ids: MapSet.new(),
-       show_drawer: false,
-       show_filters: false,
-       drawer_request: nil,
-       invitation_link: nil,
-       approve_role: "",
-       show_reject_form: false,
-       reject_reason: "",
-       show_bulk_reject_form: false,
-       bulk_reject_reason: "",
-       total_count: 0,
-       total_pages: 1,
-       per_page: @per_page,
-       statuses: @statuses,
-       current_page_ids: [],
-       view_mode: "list",
-       duplicate_warnings: []
-     )
-     |> load_requests()}
+    case Bodyguard.permit(Policy, :access_admin_panel, socket.assigns.current_user) do
+      :ok ->
+        {:ok,
+         socket
+         |> assign(
+           page_title: "Access Requests",
+           breadcrumb_section: "Admin",
+           page: 1,
+           filter_status: "all",
+           search: "",
+           selected_ids: MapSet.new(),
+           show_drawer: false,
+           show_filters: false,
+           drawer_request: nil,
+           invitation_link: nil,
+           approve_role: "",
+           show_reject_form: false,
+           reject_reason: "",
+           show_bulk_reject_form: false,
+           bulk_reject_reason: "",
+           total_count: 0,
+           total_pages: 1,
+           per_page: @per_page,
+           statuses: @statuses,
+           current_page_ids: [],
+           view_mode: "list",
+           duplicate_warnings: []
+         )
+         |> load_requests()}
+
+      {:error, :unauthorized} ->
+        {:ok,
+         socket
+         |> put_flash(:error, "You are not authorized to access this page.")
+         |> redirect(to: ~p"/")}
+    end
   end
 
   @impl true
@@ -890,52 +900,57 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   end
 
   def handle_event("reject_request", %{"id" => id}, socket) do
-    reason = String.trim(socket.assigns.reject_reason)
+    with :ok <- Bodyguard.permit(Policy, :reject_access_request, socket.assigns.current_user) do
+      reason = String.trim(socket.assigns.reject_reason)
 
-    if reason == "" do
-      {:noreply, put_flash(socket, :error, "Please provide a rejection reason.")}
-    else
-      require OpenTelemetry.Tracer
+      if reason == "" do
+        {:noreply, put_flash(socket, :error, "Please provide a rejection reason.")}
+      else
+        require OpenTelemetry.Tracer
 
-      if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
-        review_cmd = %ReviewAccessRequest{
+        if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
+          review_cmd = %ReviewAccessRequest{
+            request_id: id,
+            reviewed_by: socket.assigns.current_user.id
+          }
+
+          tracing_metadata = Tracing.inject_context(%{})
+
+          OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
+            App.dispatch(review_cmd,
+              metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
+            )
+          end
+        end
+
+        command = %RejectAccessRequest{
           request_id: id,
-          reviewed_by: socket.assigns.current_user.id
+          rejected_by: socket.assigns.current_user.id,
+          reason: reason
         }
 
         tracing_metadata = Tracing.inject_context(%{})
 
-        OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
-          App.dispatch(review_cmd,
-            metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
-          )
+        OpenTelemetry.Tracer.with_span "Admin.RejectAccessRequest" do
+          case App.dispatch(command,
+                 metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:reject")
+               ) do
+            :ok ->
+              {:noreply,
+               socket
+               |> assign(show_reject_form: false, reject_reason: "")
+               |> load_requests()
+               |> refresh_drawer(id)
+               |> push_event("toast:show:success", %{message: "Request rejected", duration: 4_000})}
+
+            {:error, reason_err} ->
+              {:noreply, put_flash(socket, :error, "Failed to reject: #{inspect(reason_err)}")}
+          end
         end
       end
-
-      command = %RejectAccessRequest{
-        request_id: id,
-        rejected_by: socket.assigns.current_user.id,
-        reason: reason
-      }
-
-      tracing_metadata = Tracing.inject_context(%{})
-
-      OpenTelemetry.Tracer.with_span "Admin.RejectAccessRequest" do
-        case App.dispatch(command,
-               metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:reject")
-             ) do
-          :ok ->
-            {:noreply,
-             socket
-             |> assign(show_reject_form: false, reject_reason: "")
-             |> load_requests()
-             |> refresh_drawer(id)
-             |> push_event("toast:show:success", %{message: "Request rejected", duration: 4_000})}
-
-          {:error, reason_err} ->
-            {:noreply, put_flash(socket, :error, "Failed to reject: #{inspect(reason_err)}")}
-        end
-      end
+    else
+      {:error, :unauthorized} ->
+        {:noreply, put_flash(socket, :error, "Unauthorized.")}
     end
   end
 
@@ -948,137 +963,155 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   end
 
   def handle_event("transition_status", %{"id" => id, "to" => to_status}, socket) do
-    require OpenTelemetry.Tracer
+    action = if to_status == "archived", do: :archive_access_request, else: :review_access_request
 
-    command =
-      case to_status do
-        "under_review" ->
-          %ReviewAccessRequest{request_id: id, reviewed_by: socket.assigns.current_user.id}
+    with :ok <- Bodyguard.permit(Policy, action, socket.assigns.current_user) do
+      require OpenTelemetry.Tracer
 
-        "archived" ->
-          %ArchiveAccessRequest{request_id: id, archived_by: socket.assigns.current_user.id}
+      command =
+        case to_status do
+          "under_review" ->
+            %ReviewAccessRequest{request_id: id, reviewed_by: socket.assigns.current_user.id}
 
-        _ ->
-          nil
-      end
+          "archived" ->
+            %ArchiveAccessRequest{request_id: id, archived_by: socket.assigns.current_user.id}
 
-    if command do
-      tracing_metadata = Tracing.inject_context(%{})
-
-      OpenTelemetry.Tracer.with_span "Admin.TransitionAccessRequest" do
-        case App.dispatch(command,
-               metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:#{to_status}")
-             ) do
-          :ok ->
-            {:noreply,
-             socket
-             |> load_requests()
-             |> refresh_drawer(id)
-             |> push_event("toast:show:success", %{
-               message: "Request marked as #{String.replace(to_status, "_", " ")}",
-               duration: 4_000
-             })}
-
-          {:error, reason} ->
-            {:noreply, put_flash(socket, :error, "Transition failed: #{inspect(reason)}")}
+          _ ->
+            nil
         end
+
+      if command do
+        tracing_metadata = Tracing.inject_context(%{})
+
+        OpenTelemetry.Tracer.with_span "Admin.TransitionAccessRequest" do
+          case App.dispatch(command,
+                 metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:#{to_status}")
+               ) do
+            :ok ->
+              {:noreply,
+               socket
+               |> load_requests()
+               |> refresh_drawer(id)
+               |> push_event("toast:show:success", %{
+                 message: "Request marked as #{String.replace(to_status, "_", " ")}",
+                 duration: 4_000
+               })}
+
+            {:error, reason} ->
+              {:noreply, put_flash(socket, :error, "Transition failed: #{inspect(reason)}")}
+          end
+        end
+      else
+        {:noreply, put_flash(socket, :error, "Invalid status transition.")}
       end
     else
-      {:noreply, put_flash(socket, :error, "Invalid status transition.")}
+      {:error, :unauthorized} ->
+        {:noreply, put_flash(socket, :error, "Unauthorized.")}
     end
   end
 
   def handle_event("approve_request", %{"id" => id}, socket) do
-    role = socket.assigns.approve_role
+    with :ok <- Bodyguard.permit(Policy, :approve_access_request, socket.assigns.current_user) do
+      role = socket.assigns.approve_role
 
-    if role == "" do
-      {:noreply, put_flash(socket, :error, "Please select a role before approving.")}
-    else
-      require OpenTelemetry.Tracer
-      require Logger
+      if role == "" do
+        {:noreply, put_flash(socket, :error, "Please select a role before approving.")}
+      else
+        require OpenTelemetry.Tracer
+        require Logger
 
-      if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
-        review_cmd = %ReviewAccessRequest{
+        if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
+          review_cmd = %ReviewAccessRequest{
+            request_id: id,
+            reviewed_by: socket.assigns.current_user.id
+          }
+
+          tracing_metadata = Tracing.inject_context(%{})
+
+          OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
+            App.dispatch(review_cmd,
+              metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
+            )
+          end
+        end
+
+        user_id = Uniq.UUID.uuid7()
+        org_id = Uniq.UUID.uuid7()
+
+        command = %ApproveAccessRequest{
           request_id: id,
-          reviewed_by: socket.assigns.current_user.id
+          approved_by: socket.assigns.current_user.id,
+          role: role,
+          provisioned_user_id: user_id,
+          provisioned_org_id: org_id
         }
 
-        tracing_metadata = Tracing.inject_context(%{})
+        OpenTelemetry.Tracer.with_span "Admin.ApproveAccessRequest" do
+          tracing_metadata = Tracing.inject_context(%{})
 
-        OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
-          App.dispatch(review_cmd,
-            metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
-          )
+          case App.dispatch(command,
+                 metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
+               ) do
+            :ok ->
+              token = BiometricInvitation.generate_token(user_id)
+              link = BiometricInvitation.magic_link(token)
+
+              Process.send_after(self(), :refresh_after_approval, 1_000)
+
+              {:noreply,
+               socket
+               |> assign(
+                 approve_role: "",
+                 invitation_link: link,
+                 drawer_request:
+                   socket.assigns.drawer_request &&
+                     %{socket.assigns.drawer_request | status: "approved"}
+               )
+               |> push_event("toast:show:success", %{
+                 message: "Access approved — invitation link generated",
+                 duration: 5_000
+               })}
+
+            {:error, reason} ->
+              Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
+              {:noreply, put_flash(socket, :error, "Approval failed: #{inspect(reason)}")}
+          end
         end
       end
-
-      user_id = Uniq.UUID.uuid7()
-      org_id = Uniq.UUID.uuid7()
-
-      command = %ApproveAccessRequest{
-        request_id: id,
-        approved_by: socket.assigns.current_user.id,
-        role: role,
-        provisioned_user_id: user_id,
-        provisioned_org_id: org_id
-      }
-
-      OpenTelemetry.Tracer.with_span "Admin.ApproveAccessRequest" do
-        tracing_metadata = Tracing.inject_context(%{})
-
-        case App.dispatch(command,
-               metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
-             ) do
-          :ok ->
-            token = BiometricInvitation.generate_token(user_id)
-            link = BiometricInvitation.magic_link(token)
-
-            Process.send_after(self(), :refresh_after_approval, 1_000)
-
-            {:noreply,
-             socket
-             |> assign(
-               approve_role: "",
-               invitation_link: link,
-               drawer_request:
-                 socket.assigns.drawer_request &&
-                   %{socket.assigns.drawer_request | status: "approved"}
-             )
-             |> push_event("toast:show:success", %{
-               message: "Access approved — invitation link generated",
-               duration: 5_000
-             })}
-
-          {:error, reason} ->
-            Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
-            {:noreply, put_flash(socket, :error, "Approval failed: #{inspect(reason)}")}
-        end
-      end
+    else
+      {:error, :unauthorized} ->
+        {:noreply,
+         put_flash(socket, :error, "Unauthorized. Only super_admin can approve requests.")}
     end
   end
 
   def handle_event("bulk_under_review", _, socket) do
-    require OpenTelemetry.Tracer
-    tracing_metadata = Tracing.inject_context(%{})
+    with :ok <- Bodyguard.permit(Policy, :review_access_request, socket.assigns.current_user) do
+      require OpenTelemetry.Tracer
+      tracing_metadata = Tracing.inject_context(%{})
 
-    ids = MapSet.to_list(socket.assigns.selected_ids)
+      ids = MapSet.to_list(socket.assigns.selected_ids)
 
-    from(r in AccessRequest, where: r.id in ^ids and r.status == "pending")
-    |> Repo.all()
-    |> Enum.each(fn request ->
-      command = %ReviewAccessRequest{
-        request_id: request.id,
-        reviewed_by: socket.assigns.current_user.id
-      }
+      from(r in AccessRequest, where: r.id in ^ids and r.status == "pending")
+      |> Repo.all()
+      |> Enum.each(fn request ->
+        command = %ReviewAccessRequest{
+          request_id: request.id,
+          reviewed_by: socket.assigns.current_user.id
+        }
 
-      OpenTelemetry.Tracer.with_span "Admin.BulkReview" do
-        App.dispatch(command,
-          metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:review")
-        )
-      end
-    end)
+        OpenTelemetry.Tracer.with_span "Admin.BulkReview" do
+          App.dispatch(command,
+            metadata: Map.put(tracing_metadata, "idempotency_key", "#{request.id}:review")
+          )
+        end
+      end)
 
-    {:noreply, socket |> assign(selected_ids: MapSet.new()) |> load_requests()}
+      {:noreply, socket |> assign(selected_ids: MapSet.new()) |> load_requests()}
+    else
+      {:error, :unauthorized} ->
+        {:noreply, put_flash(socket, :error, "Unauthorized.")}
+    end
   end
 
   def handle_event("show_bulk_reject_form", _, socket) do
@@ -1094,26 +1127,36 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   end
 
   def handle_event("bulk_reject", _, socket) do
-    reason = String.trim(socket.assigns.bulk_reject_reason)
+    with :ok <- Bodyguard.permit(Policy, :reject_access_request, socket.assigns.current_user) do
+      reason = String.trim(socket.assigns.bulk_reject_reason)
 
-    if reason == "" do
-      {:noreply, put_flash(socket, :error, "Please provide an audit reason for batch rejection.")}
+      if reason == "" do
+        {:noreply,
+         put_flash(socket, :error, "Please provide an audit reason for batch rejection.")}
+      else
+        require OpenTelemetry.Tracer
+        tracing_metadata = Tracing.inject_context(%{})
+
+        ids = MapSet.to_list(socket.assigns.selected_ids)
+
+        reviewer_id = socket.assigns.current_user.id
+
+        from(r in AccessRequest, where: r.id in ^ids and r.status in ["pending", "under_review"])
+        |> Repo.all()
+        |> Enum.each(&bulk_reject_request(&1, reviewer_id, reason, tracing_metadata))
+
+        {:noreply,
+         socket
+         |> assign(
+           selected_ids: MapSet.new(),
+           show_bulk_reject_form: false,
+           bulk_reject_reason: ""
+         )
+         |> load_requests()}
+      end
     else
-      require OpenTelemetry.Tracer
-      tracing_metadata = Tracing.inject_context(%{})
-
-      ids = MapSet.to_list(socket.assigns.selected_ids)
-
-      reviewer_id = socket.assigns.current_user.id
-
-      from(r in AccessRequest, where: r.id in ^ids and r.status in ["pending", "under_review"])
-      |> Repo.all()
-      |> Enum.each(&bulk_reject_request(&1, reviewer_id, reason, tracing_metadata))
-
-      {:noreply,
-       socket
-       |> assign(selected_ids: MapSet.new(), show_bulk_reject_form: false, bulk_reject_reason: "")
-       |> load_requests()}
+      {:error, :unauthorized} ->
+        {:noreply, put_flash(socket, :error, "Unauthorized.")}
     end
   end
 

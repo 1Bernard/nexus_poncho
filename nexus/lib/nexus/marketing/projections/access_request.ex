@@ -20,6 +20,7 @@ defmodule Nexus.Marketing.Projections.AccessRequest do
     field(:rejected_by, :string)
     field(:provisioned_user_id, :binary_id)
     field(:provisioned_org_id, :binary_id)
+    field(:sanctions_screening, :string)
 
     timestamps(type: :utc_datetime_usec, inserted_at: :created_at)
   end
@@ -41,7 +42,8 @@ defmodule Nexus.Marketing.Projections.AccessRequest do
       :approved_by,
       :rejected_by,
       :provisioned_user_id,
-      :provisioned_org_id
+      :provisioned_org_id,
+      :sanctions_screening
     ])
     |> validate_required([
       :email,

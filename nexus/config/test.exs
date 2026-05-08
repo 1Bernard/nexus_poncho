@@ -49,3 +49,7 @@ config :libcluster, topologies: []
 
 # Commanded uses local registry in tests — no :global sync needed for single-node.
 config :nexus, Nexus.App, registry: :local
+
+# Oban: manual mode in tests — jobs don't run automatically.
+# Use Oban.drain_queue/1 in integration tests to control execution.
+config :nexus, Oban, testing: :manual

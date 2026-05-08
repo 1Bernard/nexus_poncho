@@ -64,6 +64,34 @@ config :libcluster,
 
 config :nexus, :env, Mix.env()
 
+# ==================== OBAN ====================
+
+config :nexus, Oban,
+  repo: Nexus.Repo,
+  plugins: [
+    Oban.Plugins.Pruner,
+    {Oban.Plugins.Cron,
+     crontab: [
+       # 2am daily: escalate access requests older than 5 business days
+       {"0 2 * * *", Nexus.Workers.SLAEscalationWorker},
+       # 3am daily: expire approval requests past their deadline
+       {"0 3 * * *", Nexus.Workers.ApprovalExpiryWorker}
+     ]}
+  ],
+  queues: [
+    # Sanctions screening, PEP checks, KYB review tasks
+    compliance: 5,
+    # Emails — higher concurrency, fast jobs
+    notifications: 10,
+    # S3 document processing — limited to avoid rate limits
+    documents: 3,
+    # SLA sweeps, expiry enforcement — low priority background
+    maintenance: 2
+  ]
+
+# ==================== SWOOSH ====================
+# Configured in nexus_web — nexus domain dispatches Oban jobs that call the mailer
+
 # token_secret_key_base moved to runtime.exs
 
 # OTLP Configuration moved to runtime.exs

@@ -45,6 +45,8 @@ defmodule Nexus.Router do
   alias Nexus.Marketing.Commands.{
     ApproveAccessRequest,
     ArchiveAccessRequest,
+    CompleteSanctionsScreening,
+    InitiateSanctionsScreening,
     RejectAccessRequest,
     ReviewAccessRequest,
     SubmitAccessRequest
@@ -97,6 +99,8 @@ defmodule Nexus.Router do
   dispatch(
     [
       SubmitAccessRequest,
+      InitiateSanctionsScreening,
+      CompleteSanctionsScreening,
       ReviewAccessRequest,
       ApproveAccessRequest,
       RejectAccessRequest,
