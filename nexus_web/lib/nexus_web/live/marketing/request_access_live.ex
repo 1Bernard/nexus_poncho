@@ -358,7 +358,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                                 {"$500M – $1B", "500m_1b"},
                                 {"> $1B", "gt_1b"}
                               ]}
-                              class="w-full bg-white/5 border border-white/5 rounded-xl px-6 py-5 text-white text-sm font-mono focus:outline-none focus:border-emerald-400/40 focus:bg-white/[0.08] transition-all appearance-none cursor-pointer"
+                              class="w-full bg-white/5 border border-white/5 rounded-xl px-6 py-5 text-white text-sm font-mono focus:outline-none focus:border-emerald-400/40 focus:bg-white/[0.08] transition-all appearance-none cursor-pointer [color-scheme:dark] [&>option]:bg-zinc-900 [&>option]:text-white"
                             />
                             <div class="pointer-events-none absolute inset-y-0 right-5 flex items-center">
                               <.icon name="hero-chevron-down" class="w-4 h-4 text-white/20" />
@@ -381,7 +381,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                                 {"51 – 100", "51_100"},
                                 {"100+", "100_plus"}
                               ]}
-                              class="w-full bg-white/5 border border-white/5 rounded-xl px-6 py-5 text-white text-sm font-mono focus:outline-none focus:border-emerald-400/40 focus:bg-white/[0.08] transition-all appearance-none cursor-pointer"
+                              class="w-full bg-white/5 border border-white/5 rounded-xl px-6 py-5 text-white text-sm font-mono focus:outline-none focus:border-emerald-400/40 focus:bg-white/[0.08] transition-all appearance-none cursor-pointer [color-scheme:dark] [&>option]:bg-zinc-900 [&>option]:text-white"
                             />
                             <div class="pointer-events-none absolute inset-y-0 right-5 flex items-center">
                               <.icon name="hero-chevron-down" class="w-4 h-4 text-white/20" />
