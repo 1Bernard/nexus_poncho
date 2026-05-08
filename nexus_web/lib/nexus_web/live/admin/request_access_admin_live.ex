@@ -389,7 +389,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                           </span>
                         </td>
                         <td class="px-6 py-5 text-center">
-                          <.status_pill status={request.status} />
+                          <div class="flex flex-col items-center gap-1">
+                            <.status_pill status={request.status} />
+                            <.screening_pill screening={request.sanctions_screening} />
+                          </div>
                         </td>
                         <td class="px-6 py-5 text-center">
                           <% score = confidence_score(request) %>
@@ -615,6 +618,21 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
               </div>
               <div class="space-y-1">
                 <span class="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
+                  Sanctions
+                </span>
+                <div>
+                  <%= case @drawer_request.sanctions_screening do %>
+                    <% "clean" -> %>
+                      <span class="text-[10px] font-mono text-emerald-400">Cleared</span>
+                    <% nil -> %>
+                      <span class="text-[10px] font-mono text-zinc-600">—</span>
+                    <% _ -> %>
+                      <.screening_pill screening={@drawer_request.sanctions_screening} />
+                  <% end %>
+                </div>
+              </div>
+              <div class="space-y-1">
+                <span class="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">
                   Confidence Score
                 </span>
                 <div class="flex items-center gap-2">
@@ -649,6 +667,38 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 <li class="text-[10px] font-mono text-zinc-400 leading-relaxed">{warning}</li>
               <% end %>
             </ul>
+          </div>
+
+          <%!-- Sanctions screening in progress — review blocked temporarily --%>
+          <div
+            :if={@drawer_request.sanctions_screening == "pending"}
+            class="rounded-2xl border border-amber-400/20 bg-amber-400/[0.03] p-5 space-y-3"
+          >
+            <div class="flex items-center gap-2">
+              <i data-lucide="shield" class="w-4 h-4 text-amber-400"></i>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400/80">
+                Screening In Progress
+              </span>
+            </div>
+            <p class="text-[11px] font-mono text-zinc-400 leading-relaxed">
+              Automated sanctions screening is running. Review will be available once complete.
+            </p>
+          </div>
+
+          <%!-- Sanctions hold — request flagged, review permanently blocked --%>
+          <div
+            :if={@drawer_request.sanctions_screening == "flagged"}
+            class="rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] p-5 space-y-3"
+          >
+            <div class="flex items-center gap-2">
+              <i data-lucide="shield-x" class="w-4 h-4 text-rose-400"></i>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-rose-400/80">
+                Sanctions Hold
+              </span>
+            </div>
+            <p class="text-[11px] font-mono text-zinc-400 leading-relaxed">
+              This applicant matched a sanctions list. Review is blocked. Archive to close the request.
+            </p>
           </div>
 
           <div
@@ -763,7 +813,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 <button
                   phx-click="approve_request"
                   phx-value-id={@drawer_request.id}
-                  disabled={@approve_role == ""}
+                  disabled={
+                    @approve_role == "" or
+                      @drawer_request.sanctions_screening in ["pending", "flagged"]
+                  }
                   class="flex-1 py-4 bg-emerald-400 text-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-all disabled:opacity-30 shadow-lg shadow-emerald-400/10"
                 >
                   Confirm Authorization
@@ -997,6 +1050,22 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                  duration: 4_000
                })}
 
+            {:error, :sanctions_screening_in_progress} ->
+              {:noreply,
+               put_flash(
+                 socket,
+                 :error,
+                 "Sanctions screening is still running. Try again once complete."
+               )}
+
+            {:error, :sanctions_screening_flagged} ->
+              {:noreply,
+               put_flash(
+                 socket,
+                 :error,
+                 "Review blocked: applicant matched a sanctions list. Archive to close."
+               )}
+
             {:error, reason} ->
               {:noreply, put_flash(socket, :error, "Transition failed: #{inspect(reason)}")}
           end
@@ -1020,61 +1089,69 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
         require OpenTelemetry.Tracer
         require Logger
 
-        if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
-          review_cmd = %ReviewAccessRequest{
+        review_ok? =
+          if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
+            review_cmd = %ReviewAccessRequest{
+              request_id: id,
+              reviewed_by: socket.assigns.current_user.id
+            }
+
+            tracing_metadata = Tracing.inject_context(%{})
+
+            OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
+              App.dispatch(review_cmd,
+                metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
+              )
+            end
+          else
+            :ok
+          end
+
+        if review_ok? != :ok do
+          {:noreply,
+           put_flash(socket, :error, "Could not move request to review: #{inspect(review_ok?)}")}
+        else
+          user_id = Uniq.UUID.uuid7()
+          org_id = Uniq.UUID.uuid7()
+
+          command = %ApproveAccessRequest{
             request_id: id,
-            reviewed_by: socket.assigns.current_user.id
+            approved_by: socket.assigns.current_user.id,
+            role: role,
+            provisioned_user_id: user_id,
+            provisioned_org_id: org_id
           }
 
-          tracing_metadata = Tracing.inject_context(%{})
+          OpenTelemetry.Tracer.with_span "Admin.ApproveAccessRequest" do
+            tracing_metadata = Tracing.inject_context(%{})
 
-          OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
-            App.dispatch(review_cmd,
-              metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:review")
-            )
-          end
-        end
+            case App.dispatch(command,
+                   metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
+                 ) do
+              :ok ->
+                token = BiometricInvitation.generate_token(user_id)
+                link = BiometricInvitation.magic_link(token)
 
-        user_id = Uniq.UUID.uuid7()
-        org_id = Uniq.UUID.uuid7()
+                Process.send_after(self(), :refresh_after_approval, 1_000)
 
-        command = %ApproveAccessRequest{
-          request_id: id,
-          approved_by: socket.assigns.current_user.id,
-          role: role,
-          provisioned_user_id: user_id,
-          provisioned_org_id: org_id
-        }
+                {:noreply,
+                 socket
+                 |> assign(
+                   approve_role: "",
+                   invitation_link: link,
+                   drawer_request:
+                     socket.assigns.drawer_request &&
+                       %{socket.assigns.drawer_request | status: "approved"}
+                 )
+                 |> push_event("toast:show:success", %{
+                   message: "Access approved — invitation link generated",
+                   duration: 5_000
+                 })}
 
-        OpenTelemetry.Tracer.with_span "Admin.ApproveAccessRequest" do
-          tracing_metadata = Tracing.inject_context(%{})
-
-          case App.dispatch(command,
-                 metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
-               ) do
-            :ok ->
-              token = BiometricInvitation.generate_token(user_id)
-              link = BiometricInvitation.magic_link(token)
-
-              Process.send_after(self(), :refresh_after_approval, 1_000)
-
-              {:noreply,
-               socket
-               |> assign(
-                 approve_role: "",
-                 invitation_link: link,
-                 drawer_request:
-                   socket.assigns.drawer_request &&
-                     %{socket.assigns.drawer_request | status: "approved"}
-               )
-               |> push_event("toast:show:success", %{
-                 message: "Access approved — invitation link generated",
-                 duration: 5_000
-               })}
-
-            {:error, reason} ->
-              Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
-              {:noreply, put_flash(socket, :error, "Approval failed: #{inspect(reason)}")}
+              {:error, reason} ->
+                Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
+                {:noreply, put_flash(socket, :error, "Approval failed: #{inspect(reason)}")}
+            end
           end
         end
       end

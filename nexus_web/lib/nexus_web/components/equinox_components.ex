@@ -386,6 +386,29 @@ defmodule NexusWeb.EquinoxComponents do
     """
   end
 
+  # ── screening_pill ────────────────────────────────────────────────────────────
+  # Only renders for "pending" or "flagged" — "clean" and nil are invisible.
+
+  attr :screening, :string, default: nil
+  attr :class, :string, default: nil
+
+  def screening_pill(assigns) do
+    ~H"""
+    <span
+      :if={@screening in ["pending", "flagged"]}
+      class={[
+        "status-pill border",
+        @screening == "pending" && "bg-amber-400/10 text-amber-400 border-amber-400/20",
+        @screening == "flagged" && "bg-rose-500/10 text-rose-400 border-rose-500/20",
+        @class
+      ]}
+    >
+      <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
+      {if @screening == "pending", do: "SCREENING", else: "FLAGGED"}
+    </span>
+    """
+  end
+
   # ── eq_drawer_field ───────────────────────────────────────────────────────────
 
   attr :label, :string, required: true
