@@ -30,6 +30,8 @@ data/
 # 🧠 Erlang Runtime Artifacts
 Mnesia.*/
 **/Mnesia.*/
+MnesiaCore.*
+**/MnesiaCore.*
 
 # 🔬 Scratch & Debug Artifacts
 **/scratch/

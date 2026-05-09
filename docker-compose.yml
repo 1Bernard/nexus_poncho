@@ -254,7 +254,7 @@ services:
         condition: service_healthy
       vault-init:
         condition: service_completed_successfully
-    command: ["sh", "-c", "cd nexus && mix ecto.migrate && elixir --name nexus@node1.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
+    command: ["sh", "-c", "cd nexus && mix ecto.migrate && mix run priv/repo/seeds.exs && elixir --name nexus@node1.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
 
   node2:
     build:
@@ -327,7 +327,7 @@ services:
       # Workers share ERL_COOKIE among themselves for Horde clustering.
       ERL_COOKIE: ${WEB_ERL_COOKIE}
       STANDALONE_GATEWAY: "true"
-      START_METRICS_SERVER: "true"
+      START_METRICS_SERVER: "false"
       START_PROJECTIONS: "false"
       START_IDENTITY_PROJECTIONS: "false"
       START_ORGANIZATION_PROJECTIONS: "false"

@@ -29,11 +29,11 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
           </div>
 
           <h1 class="text-3xl font-serif italic font-black tracking-tight text-white mb-2">
-            Identity<br /><span class="emerald-glint">Anchored.</span>
+            Identity<br /><span class="emerald-glint">Verified.</span>
           </h1>
 
           <p class="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em] mb-10">
-            Hardware root of trust established
+            Biometric authentication successfully configured
           </p>
 
           <%!-- Status rows --%>
@@ -44,10 +44,10 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
               </div>
               <div>
                 <p class="text-[10px] font-mono font-bold text-white/80 uppercase tracking-widest">
-                  Hardware Bound
+                  Device Registered
                 </p>
                 <p class="text-[9px] font-mono text-zinc-600 mt-0.5">
-                  Credential signed by platform TPM
+                  Bound to your secure hardware
                 </p>
               </div>
               <span class="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-widest">
@@ -61,10 +61,10 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
               </div>
               <div>
                 <p class="text-[10px] font-mono font-bold text-white/80 uppercase tracking-widest">
-                  Biometric Enrolled
+                  Authentication Active
                 </p>
                 <p class="text-[9px] font-mono text-zinc-600 mt-0.5">
-                  TouchID / FaceID configured
+                  Touch ID or Face ID configured
                 </p>
               </div>
               <span class="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-widest">
@@ -78,10 +78,10 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
               </div>
               <div>
                 <p class="text-[10px] font-mono font-bold text-white/80 uppercase tracking-widest">
-                  256-bit WebAuthn
+                  Institutional Security
                 </p>
                 <p class="text-[9px] font-mono text-zinc-600 mt-0.5">
-                  Passkey bound to this device
+                  FIPS 140-3 compliant encryption
                 </p>
               </div>
               <span class="ml-auto text-[9px] font-mono text-emerald-400 uppercase tracking-widest">
@@ -95,13 +95,13 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
             class="cta-primary w-full py-5 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
           >
             <.icon name="hero-arrow-right" class="w-4 h-4" />
-            <span>Enter the Network</span>
+            <span>Enter Treasury Platform</span>
           </.link>
         </div>
 
         <div class="border-t border-white/5 px-7 py-5 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
-          <span>EQUINOX · IDENTITY ANCHOR</span>
-          <span>256-BIT WEBAUTHN</span>
+          <span>EQUINOX · ACCESS CONTROL</span>
+          <span>BIOMETRIC SECURITY</span>
         </div>
       </div>
     </div>

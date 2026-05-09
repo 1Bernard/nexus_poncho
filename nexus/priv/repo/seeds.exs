@@ -223,3 +223,21 @@ Enum.each(requests, fn attrs ->
 end)
 
 IO.puts("Seeded #{length(requests)} access requests.")
+
+# ── Bootstrap platform super_admin ───────────────────────────────────────────
+# Reads PLATFORM_ADMIN_EMAIL from env (falls back to the dev default).
+# Safe to run multiple times — skips if user not found, no-ops if already set.
+admin_email =
+  System.get_env("PLATFORM_ADMIN_EMAIL", "bernardmnansah5@gmail.com")
+
+case Repo.get_by(Nexus.Identity.Projections.User, email: admin_email) do
+  nil ->
+    IO.puts("super_admin bootstrap: #{admin_email} not found — skipping.")
+
+  %{platform_role: "super_admin"} ->
+    IO.puts("super_admin bootstrap: #{admin_email} already super_admin — skipping.")
+
+  user ->
+    Repo.update!(Ecto.Changeset.change(user, platform_role: "super_admin"))
+    IO.puts("super_admin bootstrap: granted super_admin to #{admin_email}.")
+end

@@ -18,6 +18,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   alias Nexus.Repo
   alias Nexus.Shared.Tracing
   alias NexusShared.Identity.Roles
+  alias NexusWeb.InvitationEmail
 
   @per_page 20
   @statuses ~w(pending under_review approved rejected archived)
@@ -50,7 +51,8 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
            statuses: @statuses,
            current_page_ids: [],
            view_mode: "list",
-           duplicate_warnings: []
+           duplicate_warnings: [],
+           duplicate_emails: MapSet.new()
          )
          |> load_requests()}
 
@@ -375,9 +377,18 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                         <td class="px-6 py-5"><span class="row-num text-xs text-zinc-500"></span></td>
                         <td class="px-6 py-5">
                           <div class="flex flex-col">
-                            <span class="text-sm font-bold text-white tracking-tight">
-                              {request.name}
-                            </span>
+                            <div class="flex items-center gap-2">
+                              <span class="text-sm font-bold text-white tracking-tight">
+                                {request.name}
+                              </span>
+                              <i
+                                :if={MapSet.member?(@duplicate_emails, request.email)}
+                                data-lucide="alert-triangle"
+                                class="w-3 h-3 text-amber-400 flex-shrink-0"
+                                title="Duplicate email — this address appears in multiple requests"
+                              >
+                              </i>
+                            </div>
                             <span class="text-[11px] font-mono text-zinc-400 mt-0.5">
                               {request.email}
                             </span>
@@ -766,13 +777,14 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 <label class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                   Reason for Rejection
                 </label>
-                <textarea
-                  phx-change="set_reject_reason"
-                  name="reason"
-                  rows="3"
-                  placeholder="Provide audit reason..."
-                  class="w-full bg-white/[0.02] border border-rose-400/20 rounded-xl px-4 py-4 text-xs font-medium text-white placeholder:text-zinc-700 focus:outline-none focus:border-rose-400/40 resize-none transition-all"
-                >{@reject_reason}</textarea>
+                <form phx-change="set_reject_reason">
+                  <textarea
+                    name="reason"
+                    rows="3"
+                    placeholder="Provide audit reason..."
+                    class="w-full bg-white/[0.02] border border-rose-400/20 rounded-xl px-4 py-4 text-xs font-medium text-white placeholder:text-zinc-700 focus:outline-none focus:border-rose-400/40 resize-none transition-all"
+                  >{@reject_reason}</textarea>
+                </form>
               </div>
               <div class="flex gap-3">
                 <button
@@ -1132,6 +1144,12 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 token = BiometricInvitation.generate_token(user_id)
                 link = BiometricInvitation.magic_link(token)
 
+                req = socket.assigns.drawer_request
+
+                Task.start(fn ->
+                  InvitationEmail.send_biometric_invitation(req.name, req.email, role, link)
+                end)
+
                 Process.send_after(self(), :refresh_after_approval, 1_000)
 
                 {:noreply,
@@ -1319,12 +1337,22 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
       |> offset(^((page - 1) * socket.assigns.per_page))
       |> Repo.all()
 
+    duplicate_emails =
+      from(r in AccessRequest,
+        group_by: r.email,
+        having: count(r.id) > 1,
+        select: r.email
+      )
+      |> Repo.all()
+      |> MapSet.new()
+
     socket
     |> assign(
       total_count: total,
       total_pages: total_pages,
       approved_count: approved_count,
-      current_page_ids: Enum.map(requests, & &1.id)
+      current_page_ids: Enum.map(requests, & &1.id),
+      duplicate_emails: duplicate_emails
     )
     |> stream(:requests, requests, reset: true)
   end

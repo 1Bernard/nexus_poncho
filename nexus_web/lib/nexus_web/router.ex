@@ -68,6 +68,7 @@ defmodule NexusWeb.Router do
     scope "/dev" do
       pipe_through :browser
       live_dashboard "/dashboard", metrics: NexusWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end
