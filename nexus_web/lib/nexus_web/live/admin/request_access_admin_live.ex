@@ -1126,7 +1126,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
       else
         require OpenTelemetry.Tracer
 
-        if socket.assigns.drawer_request && socket.assigns.drawer_request.status == "pending" do
+        drawer = socket.assigns.drawer_request
+
+        if drawer && drawer.status == "pending" &&
+             drawer.sanctions_screening not in ["pending", "flagged"] do
           review_cmd = %ReviewAccessRequest{
             request_id: id,
             reviewed_by: socket.assigns.current_user.id

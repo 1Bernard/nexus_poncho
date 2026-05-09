@@ -108,7 +108,8 @@ defmodule Nexus.Marketing.Aggregates.AccessRequest do
     }
   end
 
-  def execute(%AccessRequest{status: "under_review"}, %RejectAccessRequest{} = cmd) do
+  def execute(%AccessRequest{status: status}, %RejectAccessRequest{} = cmd)
+      when status in ["pending", "under_review"] do
     %AccessRequestRejected{
       request_id: cmd.request_id,
       rejected_by: cmd.rejected_by,
