@@ -3,6 +3,8 @@ defmodule Nexus.Compliance.Idempotency.IdempotencyKey do
 
   use Nexus.Schema
 
+  @primary_key {:id, :string, autogenerate: false}
+
   schema "compliance_idempotency_keys" do
     field(:command_name, :string)
     field(:executed_at, :utc_datetime_usec)

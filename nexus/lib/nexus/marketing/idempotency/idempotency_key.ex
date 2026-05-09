@@ -5,6 +5,8 @@ defmodule Nexus.Marketing.Idempotency.IdempotencyKey do
   """
   use Nexus.Schema
 
+  @primary_key {:id, :string, autogenerate: false}
+
   schema "marketing_idempotency_keys" do
     field(:command_name, :string)
     field(:execution_result, :map)

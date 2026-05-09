@@ -6,8 +6,7 @@ defmodule Nexus.Treasury.Idempotency.IdempotencyKey do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: false}
-  @foreign_key_type :binary_id
+  @primary_key {:id, :string, autogenerate: false}
 
   schema "treasury_idempotency_keys" do
     field(:command_name, :string)
