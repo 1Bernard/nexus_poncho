@@ -238,10 +238,15 @@ services:
       START_TREASURY_PROJECTIONS: "false"
       START_MESSAGING_PROJECTIONS: "false"
       START_ONBOARDING_PM: "true"
+      START_ONBOARDING_KYB_PROJECTIONS: "true"
       START_MARKETING_PROJECTIONS: "true"
       START_MARKETING_PM: "true"
       START_PLATFORM_AUDIT: "true"
       ERL_COOKIE: ${ERL_COOKIE}
+      AWS_ACCESS_KEY_ID: "ministack"
+      AWS_SECRET_ACCESS_KEY: "ministack"
+      S3_BUCKET: "nexus-kyb-documents"
+      S3_ENDPOINT: "http://ministack:4566"
     tty: true
     stdin_open: true
     networks:
@@ -295,10 +300,15 @@ services:
       START_TREASURY_PROJECTIONS: "true"
       START_MESSAGING_PROJECTIONS: "true"
       START_ONBOARDING_PM: "false"
+      START_ONBOARDING_KYB_PROJECTIONS: "true"
       START_MARKETING_PROJECTIONS: "false"
       START_MARKETING_PM: "false"
       START_PLATFORM_AUDIT: "false"
       ERL_COOKIE: ${ERL_COOKIE}
+      AWS_ACCESS_KEY_ID: "ministack"
+      AWS_SECRET_ACCESS_KEY: "ministack"
+      S3_BUCKET: "nexus-kyb-documents"
+      S3_ENDPOINT: "http://ministack:4566"
     tty: true
     stdin_open: true
     networks:
@@ -336,6 +346,7 @@ services:
       START_TREASURY_PROJECTIONS: "false"
       START_MESSAGING_PROJECTIONS: "false"
       START_ONBOARDING_PM: "false"
+      START_ONBOARDING_KYB_PROJECTIONS: "false"
       START_MARKETING_PROJECTIONS: "false"
       START_MARKETING_PM: "false"
       START_PLATFORM_AUDIT: "false"

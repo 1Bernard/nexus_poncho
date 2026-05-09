@@ -29,9 +29,20 @@ defmodule Nexus.Router do
     DeactivateUser,
     EnrollBiometric,
     ExpireSession,
+    InviteTeamMember,
     RegisterUser,
     StartSession,
     UpdateUserRole
+  }
+
+  alias Nexus.Onboarding.Aggregates.EntityKyb
+
+  alias Nexus.Onboarding.Commands.{
+    AcceptTerms,
+    CompleteKYBReview,
+    DeclareUBOs,
+    SubmitEntityProfile,
+    UploadKYBDocument
   }
 
   alias Nexus.Compliance.Aggregates.Screening
@@ -68,9 +79,26 @@ defmodule Nexus.Router do
 
   # ==================== IDENTITY — User lifecycle ====================
 
-  dispatch([RegisterUser, ActivateUser, EnrollBiometric, DeactivateUser, UpdateUserRole],
+  dispatch(
+    [
+      RegisterUser,
+      ActivateUser,
+      EnrollBiometric,
+      DeactivateUser,
+      UpdateUserRole,
+      InviteTeamMember,
+      AcceptTerms
+    ],
     to: User,
     identity: :user_id
+  )
+
+  # ==================== ONBOARDING — Entity KYB ====================
+
+  dispatch(
+    [SubmitEntityProfile, DeclareUBOs, UploadKYBDocument, CompleteKYBReview],
+    to: EntityKyb,
+    identity: :org_id
   )
 
   # ==================== IDENTITY — Session lifecycle ====================

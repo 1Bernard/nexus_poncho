@@ -26,3 +26,4 @@ config :nexus, Nexus.App, registry: :local
 config :nexus, start_platform_audit: false
 config :nexus, start_marketing_projections: false
 config :nexus, start_marketing_pm: false
+config :nexus, start_onboarding_kyb_projections: false

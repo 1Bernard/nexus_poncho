@@ -89,6 +89,18 @@ config :nexus, Oban,
     maintenance: 2
   ]
 
+# ==================== EX_AWS / S3 ====================
+# ministack (LocalStack-compatible) in dev/prod; override S3_ENDPOINT for real AWS.
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, "ministack"],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, "ministack"],
+  region: "us-east-1"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "ministack",
+  port: 4566
+
 # ==================== SWOOSH ====================
 # Configured in nexus_web — nexus domain dispatches Oban jobs that call the mailer
 

@@ -136,6 +136,7 @@ if config_env() != :test do
     start_treasury_projections: get_bool.("START_TREASURY_PROJECTIONS", true),
     start_messaging_projections: get_bool.("START_MESSAGING_PROJECTIONS", true),
     start_onboarding_pm: get_bool.("START_ONBOARDING_PM", true),
+    start_onboarding_kyb_projections: get_bool.("START_ONBOARDING_KYB_PROJECTIONS", true),
     start_platform_audit: get_bool.("START_PLATFORM_AUDIT", true),
     start_marketing_projections: get_bool.("START_MARKETING_PROJECTIONS", true),
     start_marketing_pm: get_bool.("START_MARKETING_PM", true),

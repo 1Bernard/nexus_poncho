@@ -21,7 +21,10 @@ defmodule NexusShared.Identity.Statuses do
   @doc "Offboarded, suspended, or compliance-revoked. No access."
   def deactivated, do: "deactivated"
 
-  def user_statuses, do: [invited(), registered(), active(), deactivated()]
+  @doc "Entity admin has completed the KYB wizard; awaiting platform KYB review."
+  def pending_kyb, do: "pending_kyb"
+
+  def user_statuses, do: [invited(), registered(), active(), deactivated(), pending_kyb()]
 
   @doc "Returns true if the given string is a recognised user status."
   def valid_user_status?(s) when is_binary(s), do: s in user_statuses()

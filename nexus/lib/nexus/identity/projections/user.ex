@@ -19,6 +19,10 @@ defmodule Nexus.Identity.Projections.User do
     field(:credential_id, :string)
     field(:cose_key, :string)
 
+    # Terms acceptance
+    field(:terms_accepted_at, :utc_datetime_usec)
+    field(:terms_version, :string)
+
     timestamps(type: :utc_datetime_usec, inserted_at: :created_at)
   end
 
@@ -33,7 +37,9 @@ defmodule Nexus.Identity.Projections.User do
       :status,
       :platform_role,
       :credential_id,
-      :cose_key
+      :cose_key,
+      :terms_accepted_at,
+      :terms_version
     ])
     |> validate_required([:id, :org_id, :email, :role, :status])
     |> validate_inclusion(:platform_role, ["super_admin", "platform_support"],

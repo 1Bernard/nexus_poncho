@@ -26,6 +26,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
   alias Nexus.Identity.Events.{
     BiometricEnrolled,
+    TeamMemberInvited,
     UserActivated,
     UserDeactivated,
     UserRegistered,
@@ -34,6 +35,7 @@ defmodule Nexus.Identity.Projectors.UserProjector do
 
   alias Nexus.Identity.Idempotency.IdempotencyKey
   alias Nexus.Identity.Projections.User
+  alias Nexus.Onboarding.Events.TermsAccepted
 
   require Logger
 
@@ -65,6 +67,21 @@ defmodule Nexus.Identity.Projectors.UserProjector do
       status: "deactivated"
     })
     |> deactivate_user(event)
+  end)
+
+  project(%TeamMemberInvited{} = event, metadata, fn multi ->
+    multi
+    |> track_idempotency(metadata, "InviteTeamMember", %{
+      user_id: event.user_id,
+      status: "invited"
+    })
+    |> create_user_from_invitation(event, metadata)
+  end)
+
+  project(%TermsAccepted{} = event, metadata, fn multi ->
+    multi
+    |> track_idempotency(metadata, "AcceptTerms", %{user_id: event.user_id})
+    |> record_terms_accepted(event)
   end)
 
   project(%UserRoleChanged{} = event, metadata, fn multi ->
@@ -172,6 +189,44 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     Multi.update_all(multi, :update_user_role, query,
       set: [
         role: event.new_role,
+        updated_at: DateTime.utc_now()
+      ]
+    )
+  end
+
+  defp create_user_from_invitation(multi, event, metadata) do
+    Multi.run(multi, :create_invited_user, fn repo, _ ->
+      attrs = %{
+        id: event.user_id,
+        org_id: event.org_id,
+        email: event.email,
+        name: event.name,
+        role: event.role,
+        status: "invited",
+        created_at: metadata.created_at,
+        updated_at: metadata.created_at
+      }
+
+      changeset = User.changeset(%User{}, attrs)
+
+      case repo.insert(changeset, on_conflict: :nothing, conflict_target: :id) do
+        {:ok, user} ->
+          {:ok, user}
+
+        {:error, %Ecto.Changeset{} = cs} ->
+          Logger.warning("[Identity] TeamMemberInvited skipped: #{inspect(cs.errors)}")
+          {:ok, :constraint_conflict}
+      end
+    end)
+  end
+
+  defp record_terms_accepted(multi, event) do
+    query = from(u in User, where: u.id == ^event.user_id)
+
+    Multi.update_all(multi, :record_terms_accepted, query,
+      set: [
+        terms_accepted_at: event.accepted_at,
+        terms_version: event.terms_version,
         updated_at: DateTime.utc_now()
       ]
     )

@@ -14,6 +14,9 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     ReviewAccessRequest
   }
 
+  alias Nexus.Onboarding.Commands.CompleteKYBReview
+  alias Nexus.Onboarding.Projections.{EntityProfile, KYBDocument}
+
   alias Nexus.Marketing.Projections.AccessRequest
   alias Nexus.Repo
   alias Nexus.Shared.Tracing
@@ -52,7 +55,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
            current_page_ids: [],
            view_mode: "list",
            duplicate_warnings: [],
-           duplicate_emails: MapSet.new()
+           duplicate_emails: MapSet.new(),
+           entity_profile: nil,
+           kyb_documents: [],
+           kyb_review_notes: ""
          )
          |> load_requests()}
 
@@ -757,6 +763,76 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
             </p>
           </div>
 
+          <%!-- KYB Review Section (entity admins only, after approval) --%>
+          <%= if @entity_profile && @entity_profile.kyb_status != "complete" do %>
+            <div class="space-y-4 py-4 border-t border-white/5">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                KYB Review Required
+              </p>
+
+              <div class="space-y-2">
+                <div class="flex justify-between text-[10px] font-mono p-3 bg-white/[0.02] rounded-xl">
+                  <span class="text-zinc-500">Legal Name</span>
+                  <span class="text-white/80">{@entity_profile.legal_name}</span>
+                </div>
+                <div class="flex justify-between text-[10px] font-mono p-3 bg-white/[0.02] rounded-xl">
+                  <span class="text-zinc-500">Country</span>
+                  <span class="text-white/80">{@entity_profile.country}</span>
+                </div>
+                <div class="flex justify-between text-[10px] font-mono p-3 bg-white/[0.02] rounded-xl">
+                  <span class="text-zinc-500">Reg. No.</span>
+                  <span class="text-white/80">{@entity_profile.registration_number}</span>
+                </div>
+                <div class="flex justify-between text-[10px] font-mono p-3 bg-white/[0.02] rounded-xl">
+                  <span class="text-zinc-500">Industry</span>
+                  <span class="text-white/80">{@entity_profile.industry}</span>
+                </div>
+              </div>
+
+              <%= if @kyb_documents != [] do %>
+                <p class="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">Documents</p>
+                <div class="space-y-1">
+                  <%= for doc <- @kyb_documents do %>
+                    <div class="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                      <div>
+                        <p class="text-[9px] font-mono text-white/70 uppercase tracking-widest">
+                          {String.replace(doc.document_type, "_", " ")}
+                        </p>
+                        <p class="text-[9px] font-mono text-zinc-600 truncate max-w-[180px]">
+                          {doc.file_name}
+                        </p>
+                      </div>
+                      <span class="text-[9px] font-mono text-emerald-400">✓</span>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-[9px] font-mono text-zinc-600 italic">No documents uploaded yet.</p>
+              <% end %>
+
+              <div class="space-y-2">
+                <label class="text-[9px] font-mono text-zinc-600 uppercase tracking-widest block">
+                  Review Notes (optional)
+                </label>
+                <form phx-change="update_kyb_notes">
+                  <textarea
+                    name="notes"
+                    rows="2"
+                    placeholder="Add compliance notes..."
+                    class="w-full bg-white/[0.02] border border-white/10 rounded-xl px-3 py-3 text-[10px] font-mono text-white/80 placeholder:text-zinc-700 focus:outline-none focus:border-amber-400/40 resize-none"
+                  >{@kyb_review_notes}</textarea>
+                </form>
+              </div>
+
+              <button
+                phx-click="complete_kyb_review"
+                class="w-full py-4 bg-amber-400 text-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-amber-300 transition-all flex items-center justify-center gap-2"
+              >
+                <i data-lucide="check-circle" class="w-4 h-4"></i> Complete KYB Review
+              </button>
+            </div>
+          <% end %>
+
           <%!-- Archive action (approved or rejected — moves to terminal archived state) --%>
           <%= if @drawer_request && @drawer_request.status in ["approved", "rejected"] do %>
             <button
@@ -917,6 +993,27 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
         BiometricInvitation.magic_link(token)
       end
 
+    {entity_profile, kyb_documents} =
+      if request.provisioned_org_id do
+        profile = Repo.get_by(EntityProfile, org_id: request.provisioned_org_id)
+
+        docs =
+          if profile do
+            Repo.all(
+              from(d in KYBDocument,
+                where: d.org_id == ^request.provisioned_org_id,
+                order_by: [asc: d.created_at]
+              )
+            )
+          else
+            []
+          end
+
+        {profile, docs}
+      else
+        {nil, []}
+      end
+
     default_role = Roles.all() |> List.first() || ""
 
     {:noreply,
@@ -927,7 +1024,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
        show_reject_form: false,
        reject_reason: "",
        invitation_link: invitation_link,
-       duplicate_warnings: find_duplicate_warnings(request)
+       duplicate_warnings: find_duplicate_warnings(request),
+       entity_profile: entity_profile,
+       kyb_documents: kyb_documents,
+       kyb_review_notes: ""
      )}
   end
 
@@ -948,8 +1048,61 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
        show_reject_form: false,
        reject_reason: "",
        invitation_link: nil,
-       duplicate_warnings: []
+       duplicate_warnings: [],
+       entity_profile: nil,
+       kyb_documents: [],
+       kyb_review_notes: ""
      )}
+  end
+
+  def handle_event("update_kyb_notes", %{"notes" => notes}, socket) do
+    {:noreply, assign(socket, :kyb_review_notes, notes)}
+  end
+
+  def handle_event("complete_kyb_review", _params, socket) do
+    with :ok <- Bodyguard.permit(Policy, :approve_access_request, socket.assigns.current_user),
+         %EntityProfile{} = profile <- socket.assigns.entity_profile do
+      require OpenTelemetry.Tracer
+
+      command = %CompleteKYBReview{
+        org_id: profile.org_id,
+        reviewed_by: socket.assigns.current_user.id,
+        notes: socket.assigns.kyb_review_notes
+      }
+
+      tracing_metadata = Tracing.inject_context(%{})
+
+      OpenTelemetry.Tracer.with_span "Admin.CompleteKYBReview" do
+        case App.dispatch(command,
+               metadata:
+                 Map.put(tracing_metadata, "idempotency_key", "kyb_review:#{profile.org_id}")
+             ) do
+          :ok ->
+            {:noreply,
+             socket
+             |> push_event("toast:show:success", %{
+               message: "KYB review completed — user will be activated shortly",
+               duration: 5_000
+             })}
+
+          {:error, :kyb_already_completed} ->
+            {:noreply, put_flash(socket, :info, "KYB review was already completed.")}
+
+          {:error, {:missing_required_documents, missing}} ->
+            {:noreply,
+             put_flash(socket, :error, "Missing required documents: #{Enum.join(missing, ", ")}")}
+
+          {:error, reason} ->
+            {:noreply, put_flash(socket, :error, "KYB review failed: #{inspect(reason)}")}
+        end
+      end
+    else
+      {:error, :unauthorized} ->
+        {:noreply, put_flash(socket, :error, "Unauthorized.")}
+
+      nil ->
+        {:noreply, put_flash(socket, :error, "No entity profile found for this request.")}
+    end
   end
 
   def handle_event("show_reject_form", _, socket) do
