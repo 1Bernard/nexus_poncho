@@ -100,7 +100,7 @@ defmodule Nexus.Identity.Aggregates.User do
   end
 
   def execute(%User{status: status}, %AcceptTerms{} = cmd)
-      when status in [@invited, @registered, @pending_kyb] do
+      when status in [@invited, @registered, @pending_kyb, @active] do
     %TermsAccepted{
       user_id: cmd.user_id,
       org_id: cmd.org_id,
