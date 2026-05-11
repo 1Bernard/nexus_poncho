@@ -92,6 +92,7 @@ config :nexus, Oban,
 # ==================== EX_AWS / S3 ====================
 # ministack (LocalStack-compatible) in dev/prod; override S3_ENDPOINT for real AWS.
 config :ex_aws,
+  http_client: ExAws.Request.Req,
   access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, "ministack"],
   secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, "ministack"],
   region: "us-east-1"
