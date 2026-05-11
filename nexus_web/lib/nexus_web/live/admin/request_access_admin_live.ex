@@ -1157,11 +1157,11 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                  metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:reject")
                ) do
             :ok ->
+              Process.send_after(self(), :refresh_requests, 800)
+
               {:noreply,
                socket
                |> assign(show_reject_form: false, reject_reason: "")
-               |> load_requests()
-               |> refresh_drawer(id)
                |> push_event("toast:show:success", %{message: "Request rejected", duration: 4_000})}
 
             {:error, reason_err} ->
@@ -1209,10 +1209,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                  metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:#{to_status}")
                ) do
             :ok ->
+              Process.send_after(self(), :refresh_requests, 800)
+
               {:noreply,
                socket
-               |> load_requests()
-               |> refresh_drawer(id)
                |> push_event("toast:show:success", %{
                  message: "Request marked as #{String.replace(to_status, "_", " ")}",
                  duration: 4_000
@@ -1441,6 +1441,10 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
   @impl true
   def handle_info(:refresh_after_approval, socket) do
+    {:noreply, socket |> load_requests() |> refresh_drawer_if_open()}
+  end
+
+  def handle_info(:refresh_requests, socket) do
     {:noreply, socket |> load_requests() |> refresh_drawer_if_open()}
   end
 
