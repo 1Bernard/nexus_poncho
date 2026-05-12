@@ -1,0 +1,5 @@
+# Ignore all dep build artifacts that leak into lib/ via MIX_BUILD_PATH.
+# Only nexus_web/ contains real source files.
+*
+!nexus_web/
+!.gitignore
