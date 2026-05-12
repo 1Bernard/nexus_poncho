@@ -1,4 +1,5 @@
 defmodule Nexus.Identity.Commands.InviteTeamMember do
+  @moduledoc false
   use TypedStruct
 
   typedstruct enforce: true do

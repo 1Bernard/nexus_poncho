@@ -24,21 +24,20 @@ defmodule NexusWeb.Notifications.AccessRequestRejectedHandler do
         :ok
 
       request ->
-        Task.start(fn ->
-          case KYBEmail.send_access_rejected(request.name, request.email, reason) do
-            {:ok, _} ->
-              Logger.info(
-                "[AccessRequestRejectedHandler] Rejection email sent to #{request.email}"
-              )
-
-            {:error, err} ->
-              Logger.error(
-                "[AccessRequestRejectedHandler] Failed to send rejection email to #{request.email}: #{inspect(err)}"
-              )
-          end
-        end)
-
+        Task.start(fn -> send_rejection_email(request.name, request.email, reason) end)
         :ok
+    end
+  end
+
+  defp send_rejection_email(name, email, reason) do
+    case KYBEmail.send_access_rejected(name, email, reason) do
+      {:ok, _} ->
+        Logger.info("[AccessRequestRejectedHandler] Rejection email sent to #{email}")
+
+      {:error, err} ->
+        Logger.error(
+          "[AccessRequestRejectedHandler] Failed to send rejection email to #{email}: #{inspect(err)}"
+        )
     end
   end
 end

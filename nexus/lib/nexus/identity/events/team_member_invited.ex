@@ -1,4 +1,5 @@
 defmodule Nexus.Identity.Events.TeamMemberInvited do
+  @moduledoc false
   use TypedStruct
 
   @derive Jason.Encoder

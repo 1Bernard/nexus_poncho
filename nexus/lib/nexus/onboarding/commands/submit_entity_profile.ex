@@ -1,4 +1,5 @@
 defmodule Nexus.Onboarding.Commands.SubmitEntityProfile do
+  @moduledoc false
   use TypedStruct
 
   typedstruct enforce: true do

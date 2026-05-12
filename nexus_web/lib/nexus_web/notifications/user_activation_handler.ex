@@ -23,22 +23,23 @@ defmodule NexusWeb.Notifications.UserActivationHandler do
         :ok
 
       user when user.role in @entity_admin_roles ->
-        Task.start(fn ->
-          case KYBEmail.send_kyb_approved(user.name, user.email) do
-            {:ok, _} ->
-              Logger.info("[UserActivationHandler] KYB approved email sent to #{user.email}")
-
-            {:error, reason} ->
-              Logger.error(
-                "[UserActivationHandler] Failed to send KYB email to #{user.email}: #{inspect(reason)}"
-              )
-          end
-        end)
-
+        Task.start(fn -> send_kyb_approved_email(user.name, user.email) end)
         :ok
 
       _team_member ->
         :ok
+    end
+  end
+
+  defp send_kyb_approved_email(name, email) do
+    case KYBEmail.send_kyb_approved(name, email) do
+      {:ok, _} ->
+        Logger.info("[UserActivationHandler] KYB approved email sent to #{email}")
+
+      {:error, reason} ->
+        Logger.error(
+          "[UserActivationHandler] Failed to send KYB email to #{email}: #{inspect(reason)}"
+        )
     end
   end
 end

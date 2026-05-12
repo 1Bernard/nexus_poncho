@@ -269,6 +269,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
   end
 
   @impl true
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def handle_event("upload_doc", %{"doc_type" => doc_type}, socket) do
     upload_key = doc_type_to_upload_key(doc_type)
     user = socket.assigns.user
@@ -357,9 +358,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
 
   @impl true
   def handle_event("submit_terms", _params, socket) do
-    unless socket.assigns.terms_accepted do
-      {:noreply, assign(socket, :error, "You must accept the terms and conditions to continue.")}
-    else
+    if socket.assigns.terms_accepted do
       user = socket.assigns.user
 
       command = %AcceptTerms{
@@ -383,6 +382,8 @@ defmodule NexusWeb.Identity.OnboardingLive do
           {:noreply,
            assign(socket, :error, "Failed to record terms acceptance. Please try again.")}
       end
+    else
+      {:noreply, assign(socket, :error, "You must accept the terms and conditions to continue.")}
     end
   end
 
@@ -426,24 +427,22 @@ defmodule NexusWeb.Identity.OnboardingLive do
 
   @impl true
   def handle_event("biometric_complete", %{"attestation" => attestation}, socket) do
-    try do
-      case WebAuthn.register_finish(attestation, socket.assigns.user_id, socket.assigns.user_id) do
-        {:ok, %{auth_data: %{credential_id: credential_id, cose_key: cose_key}}} ->
-          enroll_credential(credential_id, cose_key, socket)
+    case WebAuthn.register_finish(attestation, socket.assigns.user_id, socket.assigns.user_id) do
+      {:ok, %{auth_data: %{credential_id: credential_id, cose_key: cose_key}}} ->
+        enroll_credential(credential_id, cose_key, socket)
 
-        {:error, reason} ->
-          Logger.error("[OnboardingUI] Attestation failed: #{inspect(reason)}")
-          {:noreply, assign(socket, status: :error, error: format_webauthn_error(reason))}
-      end
-    rescue
-      err ->
-        Logger.error("[OnboardingUI] Biometric crash: #{inspect(err)}")
-
-        {:noreply,
-         socket
-         |> assign(:status, :error)
-         |> assign(:error, "Hardware handshake failed. Please try again.")}
+      {:error, reason} ->
+        Logger.error("[OnboardingUI] Attestation failed: #{inspect(reason)}")
+        {:noreply, assign(socket, status: :error, error: format_webauthn_error(reason))}
     end
+  rescue
+    err ->
+      Logger.error("[OnboardingUI] Biometric crash: #{inspect(err)}")
+
+      {:noreply,
+       socket
+       |> assign(:status, :error)
+       |> assign(:error, "Hardware handshake failed. Please try again.")}
   end
 
   @impl true

@@ -1,4 +1,5 @@
 defmodule NexusWeb.InvitationEmail do
+  @moduledoc false
   import Swoosh.Email
 
   alias NexusWeb.Mailer

@@ -3,20 +3,15 @@ defmodule NexusWeb.Identity.TeamInviteLive do
 
   alias Nexus.Identity.Commands.InviteTeamMember
   alias Nexus.Identity.WebAuthn.BiometricInvitation
-  alias NexusWeb.InvitationEmail
   alias NexusShared.Identity.Roles
+  alias NexusWeb.InvitationEmail
   require Logger
 
   @impl true
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
 
-    unless user && user.role in ~w(org_admin group_treasurer) do
-      {:ok,
-       socket
-       |> put_flash(:error, "Only org admins can invite team members.")
-       |> push_navigate(to: ~p"/vaults")}
-    else
+    if user && user.role in ~w(org_admin group_treasurer) do
       {:ok,
        socket
        |> assign(:page_title, "Invite Team Member")
@@ -24,6 +19,11 @@ defmodule NexusWeb.Identity.TeamInviteLive do
        |> assign(:errors, %{})
        |> assign(:error, nil)
        |> assign(:success, nil)}
+    else
+      {:ok,
+       socket
+       |> put_flash(:error, "Only org admins can invite team members.")
+       |> push_navigate(to: ~p"/vaults")}
     end
   end
 
@@ -170,54 +170,58 @@ defmodule NexusWeb.Identity.TeamInviteLive do
     errors = validate_invite_form(form)
 
     if map_size(errors) == 0 do
-      user = socket.assigns.current_user
-      invitee_user_id = Uniq.UUID.uuid7()
-
-      command = %InviteTeamMember{
-        user_id: invitee_user_id,
-        org_id: user.org_id,
-        invited_by: user.id,
-        email: form["email"],
-        name: form["name"],
-        role: form["role"]
-      }
-
-      case Nexus.App.dispatch(command,
-             metadata: %{"idempotency_key" => "invite:#{user.org_id}:#{form["email"]}"}
-           ) do
-        :ok ->
-          token = BiometricInvitation.generate_token(invitee_user_id)
-          link = BiometricInvitation.magic_link(token)
-
-          Task.start(fn ->
-            InvitationEmail.send_biometric_invitation(
-              form["name"],
-              form["email"],
-              form["role"],
-              link
-            )
-          end)
-
-          Logger.info(
-            "[TeamInvite] Invitation dispatched for #{form["email"]} (role: #{form["role"]})"
-          )
-
-          {:noreply,
-           socket
-           |> assign(:form, %{"name" => "", "email" => "", "role" => ""})
-           |> assign(:errors, %{})
-           |> assign(:error, nil)
-           |> assign(
-             :success,
-             "Invitation sent to #{form["email"]}. They will receive a biometric enrollment link via email."
-           )}
-
-        {:error, reason} ->
-          Logger.error("[TeamInvite] InviteTeamMember failed: #{inspect(reason)}")
-          {:noreply, assign(socket, :error, "Failed to send invitation. Please try again.")}
-      end
+      dispatch_invitation(form, socket)
     else
       {:noreply, assign(socket, form: form, errors: errors, error: nil, success: nil)}
+    end
+  end
+
+  defp dispatch_invitation(form, socket) do
+    user = socket.assigns.current_user
+    invitee_user_id = Uniq.UUID.uuid7()
+
+    command = %InviteTeamMember{
+      user_id: invitee_user_id,
+      org_id: user.org_id,
+      invited_by: user.id,
+      email: form["email"],
+      name: form["name"],
+      role: form["role"]
+    }
+
+    case Nexus.App.dispatch(command,
+           metadata: %{"idempotency_key" => "invite:#{user.org_id}:#{form["email"]}"}
+         ) do
+      :ok ->
+        token = BiometricInvitation.generate_token(invitee_user_id)
+        link = BiometricInvitation.magic_link(token)
+
+        Task.start(fn ->
+          InvitationEmail.send_biometric_invitation(
+            form["name"],
+            form["email"],
+            form["role"],
+            link
+          )
+        end)
+
+        Logger.info(
+          "[TeamInvite] Invitation dispatched for #{form["email"]} (role: #{form["role"]})"
+        )
+
+        {:noreply,
+         socket
+         |> assign(:form, %{"name" => "", "email" => "", "role" => ""})
+         |> assign(:errors, %{})
+         |> assign(:error, nil)
+         |> assign(
+           :success,
+           "Invitation sent to #{form["email"]}. They will receive a biometric enrollment link via email."
+         )}
+
+      {:error, reason} ->
+        Logger.error("[TeamInvite] InviteTeamMember failed: #{inspect(reason)}")
+        {:noreply, assign(socket, :error, "Failed to send invitation. Please try again.")}
     end
   end
 

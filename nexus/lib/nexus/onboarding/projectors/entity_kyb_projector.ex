@@ -1,4 +1,5 @@
 defmodule Nexus.Onboarding.Projectors.EntityKybProjector do
+  @moduledoc false
   use Commanded.Projections.Ecto,
     application: Nexus.App,
     repo: Nexus.Repo,

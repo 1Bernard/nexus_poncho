@@ -1,4 +1,5 @@
 defmodule Nexus.Onboarding.Events.EntityProfileSubmitted do
+  @moduledoc false
   use TypedStruct
 
   @derive Jason.Encoder

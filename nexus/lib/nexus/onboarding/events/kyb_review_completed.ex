@@ -1,4 +1,5 @@
 defmodule Nexus.Onboarding.Events.KYBReviewCompleted do
+  @moduledoc false
   use TypedStruct
 
   @derive Jason.Encoder

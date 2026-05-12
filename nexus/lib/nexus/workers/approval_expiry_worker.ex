@@ -41,30 +41,7 @@ defmodule Nexus.Workers.ApprovalExpiryWorker do
     else
       require Logger
 
-      results =
-        Enum.map(expired, fn req ->
-          cmd = %ArchiveAccessRequest{
-            request_id: req.id,
-            archived_by: @system_actor
-          }
-
-          case App.dispatch(cmd,
-                 metadata: %{"idempotency_key" => "#{req.id}:expiry_archive"}
-               ) do
-            :ok ->
-              Logger.info(
-                "[ApprovalExpiry] Auto-archived #{req.id} for #{req.organization} — review SLA exceeded"
-              )
-
-              :ok
-
-            {:error, reason} ->
-              Logger.error("[ApprovalExpiry] Failed to archive #{req.id}: #{inspect(reason)}")
-
-              {:error, req.id}
-          end
-        end)
-
+      results = Enum.map(expired, &archive_request/1)
       errors = Enum.filter(results, &match?({:error, _}, &1))
 
       if errors == [] do
@@ -72,6 +49,28 @@ defmodule Nexus.Workers.ApprovalExpiryWorker do
       else
         {:error, "#{length(errors)} archival(s) failed"}
       end
+    end
+  end
+
+  defp archive_request(req) do
+    require Logger
+
+    cmd = %ArchiveAccessRequest{
+      request_id: req.id,
+      archived_by: @system_actor
+    }
+
+    case App.dispatch(cmd, metadata: %{"idempotency_key" => "#{req.id}:expiry_archive"}) do
+      :ok ->
+        Logger.info(
+          "[ApprovalExpiry] Auto-archived #{req.id} for #{req.organization} — review SLA exceeded"
+        )
+
+        :ok
+
+      {:error, reason} ->
+        Logger.error("[ApprovalExpiry] Failed to archive #{req.id}: #{inspect(reason)}")
+        {:error, req.id}
     end
   end
 end

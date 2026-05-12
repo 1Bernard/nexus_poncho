@@ -13,12 +13,7 @@ defmodule NexusWeb.Compliance.DashboardLive do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
 
-    unless user && can_view_compliance?(user) do
-      {:ok,
-       socket
-       |> put_flash(:error, "You do not have permission to view the compliance dashboard.")
-       |> redirect(to: ~p"/vaults")}
-    else
+    if user && can_view_compliance?(user) do
       {:ok,
        socket
        |> assign(:page_title, "Compliance Dashboard")
@@ -27,6 +22,11 @@ defmodule NexusWeb.Compliance.DashboardLive do
        |> assign(:recent_audit, load_recent_audit())
        |> assign(:flagged_requests, load_flagged_requests())
        |> assign(:filter, "all")}
+    else
+      {:ok,
+       socket
+       |> put_flash(:error, "You do not have permission to view the compliance dashboard.")
+       |> redirect(to: ~p"/vaults")}
     end
   end
 

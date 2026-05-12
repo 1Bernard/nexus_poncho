@@ -10,12 +10,7 @@ defmodule NexusWeb.Identity.TeamManagementLive do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_user
 
-    unless user && can_manage_team?(user) do
-      {:ok,
-       socket
-       |> put_flash(:error, "You do not have permission to manage team members.")
-       |> redirect(to: ~p"/vaults")}
-    else
+    if user && can_manage_team?(user) do
       members = ListOrgMembers.execute(user.org_id)
 
       {:ok,
@@ -26,6 +21,11 @@ defmodule NexusWeb.Identity.TeamManagementLive do
        |> assign(:role_change, nil)
        |> assign(:selected_role, nil)
        |> assign(:action_error, nil)}
+    else
+      {:ok,
+       socket
+       |> put_flash(:error, "You do not have permission to manage team members.")
+       |> redirect(to: ~p"/vaults")}
     end
   end
 

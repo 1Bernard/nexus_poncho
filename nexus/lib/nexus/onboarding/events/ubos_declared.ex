@@ -1,4 +1,5 @@
 defmodule Nexus.Onboarding.Events.UBOsDeclared do
+  @moduledoc false
   use TypedStruct
 
   @derive Jason.Encoder
