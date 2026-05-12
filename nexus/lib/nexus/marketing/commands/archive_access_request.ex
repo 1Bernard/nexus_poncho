@@ -4,6 +4,6 @@ defmodule Nexus.Marketing.Commands.ArchiveAccessRequest do
 
   typedstruct enforce: true do
     field(:request_id, String.t())
-    field(:archived_by, String.t(), enforce: false)
+    field(:archived_by, String.t())
   end
 end

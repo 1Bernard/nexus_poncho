@@ -5,6 +5,6 @@ defmodule Nexus.Marketing.Events.AccessRequestArchived do
 
   typedstruct enforce: true do
     field(:request_id, String.t())
-    field(:archived_by, String.t(), enforce: false)
+    field(:archived_by, String.t())
   end
 end

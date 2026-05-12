@@ -78,7 +78,8 @@ defmodule NexusWeb.MixProject do
       {:nexus_shared, path: "../nexus_shared"},
       {:bodyguard, "~> 2.4"},
       {:swoosh, "~> 1.16"},
-      {:finch, "~> 0.19"}
+      {:finch, "~> 0.19"},
+      {:hammer, "~> 6.2"}
     ]
   end
 

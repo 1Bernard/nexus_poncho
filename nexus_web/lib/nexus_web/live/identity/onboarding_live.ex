@@ -394,6 +394,11 @@ defmodule NexusWeb.Identity.OnboardingLive do
   end
 
   @impl true
+  def handle_event("advance_to_biometric", _params, socket) do
+    {:noreply, assign(socket, step: :biometric, status: :idle, error: nil)}
+  end
+
+  @impl true
   def handle_event("biometric_start", _params, socket) do
     user = socket.assigns[:user]
 

@@ -5,7 +5,7 @@ defmodule Nexus.Marketing.Events.AccessRequestApproved do
 
   typedstruct enforce: true do
     field(:request_id, String.t())
-    field(:approved_by, String.t(), enforce: false)
+    field(:approved_by, String.t())
     field(:role, String.t())
     field(:provisioned_user_id, String.t())
     field(:provisioned_org_id, String.t())

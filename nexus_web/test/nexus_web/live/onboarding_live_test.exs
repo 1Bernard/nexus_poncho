@@ -24,8 +24,8 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/onboarding/enroll?token=#{token}")
 
-      assert html =~ "Anchor your identity to complete onboarding"
-      assert html =~ "Anchor Biometric Identity"
+      assert html =~ "Complete your onboarding to access the platform"
+      assert html =~ "Begin Onboarding"
     end
 
     test "shows loading state when user projection is not yet in the DB", %{conn: conn} do
@@ -61,7 +61,7 @@ defmodule NexusWeb.Identity.OnboardingLiveTest do
       html = render_hook(view, "biometric_error", %{"reason" => "document lost focus"})
 
       assert html =~ "Security focus lost"
-      assert html =~ "click the fingerprint scanner directly"
+      assert html =~ "click the scanner directly"
     end
   end
 end

@@ -61,6 +61,13 @@ config :logger, :default_formatter,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# ==================== HAMMER (rate limiting) ====================
+# ETS backend: buckets expire after 2 hours, cleanup runs every 10 minutes.
+config :hammer,
+  backend:
+    {Hammer.Backend.ETS,
+     [expiry_ms: 60_000 * 120, cleanup_interval_ms: 60_000 * 10, pool_size: 2]}
+
 # ==================== SWOOSH ====================
 
 config :nexus_web, NexusWeb.Mailer, adapter: Swoosh.Adapters.Local

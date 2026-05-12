@@ -96,7 +96,7 @@ npm-debug.log
 /lib/nexus/
 /lib/nexus_shared/
 /lib/nexus_web/.mix/
-/lib/nexus_web/priv/
+/lib/nexus_web/priv
 /lib/nimble_options/
 /lib/nimble_pool/
 /lib/number/

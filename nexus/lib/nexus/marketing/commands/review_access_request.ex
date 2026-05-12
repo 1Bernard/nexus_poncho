@@ -4,6 +4,6 @@ defmodule Nexus.Marketing.Commands.ReviewAccessRequest do
 
   typedstruct enforce: true do
     field(:request_id, String.t())
-    field(:reviewed_by, String.t(), enforce: false)
+    field(:reviewed_by, String.t())
   end
 end

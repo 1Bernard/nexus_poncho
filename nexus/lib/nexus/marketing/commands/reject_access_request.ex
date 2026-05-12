@@ -4,7 +4,7 @@ defmodule Nexus.Marketing.Commands.RejectAccessRequest do
 
   typedstruct enforce: true do
     field(:request_id, String.t())
-    field(:rejected_by, String.t(), enforce: false)
+    field(:rejected_by, String.t())
     field(:reason, String.t(), enforce: false)
   end
 end
