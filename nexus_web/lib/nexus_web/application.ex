@@ -36,6 +36,8 @@ defmodule NexusWeb.Application do
           NexusWeb.Telemetry,
           {Phoenix.PubSub, name: NexusWeb.PubSub},
           {Finch, name: NexusWeb.Finch},
+          NexusWeb.Notifications.UserActivationHandler,
+          NexusWeb.Notifications.AccessRequestRejectedHandler,
           NexusWeb.Endpoint
         ]
 

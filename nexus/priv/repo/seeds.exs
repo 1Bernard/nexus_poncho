@@ -22,7 +22,7 @@ now = DateTime.utc_now()
 Enum.each(roles, fn attrs ->
   Repo.insert_all(
     "roles",
-    [Map.merge(attrs, %{id: Uniq.UUID.uuid7(), created_at: now})],
+    [Map.merge(attrs, %{id: Ecto.UUID.dump!(Uniq.UUID.uuid7()), created_at: now})],
     on_conflict: :nothing,
     conflict_target: :name
   )
@@ -218,8 +218,10 @@ requests = [
 now = DateTime.utc_now()
 
 Enum.each(requests, fn attrs ->
-  record = struct(AccessRequest, Map.merge(attrs, %{created_at: now, updated_at: now}))
-  Repo.insert!(record, on_conflict: :nothing, conflict_target: :email)
+  unless Repo.get_by(AccessRequest, email: attrs.email) do
+    record = struct(AccessRequest, Map.merge(attrs, %{created_at: now, updated_at: now}))
+    Repo.insert!(record)
+  end
 end)
 
 IO.puts("Seeded #{length(requests)} access requests.")
@@ -240,4 +242,54 @@ case Repo.get_by(Nexus.Identity.Projections.User, email: admin_email) do
   user ->
     Repo.update!(Ecto.Changeset.change(user, platform_role: "super_admin"))
     IO.puts("super_admin bootstrap: granted super_admin to #{admin_email}.")
+end
+
+# ── Dev test accounts (one per role) ─────────────────────────────────────────
+# Visible in the Team Management panel for manual UI verification.
+# All created in the same org as the platform admin. Safe to re-run.
+
+case Repo.get_by(Nexus.Identity.Projections.User, email: admin_email) do
+  nil ->
+    IO.puts("Dev seed users: admin not found — skipping role accounts.")
+
+  admin ->
+    dev_users = [
+      %{role: "org_admin", name: "Org Admin (Dev)", email: "dev.org_admin@equinox.test"},
+      %{
+        role: "group_treasurer",
+        name: "Group Treasurer (Dev)",
+        email: "dev.group_treasurer@equinox.test"
+      },
+      %{
+        role: "treasury_manager",
+        name: "Treasury Manager (Dev)",
+        email: "dev.treasury_manager@equinox.test"
+      },
+      %{
+        role: "treasury_analyst",
+        name: "Treasury Analyst (Dev)",
+        email: "dev.treasury_analyst@equinox.test"
+      },
+      %{
+        role: "vault_manager",
+        name: "Vault Manager (Dev)",
+        email: "dev.vault_manager@equinox.test"
+      },
+      %{
+        role: "compliance_officer",
+        name: "Compliance Officer (Dev)",
+        email: "dev.compliance_officer@equinox.test"
+      },
+      %{role: "auditor", name: "Auditor (Dev)", email: "dev.auditor@equinox.test"}
+    ]
+
+    Enum.each(dev_users, fn attrs ->
+      params = Map.merge(attrs, %{id: Uniq.UUID.uuid7(), org_id: admin.org_id, status: "active"})
+
+      %Nexus.Identity.Projections.User{}
+      |> Nexus.Identity.Projections.User.changeset(params)
+      |> Repo.insert(on_conflict: :nothing, conflict_target: :email)
+    end)
+
+    IO.puts("Seeded dev test accounts: #{Enum.map_join(dev_users, ", ", & &1.role)}")
 end

@@ -29,6 +29,8 @@ defmodule Nexus.Identity.Fixtures do
       org_id: user.org_id,
       email: user.email,
       name: user.name,
+      role: user.role,
+      platform_role: user.platform_role,
       status: user.status
     }
   end

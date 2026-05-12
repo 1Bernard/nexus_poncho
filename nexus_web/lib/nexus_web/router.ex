@@ -48,7 +48,9 @@ defmodule NexusWeb.Router do
       live "/vaults", Treasury.VaultDashboardLive, :index
       live "/vaults/new", Treasury.VaultRegistrationLive, :new
       live "/admin/access-requests", Admin.RequestAccessAdminLive, :index
+      live "/team", Identity.TeamManagementLive, :index
       live "/team/invite", Identity.TeamInviteLive, :new
+      live "/compliance", Compliance.DashboardLive, :index
     end
   end
 
