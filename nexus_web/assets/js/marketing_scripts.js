@@ -10,7 +10,7 @@ export const Marketing = {
         this.initThreeGlobe();
         this.initAnimations();
         this.initPricingToggle();
-        this.initAccordions();
+        this.initFaqPane();
         this.initParallaxCards();
         this.initRoadmapProgress();
     },
@@ -318,29 +318,37 @@ export const Marketing = {
         });
     },
 
-    initAccordions() {
-        document.querySelectorAll('.accordion-trigger').forEach(trigger => {
-            trigger.addEventListener('click', () => {
-                const item = trigger.parentElement;
-                const content = item.querySelector('.accordion-content');
-                const icon = item.querySelector('.accordion-icon');
-                const isOpen = item.classList.contains('active');
+    initFaqPane() {
+        const buttons = document.querySelectorAll('.faq-btn');
+        const answers = document.querySelectorAll('.faq-answer');
+        if (!buttons.length || !answers.length) return;
 
-                document.querySelectorAll('.accordion-item').forEach(other => {
-                    if (other !== item && other.classList.contains('active')) {
-                        other.classList.remove('active');
-                        gsap.to(other.querySelector('.accordion-content'), { height: 0, duration: 0.5 });
-                        other.querySelector('.accordion-icon').innerText = '+';
-                    }
+        buttons.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                // Update buttons
+                buttons.forEach(b => {
+                    b.classList.remove('active', 'bg-white/5', 'border-white/5');
+                    b.classList.add('border-transparent', 'opacity-60');
+                    b.classList.remove('opacity-100');
+                    b.querySelector('.indicator').classList.remove('opacity-100');
+                    b.querySelector('.indicator').classList.add('opacity-0');
                 });
+                
+                btn.classList.add('active', 'bg-white/5', 'border-white/5', 'opacity-100');
+                btn.classList.remove('border-transparent', 'opacity-60');
+                btn.querySelector('.indicator').classList.remove('opacity-0');
+                btn.querySelector('.indicator').classList.add('opacity-100');
 
-                item.classList.toggle('active');
-                if (!isOpen) {
-                    gsap.to(content, { height: "auto", duration: 0.5 });
-                    icon.innerText = '−';
-                } else {
-                    gsap.to(content, { height: 0, duration: 0.5 });
-                    icon.innerText = '+';
+                // Update answers
+                answers.forEach(a => {
+                    a.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                    a.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                });
+                
+                const targetAnswer = answers[index];
+                if (targetAnswer) {
+                    targetAnswer.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                    targetAnswer.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
                 }
             });
         });

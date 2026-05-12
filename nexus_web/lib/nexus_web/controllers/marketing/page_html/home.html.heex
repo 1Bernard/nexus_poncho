@@ -512,83 +512,6 @@
         </div>
       </div>
     </div>
-    
-<!-- Vignettes Info -->
-    <div class="grid md:grid-cols-3 gap-12 mt-20 reveal-y">
-      <div class="flex flex-col items-center text-center px-4">
-        <div class="w-10 h-10 bg-emerald-400/10 rounded-full flex items-center justify-center mb-6">
-          <i data-lucide="globe" class="text-emerald-400 w-4 h-4"></i>
-        </div>
-        <h4 class="font-serif italic text-xl mb-3">Global Visibility</h4>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Real-time aggregation of multi-currency cash positions across 140+ subsidiaries.
-        </p>
-      </div>
-      <div class="flex flex-col items-center text-center px-4">
-        <div class="w-10 h-10 bg-emerald-400/10 rounded-full flex items-center justify-center mb-6">
-          <i data-lucide="git-merge" class="text-emerald-400 w-4 h-4"></i>
-        </div>
-        <h4 class="font-serif italic text-xl mb-3">Frictionless Netting</h4>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Watch complex intercompany flows resolve into optimized settlement paths in seconds.
-        </p>
-      </div>
-      <div class="flex flex-col items-center text-center px-4">
-        <div class="w-10 h-10 bg-emerald-400/10 rounded-full flex items-center justify-center mb-6">
-          <i data-lucide="shield-check" class="text-emerald-400 w-4 h-4"></i>
-        </div>
-        <h4 class="font-serif italic text-xl mb-3">Biometric Auth</h4>
-        <p class="text-zinc-500 text-sm font-light leading-relaxed">
-          Secure high-value movements with hardware-backed WebAuthn and Touch ID authorization.
-        </p>
-      </div>
-    </div>
-  </section>
-  
-<!-- Resource Library (Authority Builder) -->
-  <section id="resources" class="py-32 px-4 max-w-7xl mx-auto border-t border-white/5">
-    <div class="text-center mb-16">
-      <span class="font-mono text-[10px] text-emerald-400 tracking-[0.4em] uppercase mb-4 block reveal-y">
-        Knowledge
-      </span>
-      <h2 class="text-5xl font-serif italic mb-6 reveal-y">
-        Institutional <span class="text-emerald-400">Knowledge.</span>
-      </h2>
-      <p class="text-zinc-500 max-w-xl mx-auto font-light leading-relaxed reveal-y">
-        Technical dossiers, whitepapers, and audit summaries for the modern treasurer.
-      </p>
-    </div>
-
-    <div class="grid md:grid-cols-3 gap-8 reveal-y">
-      <%= for {type, title, action, icon} <- [
-        {"Whitepaper", "Distributed Treasury Architecture", "Download PDF", "file-text"},
-        {"Audit", "SOC2 & ISO Compliance Summary", "View Report", "shield"},
-        {"Protocol", "MPC Security & Governance Framework", "Request Access", "lock"}
-      ] do %>
-        <div class="bracket-card p-10 rounded-3xl group cursor-pointer flex flex-col justify-between transition-all hover:scale-[1.02]">
-          <div>
-            <div class="flex items-center gap-3 mb-6">
-              <i data-lucide={icon} class="w-4 h-4 text-emerald-400"></i>
-              <span class="font-mono text-[9px] text-zinc-600 tracking-[0.4em] uppercase">
-                {type}
-              </span>
-            </div>
-            <h3 class="text-2xl font-serif italic mb-6 leading-tight">{title}</h3>
-          </div>
-
-          <div class="flex items-center justify-between pt-8 border-t border-white/5">
-            <span class="font-mono text-[10px] tracking-widest text-zinc-500 group-hover:text-emerald-400 transition-colors">
-              {action}
-            </span>
-            <i
-              data-lucide="arrow-right"
-              class="w-4 h-4 text-zinc-700 group-hover:text-emerald-400 transition-all group-hover:translate-x-1"
-            >
-            </i>
-          </div>
-        </div>
-      <% end %>
-    </div>
   </section>
   
 <!-- Security Sovereignty (The Hardware Layer) -->
@@ -678,73 +601,6 @@
     </div>
   </section>
   
-<!-- Expandable Modules / Accordions -->
-  <section id="accordions" class="py-32 px-4 max-w-4xl mx-auto">
-    <h2 class="text-5xl font-serif italic mb-16 text-center">
-      Technical <span class="text-emerald-400">Deep Dive</span>
-    </h2>
-    <div class="space-y-4">
-      <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
-        <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-          <span>🔐 Biometric Authentication & Step-Up Authorization</span>
-          <span class="accordion-icon transition-transform duration-300">+</span>
-        </button>
-        <div class="accordion-content">
-          <div class="p-6 pt-0 border-t border-white/5 mt-2">
-            <pre
-              phx-no-curly-interpolation
-              class="font-mono text-xs bg-black/50 p-4 rounded-lg overflow-x-auto"
-            ><span class="text-emerald-400">$</span> equinox auth enroll --method webauthn --user cfo@meridian.com\n<span class="text-zinc-500">✓ Hardware credential registered: Touch ID (FIDO2/WebAuthn)\n✓ Step-up policy: transfers &gt; $500K require re-authentication\n✓ Zero passwords stored — phishing surface: none</span></pre>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
-        <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-          <span>⚡ Intercompany Netting Engine Architecture</span>
-          <span class="accordion-icon transition-transform duration-300">+</span>
-        </button>
-        <div class="accordion-content">
-          <div class="p-6 pt-0 border-t border-white/5 mt-2">
-            <div class="grid md:grid-cols-2 gap-4">
-              <div class="bg-white/5 p-4 rounded-lg">
-                <div class="text-emerald-400 font-mono text-xs">LATENCY</div>
-                <div class="text-2xl font-bold">0.14s</div>
-              </div>
-              <div class="bg-white/5 p-4 rounded-lg">
-                <div class="text-emerald-400 font-mono text-xs">THROUGHPUT</div>
-                <div class="text-2xl font-bold">1,247 TX/S</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
-        <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-          <span>🌐 Multi-Entity Settlement Mesh</span>
-          <span class="accordion-icon transition-transform duration-300">+</span>
-        </button>
-        <div class="accordion-content">
-          <div class="p-6 pt-0 border-t border-white/5 mt-2">
-            <div class="flex flex-wrap gap-2 text-zinc-400 text-sm font-light">
-              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
-                North America: 48 entities
-              </span>
-              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
-                Europe: 52 entities
-              </span>
-              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
-                APAC: 31 entities
-              </span>
-              <span class="px-3 py-1 bg-emerald-400/5 border border-emerald-400/10 rounded-full">
-                Africa: 11 entities
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-  
 <!-- Testimonial Marquee Section -->
   <section id="carousel" class="py-32 relative z-10 overflow-hidden">
     <div class="max-w-7xl mx-auto text-center mb-16 px-6">
@@ -770,7 +626,9 @@
               CF
             </div>
             <div>
-              <div class="text-[10px] font-bold">@cfernandez</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                Carlos Fernandez
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 Group Treasurer, Meridian Holdings
               </div>
@@ -786,7 +644,9 @@
               KP
             </div>
             <div>
-              <div class="text-[10px] font-bold">@kpatel</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                Kiran Patel
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 Head of Treasury, Atlas Group
               </div>
@@ -802,7 +662,9 @@
               LO
             </div>
             <div>
-              <div class="text-[10px] font-bold">@l.okonkwo</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                L. Okonkwo
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 Finance Controller, Zenith Corp
               </div>
@@ -819,7 +681,9 @@
               CF
             </div>
             <div>
-              <div class="text-[10px] font-bold">@cfernandez</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                Carlos Fernandez
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 Group Treasurer, Meridian Holdings
               </div>
@@ -839,7 +703,9 @@
               SB
             </div>
             <div>
-              <div class="text-[10px] font-bold">@s.brennan</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                Sarah Brennan
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 CFO, Vantage Multinationals
               </div>
@@ -855,7 +721,9 @@
               RN
             </div>
             <div>
-              <div class="text-[10px] font-bold">@r.nakamura</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                R. Nakamura
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 Treasury Manager, Apex Pacific
               </div>
@@ -871,7 +739,9 @@
               MA
             </div>
             <div>
-              <div class="text-[10px] font-bold">@m.adeyemi</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                M. Adeyemi
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 Group CFO, Kondor Holdings
               </div>
@@ -888,7 +758,9 @@
               SB
             </div>
             <div>
-              <div class="text-[10px] font-bold">@s.brennan</div>
+              <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400">
+                Sarah Brennan
+              </div>
               <div class="text-[8px] text-zinc-600 uppercase font-mono tracking-tighter">
                 CFO, Vantage Multinationals
               </div>
@@ -958,6 +830,94 @@
             <i data-lucide="fingerprint" class="text-emerald-400 w-5 h-5"></i><span class="text-zinc-300 font-light">WebAuthn SDK: hardware-backed identity in one line of code.</span>
           </li>
         </ul>
+      </div>
+    </div>
+  </section>
+  
+<!-- Institutional FAQ Split-Pane -->
+  <section id="faq" class="py-32 px-4 max-w-7xl mx-auto border-t border-white/5">
+    <div class="text-center mb-16">
+      <span class="font-mono text-[10px] text-emerald-400 tracking-[0.4em] uppercase mb-4 block reveal-y">
+        Trust
+      </span>
+      <h2 class="text-5xl font-serif italic mb-6 reveal-y">
+        Institutional <span class="text-emerald-400">Questions.</span>
+      </h2>
+    </div>
+
+    <div class="grid md:grid-cols-12 gap-12 lg:gap-20 max-w-6xl mx-auto">
+      <!-- Left Pane: Questions -->
+      <div class="md:col-span-5 flex flex-col gap-2 reveal-y" id="faq-questions">
+        <button class="faq-btn active text-left px-6 py-5 rounded-2xl border border-white/5 transition-all duration-300 relative group overflow-hidden bg-white/5 opacity-100">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 indicator opacity-100 transition-opacity">
+          </div>
+          <span class="font-bold text-white group-hover:text-emerald-400 transition-colors relative z-10 text-lg">
+            Where is our entity data stored?
+          </span>
+        </button>
+        <button class="faq-btn text-left px-6 py-5 rounded-2xl border border-transparent hover:border-white/5 transition-all duration-300 relative group overflow-hidden opacity-60 hover:opacity-100">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 indicator opacity-0 transition-opacity">
+          </div>
+          <span class="font-bold text-white group-hover:text-emerald-400 transition-colors relative z-10 text-lg">
+            How long is the deployment cycle?
+          </span>
+        </button>
+        <button class="faq-btn text-left px-6 py-5 rounded-2xl border border-transparent hover:border-white/5 transition-all duration-300 relative group overflow-hidden opacity-60 hover:opacity-100">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 indicator opacity-0 transition-opacity">
+          </div>
+          <span class="font-bold text-white group-hover:text-emerald-400 transition-colors relative z-10 text-lg">
+            What are the availability guarantees?
+          </span>
+        </button>
+        <button class="faq-btn text-left px-6 py-5 rounded-2xl border border-transparent hover:border-white/5 transition-all duration-300 relative group overflow-hidden opacity-60 hover:opacity-100">
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 indicator opacity-0 transition-opacity">
+          </div>
+          <span class="font-bold text-white group-hover:text-emerald-400 transition-colors relative z-10 text-lg">
+            Are you SOC2 / ISO certified?
+          </span>
+        </button>
+      </div>
+      
+<!-- Right Pane: Answers -->
+      <div class="md:col-span-7 reveal-y">
+        <div class="bracket-card h-full p-10 rounded-3xl relative overflow-hidden flex flex-col justify-center min-h-[300px]">
+          <div class="absolute inset-0 bg-[radial-gradient(rgba(52,211,153,0.05)_1px,transparent_1px)] [background-size:24px_24px]">
+          </div>
+
+          <div id="faq-answers" class="relative z-10 w-full h-full">
+            <!-- Answer 1 -->
+            <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-100 scale-100 pointer-events-auto transition-all duration-500 p-10">
+              <i data-lucide="database" class="w-6 h-6 text-emerald-400 mb-6"></i>
+              <p class="text-zinc-300 text-lg font-light leading-relaxed">
+                Equinox utilizes a sovereign-cluster architecture. Your event ledger and entity data can be hosted in our SOC2-compliant primary regions (Frankfurt, Zurich, New York) or deployed entirely on-premise within your own isolated private cloud via our Enterprise Kubernetes distribution.
+              </p>
+            </div>
+            
+<!-- Answer 2 -->
+            <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-0 scale-95 pointer-events-none transition-all duration-500 p-10">
+              <i data-lucide="timer" class="w-6 h-6 text-emerald-400 mb-6"></i>
+              <p class="text-zinc-300 text-lg font-light leading-relaxed">
+                Standard integration with major ERPs (SAP, Oracle) and banking networks (SWIFT) averages 14 to 21 days. Because Equinox acts as an event-sourced overlay, we do not require you to rip and replace your existing core treasury infrastructure during deployment.
+              </p>
+            </div>
+            
+<!-- Answer 3 -->
+            <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-0 scale-95 pointer-events-none transition-all duration-500 p-10">
+              <i data-lucide="activity" class="w-6 h-6 text-emerald-400 mb-6"></i>
+              <p class="text-zinc-300 text-lg font-light leading-relaxed">
+                Our distributed modular monolith is engineered for absolute resilience. We provide a financially backed 99.999% (Five Nines) uptime SLA. In the event of a regional partition, our localized nodes continue to process and queue settlements deterministically.
+              </p>
+            </div>
+            
+<!-- Answer 4 -->
+            <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-0 scale-95 pointer-events-none transition-all duration-500 p-10">
+              <i data-lucide="shield-check" class="w-6 h-6 text-emerald-400 mb-6"></i>
+              <p class="text-zinc-300 text-lg font-light leading-relaxed">
+                Yes. Equinox maintains SOC 2 Type II and ISO 27001 certifications. Furthermore, our hardware-bound authentication and cryptographic ledgers exceed the regulatory requirements for PSD2, GDPR, and enterprise Segregation of Duties (SoD) mandates.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1173,39 +1133,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </section>
-  
-<!-- Institutional Trust (FAQ) -->
-  <section id="faq" class="py-32 px-4 max-w-4xl mx-auto border-t border-white/5">
-    <div class="text-center mb-16">
-      <span class="font-mono text-[10px] text-emerald-400 tracking-[0.4em] uppercase mb-4 block reveal-y">
-        Trust
-      </span>
-      <h2 class="text-5xl font-serif italic mb-6 reveal-y">
-        Institutional <span class="text-emerald-400">Questions.</span>
-      </h2>
-    </div>
-
-    <div class="space-y-4 reveal-y">
-      <%= for {q, a} <- [
-        {"Where is our entity data stored?", "Equinox utilizes a sovereign data architecture. You choose your residency—Europe, Americas, or APAC—ensuring 100% compliance with local data laws."},
-        {"How long is the deployment cycle?", "Our 'Fast-Track' onboarding allows for full ERP integration and netting initialization in as little as 48 hours for standard SAP/Oracle environments."},
-        {"What are the availability guarantees?", "Equinox operates on a triple-redundant architecture with a 99.999% uptime SLA, backed by 24/7 priority institutional support."},
-        {"Are you SOC2 / ISO certified?", "Yes. Equinox is SOC2 Type II and ISO 27001 certified. Our infrastructure is physically audited and tamper-resistant by design."}
-      ] do %>
-        <div class="accordion-item border border-white/10 rounded-2xl overflow-hidden glass-card">
-          <button class="accordion-trigger w-full flex justify-between items-center p-6 text-left font-bold text-lg hover:bg-white/5 transition-colors">
-            <span>{q}</span>
-            <span class="accordion-icon transition-transform duration-300">+</span>
-          </button>
-          <div class="accordion-content">
-            <div class="p-6 pt-0 border-t border-white/5 mt-2 text-zinc-500 font-light leading-relaxed">
-              {a}
-            </div>
-          </div>
-        </div>
-      <% end %>
     </div>
   </section>
   
