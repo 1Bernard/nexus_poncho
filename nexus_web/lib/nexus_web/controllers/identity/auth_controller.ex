@@ -29,7 +29,7 @@ defmodule NexusWeb.Identity.AuthController do
 
         conn
         |> put_session(:session_id, session_id)
-        |> redirect(to: "/vaults")
+        |> redirect(to: "/admin/access-requests")
 
       {:error, reason} ->
         Logger.warning("[AuthController] Auth token rejected: #{inspect(reason)}")

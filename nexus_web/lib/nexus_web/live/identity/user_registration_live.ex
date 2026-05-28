@@ -4,7 +4,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
   alias Nexus.App
   alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Identity.WebAuthn.BiometricInvitation
-  alias Nexus.Shared.Tracing
+  alias NexusWeb.TracingHooks
   alias NexusShared.Identity.Roles
 
   @impl true
@@ -117,7 +117,7 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
     require Logger
 
     OpenTelemetry.Tracer.with_span "Identity.RegisterUser" do
-      tracing_metadata = Tracing.inject_context(%{})
+      tracing_metadata = TracingHooks.session_metadata(socket)
 
       case App.dispatch(command, metadata: Map.put(tracing_metadata, "idempotency_key", user_id)) do
         result when result == :ok or (is_tuple(result) and elem(result, 0) == :ok) ->

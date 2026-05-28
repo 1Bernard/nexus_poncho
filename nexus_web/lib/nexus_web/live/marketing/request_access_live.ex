@@ -4,7 +4,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
   alias Nexus.App
   alias Nexus.Marketing.Commands.SubmitAccessRequest
   alias Nexus.Marketing.Projections.AccessRequest
-  alias Nexus.Shared.Tracing
+  alias NexusWeb.TracingHooks
 
   require OpenTelemetry.Tracer
 
@@ -93,7 +93,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
         message: params["message"]
       }
 
-      tracing_metadata = Tracing.inject_context(%{})
+      tracing_metadata = TracingHooks.session_metadata(socket)
 
       OpenTelemetry.Tracer.with_span "Marketing.SubmitAccessRequest" do
         case App.dispatch(command,
@@ -135,7 +135,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
             Begin your Institutional <span class="emerald-glint">Journey.</span>
           </h1>
           <p class="text-zinc-500 text-lg max-w-2xl mx-auto font-medium">
-            Equinox is by invitation. Complete our brief application process to request access for your organization.
+            {brand_name()} is by invitation. Complete our brief application process to request access for your organization.
           </p>
         </div>
 
@@ -210,7 +210,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                 Privacy & Confidentiality
               </p>
               <p class="text-zinc-600 text-[11px] leading-relaxed italic">
-                Your information is used solely to evaluate eligibility. Equinox maintains strict data privacy standards for all institutional requests.
+                Your information is used solely to evaluate eligibility. {brand_name()} maintains strict data privacy standards for all institutional requests.
               </p>
             </div>
           </div>
@@ -218,7 +218,7 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
           <%!-- Right column: active step form --%>
           <div class="lg:col-span-3">
             <%= if @submitted do %>
-              <div class="prestige-card rounded-[2.5rem] p-12 text-center animate-in fade-in zoom-in duration-700">
+              <.prestige_card class="p-12 text-center animate-in fade-in zoom-in duration-700">
                 <div class="w-20 h-20 rounded-full bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center mx-auto mb-8 shadow-[0_0_50px_rgba(52,211,153,0.15)]">
                   <.icon name="hero-check-circle" class="w-10 h-10 text-emerald-400" />
                 </div>
@@ -234,14 +234,14 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
                 <div class="mt-12 pt-8 border-t border-white/5">
                   <.link
                     navigate={~p"/"}
-                    class="font-mono text-[10px] tracking-[0.2em] text-zinc-500 hover:text-emerald-400 uppercase transition-all duration-300"
+                    class="font-mono text-[10px] tracking-widest text-zinc-500 hover:text-emerald-400 uppercase transition-all duration-300"
                   >
                     ← Return to Platform
                   </.link>
                 </div>
-              </div>
+              </.prestige_card>
             <% else %>
-              <div class="prestige-card rounded-[2.5rem] p-10 md:p-12 min-h-[500px] flex flex-col">
+              <.prestige_card class="p-10 md:p-12 min-h-[500px] flex flex-col">
                 <.form
                   for={@form}
                   id="request-access-form"
@@ -407,49 +407,46 @@ defmodule NexusWeb.Marketing.RequestAccessLive do
 
                   <%!-- Navigation Controls --%>
                   <div class="mt-auto pt-12 flex items-center justify-between gap-6">
-                    <button
+                    <.eq_button
                       :if={@current_step > 1}
                       type="button"
                       phx-click="prev_step"
-                      class="px-8 py-5 border border-white/10 rounded-xl text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:bg-white/5 transition-all"
+                      variant="outline"
+                      class="px-8"
                     >
                       Back
-                    </button>
+                    </.eq_button>
                     <div :if={@current_step == 1} class="flex-1"></div>
 
-                    <button
+                    <.eq_button
                       :if={@current_step < 3}
                       type="button"
                       phx-click="next_step"
-                      class="flex-1 py-5 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group"
+                      variant="secondary"
+                      class="flex-1 group"
                     >
                       <span>Next Step</span>
                       <.icon
                         name="hero-arrow-right"
                         class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform"
                       />
-                    </button>
+                    </.eq_button>
 
-                    <button
+                    <.eq_button
                       :if={@current_step == 3}
                       type="submit"
-                      class="cta-primary flex-1 py-5 bg-emerald-400 text-black rounded-xl text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
+                      full_width
+                      arrow
                     >
-                      <span class="relative z-10 flex items-center gap-3">
-                        Submit Application
-                        <span class="arrow-wrap">
-                          <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-icon" />
-                          <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-clone" />
-                        </span>
-                      </span>
-                    </button>
+                      Submit Application
+                    </.eq_button>
                   </div>
 
                   <p class="text-center text-zinc-700 text-[9px] font-mono mt-8 uppercase tracking-[0.2em]">
                     Secure submission channel active
                   </p>
                 </.form>
-              </div>
+              </.prestige_card>
             <% end %>
           </div>
         </div>

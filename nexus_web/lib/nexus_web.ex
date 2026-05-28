@@ -86,8 +86,10 @@ defmodule NexusWeb do
       import Phoenix.HTML
       # Core UI components
       import NexusWeb.CoreComponents
-      # Equinox design system components
+      # Nexus design system components
       import NexusWeb.EquinoxComponents
+      # Brand name helpers — brand_name/0 and brand_name_upper/0
+      import NexusWeb.Brand
 
       # Common modules used in templates
       alias NexusWeb.Layouts

@@ -159,7 +159,7 @@
           Built for the <span class="text-emerald-400">Modern Treasurer.</span>
         </h2>
         <p class="text-zinc-400 text-lg font-light">
-          Every component of Equinox is engineered for the realities of global enterprise finance — not retrofitted for compliance, but built with it at the core.
+          Every component of {brand_name()} is engineered for the realities of global enterprise finance — not retrofitted for compliance, but built with it at the core.
         </p>
       </div>
     </div>
@@ -176,7 +176,7 @@
           </div>
           <h3 class="text-4xl font-serif italic mb-6">Every Transaction. Forever Traceable.</h3>
           <p class="text-zinc-500 text-sm font-light leading-relaxed mb-6">
-            Equinox records every financial event as an immutable fact — from policy changes to settlement confirmations. Complete audit-readiness is built in, not bolted on.
+            {brand_name()} records every financial event as an immutable fact — from policy changes to settlement confirmations. Complete audit-readiness is built in, not bolted on.
           </p>
           <div class="flex gap-4">
             <span class="px-3 py-1 border border-white/5 rounded font-mono text-[8px] text-zinc-500 uppercase">
@@ -246,7 +246,7 @@
             operator_delta@blackrock.io
           </div>
           <div class="h-10 border border-white/5 rounded-lg bg-zinc-950/80 flex items-center px-4 font-mono text-[8px] text-zinc-800">
-            node_root@equinox.io
+            node_root@nexus.io
           </div>
         </div>
       </div>
@@ -388,7 +388,7 @@
         Institutional <span class="text-emerald-400">Ecosystem.</span>
       </h2>
       <p class="text-zinc-500 max-w-xl mx-auto font-light leading-relaxed reveal-y">
-        Equinox integrates natively with the world's most critical financial infrastructure and enterprise ERP systems.
+        {brand_name()} integrates natively with the world's most critical financial infrastructure and enterprise ERP systems.
       </p>
     </div>
 
@@ -451,7 +451,7 @@
           playsinline
           onerror="this.style.display='none'; document.getElementById('video-fallback').style.display='flex';"
         >
-          <source src="/assets/videos/equinox-demo.mp4" type="video/mp4" />
+          <source src="/assets/videos/equinox.mp4" type="video/mp4" />
         </video>
         <!-- Fallback Visual (shown when video file is absent) -->
         <div
@@ -528,7 +528,7 @@
           Hardware <br /><span class="text-emerald-400">Sovereignty.</span>
         </h2>
         <p class="text-zinc-500 text-lg font-light leading-relaxed mb-12 max-w-lg">
-          Equinox moves beyond software-only security. We leverage certified hardware to ensure that no single entity—not even us—has absolute control over your capital.
+          {brand_name()} moves beyond software-only security. We leverage certified hardware to ensure that no single entity—not even us—has absolute control over your capital.
         </p>
 
         <div class="space-y-8">
@@ -564,38 +564,125 @@
       </div>
 
       <div class="relative reveal-x">
-        <!-- Visual Component: The Shield -->
-        <div class="relative w-full aspect-square flex items-center justify-center">
-          <div class="absolute inset-0 bg-emerald-500/5 blur-[120px] rounded-full animate-pulse">
-          </div>
-          <svg viewBox="0 0 400 400" class="w-full max-w-md z-10">
-            <!-- Hexagonal Shield Grids -->
-            <circle cx="200" cy="200" r="150" class="tech-path" stroke-dasharray="4 8" />
+        <!-- Visual Component: The Sovereign Core -->
+        <div class="relative w-full aspect-square flex items-center justify-center p-4">
+          <.prestige_card class="w-full h-full max-h-[450px] max-w-[450px] p-0 relative overflow-hidden bg-[#020202] border-white/5 shadow-2xl flex items-center justify-center group">
+            <!-- Background Grid -->
+            <div class="absolute inset-0 bg-grid-elite opacity-50 mix-blend-screen"></div>
             
-<!-- Central Lock Mechanism -->
-            <g class="parallax-layer">
-              <path
-                d="M200 120 L260 150 L260 250 L200 280 L140 250 L140 150 Z"
-                class="fill-obsidian stroke-emerald-400/30 stroke-1"
-              />
-              <circle
-                cx="200"
-                cy="200"
-                r="40"
-                class="fill-emerald-400/5 stroke-emerald-400 stroke-2"
-              />
-              <path
-                d="M185 190 L215 190 L215 220 L185 220 Z M200 170 C190 170 182 178 182 188 L182 190 L218 190 L218 188 C218 178 210 170 200 170 Z"
-                class="fill-emerald-400"
-              />
-            </g>
+<!-- Ambient Glow -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full animate-pulse">
+            </div>
             
-<!-- Orbiting Data Points -->
-            <circle cx="200" cy="50" r="4" class="node-pulse" />
-            <circle cx="350" cy="200" r="4" class="node-pulse" style="animation-delay: 1s;" />
-            <circle cx="200" cy="350" r="4" class="node-pulse" style="animation-delay: 2s;" />
-            <circle cx="50" cy="200" r="4" class="node-pulse" style="animation-delay: 3s;" />
-          </svg>
+<!-- Diagnostic HUD Corners -->
+            <div class="absolute top-6 left-6 flex flex-col gap-1 z-20">
+              <span class="text-[9px] font-mono text-emerald-400 uppercase tracking-[0.3em] font-black">
+                FIPS-140-3
+              </span>
+              <span class="text-[8px] font-mono text-zinc-500 uppercase tracking-widest">
+                LEVEL 4 ENCLAVE
+              </span>
+            </div>
+
+            <div class="absolute top-6 right-6 flex flex-col gap-1 text-right z-20">
+              <span class="text-[9px] font-mono text-zinc-400 uppercase tracking-[0.3em] font-black">
+                TAMPER-MESH
+              </span>
+              <span class="text-[8px] font-mono text-emerald-500/70 uppercase tracking-widest">
+                ACTIVE
+              </span>
+            </div>
+
+            <div class="absolute bottom-6 left-6 flex flex-col gap-1 z-20">
+              <span class="text-[9px] font-mono text-zinc-400 uppercase tracking-[0.3em] font-black">
+                SHARD-ALIGN
+              </span>
+              <span class="text-[8px] font-mono text-zinc-500 uppercase tracking-widest">
+                3 OF 3
+              </span>
+            </div>
+
+            <div class="absolute bottom-6 right-6 flex flex-col gap-1 text-right z-20">
+              <span class="text-[9px] font-mono text-zinc-400 uppercase tracking-[0.3em] font-black">
+                LATENCY
+              </span>
+              <span class="text-[8px] font-mono text-emerald-500/70 uppercase tracking-widest tabular-nums">
+                0.04ms
+              </span>
+            </div>
+            
+<!-- The Anti-Tamper Mesh -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full border border-white/[0.03] border-dashed animate-[spin_40s_linear_infinite] pointer-events-none">
+            </div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] rounded-full border border-emerald-400/[0.05] border-dotted animate-[spin_60s_linear_infinite_reverse] pointer-events-none">
+            </div>
+            
+<!-- Horizontal/Vertical Circuit Traces -->
+            <div class="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent -translate-y-1/2">
+            </div>
+            <div class="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-emerald-400/20 to-transparent -translate-x-1/2">
+            </div>
+            
+<!-- Data Packet Animations -->
+            <div class="absolute top-1/2 left-[15%] w-16 h-px bg-emerald-400 shadow-[0_0_10px_#34d399] -translate-y-1/2 animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]">
+            </div>
+            <div class="absolute top-[85%] left-1/2 w-px h-16 bg-emerald-400 shadow-[0_0_10px_#34d399] -translate-x-1/2 animate-[pulse_3s_cubic-bezier(0.4,0,0.6,1)_infinite_reverse]">
+            </div>
+            
+<!-- The MPC Shards Centerpiece -->
+            <div class="relative z-10 flex gap-3 p-8 rounded-2xl bg-[#030303]/90 backdrop-blur-xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-700 ease-out">
+              
+<!-- Shard 1 -->
+              <div class="w-6 h-20 bg-gradient-to-b from-zinc-800 to-[#050505] rounded shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] relative overflow-hidden border border-zinc-700/50">
+                <div class="absolute inset-0 bg-emerald-400/10 animate-pulse"></div>
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]">
+                </div>
+                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-emerald-400/20 to-transparent opacity-50">
+                </div>
+              </div>
+              
+<!-- Shard 2 (Master) -->
+              <div class="w-10 h-28 bg-gradient-to-b from-emerald-900/50 to-[#050505] rounded-md shadow-[inset_0_1px_0_rgba(52,211,153,0.3),0_0_30px_rgba(52,211,153,0.1)] relative overflow-hidden border border-emerald-500/40 -mt-4">
+                <div
+                  class="absolute inset-0 bg-emerald-400/5 animate-pulse"
+                  style="animation-duration: 2s;"
+                >
+                </div>
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]">
+                </div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[9px] font-mono text-emerald-400 font-black rotate-90 tracking-[0.4em] opacity-90">
+                  SECURE
+                </div>
+                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-emerald-400/40 to-transparent opacity-60">
+                </div>
+              </div>
+              
+<!-- Shard 3 -->
+              <div class="w-6 h-20 bg-gradient-to-b from-zinc-800 to-[#050505] rounded shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] relative overflow-hidden border border-zinc-700/50">
+                <div
+                  class="absolute inset-0 bg-emerald-400/10 animate-pulse"
+                  style="animation-delay: 0.5s;"
+                >
+                </div>
+                <div class="absolute top-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]">
+                </div>
+                <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-emerald-400/20 to-transparent opacity-50">
+                </div>
+              </div>
+            </div>
+            
+<!-- Floating data nodes -->
+            <div
+              class="absolute top-[30%] left-[30%] w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399] animate-ping"
+              style="animation-duration: 3s;"
+            >
+            </div>
+            <div
+              class="absolute bottom-[30%] right-[30%] w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399] animate-ping"
+              style="animation-duration: 4s; animation-delay: 1s;"
+            >
+            </div>
+          </.prestige_card>
         </div>
       </div>
     </div>
@@ -608,7 +695,7 @@
         Trusted by <span class="text-emerald-400">Global Institutions</span>
       </h2>
       <p class="text-zinc-500 font-light max-w-2xl mx-auto text-lg mb-8">
-        What Group Treasurers, CFOs, and Finance Controllers say about running their treasury on Equinox.
+        What Group Treasurers, CFOs, and Finance Controllers say about running their treasury on {brand_name()}.
       </p>
       <div class="flex justify-center gap-4">
         <button class="bg-zinc-900 border border-white/10 px-6 py-3 rounded-md font-mono text-[10px] uppercase tracking-widest flex items-center gap-3 hover:bg-zinc-800 transition-colors">
@@ -748,7 +835,7 @@
             </div>
           </div>
           <p class="text-zinc-400 text-sm font-light leading-relaxed">
-            We operate across 9 African markets. Equinox gave us a single FX position view and automated netting we never thought possible at this scale.
+            We operate across 9 African markets. {brand_name()} gave us a single FX position view and automated netting we never thought possible at this scale.
           </p>
         </div>
         <!-- Duplicate for loop -->
@@ -783,17 +870,17 @@
             <div class="dot dot-red"></div>
             <div class="dot dot-yellow"></div>
             <div class="dot dot-green"></div>
-            <span class="font-mono text-[10px] text-zinc-500 ml-4">equinox-sdk.js</span>
+            <span class="font-mono text-[10px] text-zinc-500 ml-4">nexus-sdk.js</span>
           </div>
           <div
             phx-no-curly-interpolation
             class="p-8 font-mono text-sm leading-relaxed bg-obsidian"
           >
-            <div class="text-zinc-500">// Initialize Equinox treasury gateway</div>
+            <div class="text-zinc-500">// Initialize {brand_name()} treasury gateway</div>
             <div>
               <span class="text-emerald-400">const</span>
               client = <span class="text-emerald-400">new</span>
-              Equinox({ apiKey: <span class="text-zinc-400">'eq_live_v4_...'</span>
+              {brand_name()}({ apiKey: <span class="text-zinc-400">'eq_live_v4_...'</span>
               });
             </div>
             <div class="mt-4">
@@ -889,7 +976,7 @@
             <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-100 scale-100 pointer-events-auto transition-all duration-500 p-10">
               <i data-lucide="database" class="w-6 h-6 text-emerald-400 mb-6"></i>
               <p class="text-zinc-300 text-lg font-light leading-relaxed">
-                Equinox utilizes a sovereign-cluster architecture. Your event ledger and entity data can be hosted in our SOC2-compliant primary regions (Frankfurt, Zurich, New York) or deployed entirely on-premise within your own isolated private cloud via our Enterprise Kubernetes distribution.
+                {brand_name()} utilizes a sovereign-cluster architecture. Your event ledger and entity data can be hosted in our SOC2-compliant primary regions (Frankfurt, Zurich, New York) or deployed entirely on-premise within your own isolated private cloud via our Enterprise Kubernetes distribution.
               </p>
             </div>
             
@@ -897,7 +984,7 @@
             <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-0 scale-95 pointer-events-none transition-all duration-500 p-10">
               <i data-lucide="timer" class="w-6 h-6 text-emerald-400 mb-6"></i>
               <p class="text-zinc-300 text-lg font-light leading-relaxed">
-                Standard integration with major ERPs (SAP, Oracle) and banking networks (SWIFT) averages 14 to 21 days. Because Equinox acts as an event-sourced overlay, we do not require you to rip and replace your existing core treasury infrastructure during deployment.
+                Standard integration with major ERPs (SAP, Oracle) and banking networks (SWIFT) averages 14 to 21 days. Because Nexus acts as an event-sourced overlay, we do not require you to rip and replace your existing core treasury infrastructure during deployment.
               </p>
             </div>
             
@@ -913,7 +1000,7 @@
             <div class="faq-answer absolute inset-0 flex flex-col justify-center opacity-0 scale-95 pointer-events-none transition-all duration-500 p-10">
               <i data-lucide="shield-check" class="w-6 h-6 text-emerald-400 mb-6"></i>
               <p class="text-zinc-300 text-lg font-light leading-relaxed">
-                Yes. Equinox maintains SOC 2 Type II and ISO 27001 certifications. Furthermore, our hardware-bound authentication and cryptographic ledgers exceed the regulatory requirements for PSD2, GDPR, and enterprise Segregation of Duties (SoD) mandates.
+                Yes. {brand_name()} maintains SOC 2 Type II and ISO 27001 certifications. Furthermore, our hardware-bound authentication and cryptographic ledgers exceed the regulatory requirements for PSD2, GDPR, and enterprise Segregation of Duties (SoD) mandates.
               </p>
             </div>
           </div>
@@ -1142,7 +1229,7 @@
     </div>
     <div class="max-w-5xl mx-auto text-center relative">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-serif italic font-black text-white/[0.012] pointer-events-none select-none tracking-tighter uppercase">
-        EQUINOX
+        {brand_name_upper()}
       </div>
       <h2 class="hero-title font-serif italic mb-12">
         The Future is <span class="text-emerald-400 text-glow-emerald">Verifiable.</span>

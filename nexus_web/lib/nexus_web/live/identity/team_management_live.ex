@@ -12,15 +12,21 @@ defmodule NexusWeb.Identity.TeamManagementLive do
 
     if user && can_manage_team?(user) do
       members = ListOrgMembers.execute(user.org_id)
+      admin_count = Enum.count(members, &(&1.role in ~w(admin org_admin)))
 
       {:ok,
        socket
        |> assign(:page_title, "Team Management")
        |> assign(:members, members)
+       |> assign(:total_members, length(members))
+       |> assign(:admin_count, admin_count)
        |> assign(:confirm_deactivate, nil)
        |> assign(:role_change, nil)
        |> assign(:selected_role, nil)
-       |> assign(:action_error, nil)}
+       |> assign(:action_error, nil)
+       |> assign(:search_query, "")
+       |> assign(:page, 1)
+       |> assign(:per_page, 10)}
     else
       {:ok,
        socket
@@ -31,6 +37,17 @@ defmodule NexusWeb.Identity.TeamManagementLive do
 
   @impl true
   def render(assigns) do
+    filtered = filter_members(assigns.members, assigns.search_query)
+    total_count = length(filtered)
+    total_pages = max(1, ceil(total_count / assigns.per_page))
+    paginated = Enum.slice(filtered, (assigns.page - 1) * assigns.per_page, assigns.per_page)
+
+    assigns =
+      assigns
+      |> assign(:total_count, total_count)
+      |> assign(:total_pages, total_pages)
+      |> assign(:paginated_members, paginated)
+
     ~H"""
     <Layouts.app
       flash={@flash}
@@ -38,214 +55,276 @@ defmodule NexusWeb.Identity.TeamManagementLive do
       page_title={@page_title}
       breadcrumb_section="Team"
     >
-      <div class="p-8 bg-[#010101] min-h-full">
-        <div class="max-w-5xl mx-auto">
-          <%!-- Header --%>
-          <div class="flex items-center justify-between mb-8">
-            <div>
-              <p class="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.3em] mb-2">
-                TEAM · ROSTER
-              </p>
-              <h1 class="text-2xl font-serif font-bold text-white">Team Management</h1>
-              <p class="text-[10px] font-mono text-zinc-500 mt-1">
-                {length(@members)} active member{if length(@members) != 1, do: "s", else: ""}
-              </p>
-            </div>
-            <.link
-              navigate={~p"/team/invite"}
-              class="flex items-center gap-2 px-5 py-2.5 bg-emerald-400 text-black text-[10px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-emerald-300 transition-colors"
-            >
-              <.icon name="hero-user-plus-mini" class="w-4 h-4" /> Invite Member
-            </.link>
+      <div class="p-8 bg-[#010101] min-h-full relative overflow-hidden">
+        <div class="bg-grid-elite"></div>
+
+        <div class="max-w-7xl mx-auto space-y-10 relative z-10">
+          <.eq_control_bar>
+            <.eq_control_cluster>
+              <div class="flex items-center pl-4">
+                <.icon name="hero-magnifying-glass-mini" class="w-4 h-4 text-emerald-400/50" />
+                <input
+                  type="text"
+                  placeholder="SEARCH ROSTER..."
+                  value={@search_query}
+                  phx-input="search"
+                  phx-debounce="300"
+                  class="search-input py-2.5 px-4 text-[10px] font-mono font-bold text-white placeholder:text-zinc-700 focus:outline-none uppercase tracking-widest"
+                />
+              </div>
+            </.eq_control_cluster>
+
+            <.eq_control_cluster>
+              <.eq_button navigate={~p"/team/invite"} variant="primary" class="!px-6 !py-3" arrow>
+                Invite Member
+              </.eq_button>
+            </.eq_control_cluster>
+          </.eq_control_bar>
+
+          <%!-- HUD Stats Ribbon --%>
+          <div class="grid grid-cols-4 gap-6">
+            <.hud_metric_card
+              label="Total Personnel"
+              value={@total_members}
+              color="emerald"
+              status="VERIFIED"
+            />
+            <.hud_metric_card
+              label="Active Admins"
+              value={@admin_count}
+              color="sky"
+              status="PRIVILEGED"
+            />
+            <.hud_metric_card
+              label="Invite Slots"
+              value="UNLIMITED"
+              color="zinc"
+              status="ELITE"
+            />
+            <.hud_metric_card
+              label="Audit Integrity"
+              value="100%"
+              color="emerald"
+              status="IMMUTABLE"
+            />
           </div>
 
           <%!-- Action error --%>
           <%= if @action_error do %>
-            <div class="mb-6 p-3 bg-rose-400/10 border border-rose-400/20 rounded-xl text-[10px] font-mono text-rose-400">
+            <div class="p-4 bg-rose-400/10 border border-rose-400/20 rounded-xl text-[10px] font-mono text-rose-400 uppercase tracking-widest flex items-center gap-3">
+              <.icon name="hero-exclamation-circle-mini" class="w-4 h-4" />
               {@action_error}
             </div>
           <% end %>
 
           <%!-- Confirm deactivation modal --%>
           <%= if @confirm_deactivate do %>
-            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <div class="w-full max-w-sm prestige-card rounded-[2rem] p-8 border border-rose-400/20">
-                <div class="mb-6">
-                  <div class="w-12 h-12 rounded-xl bg-rose-400/10 border border-rose-400/20 flex items-center justify-center mb-4">
-                    <.icon name="hero-exclamation-triangle-mini" class="w-6 h-6 text-rose-400" />
+            <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
+              <.prestige_card class="w-full max-w-sm p-10 border-rose-500/20 shadow-2xl">
+                <div class="mb-8">
+                  <div class="w-14 h-14 rounded-2xl bg-rose-400/10 border border-rose-400/20 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(244,63,94,0.1)]">
+                    <.icon name="hero-exclamation-triangle-mini" class="w-7 h-7 text-rose-400" />
                   </div>
-                  <h2 class="text-lg font-bold text-white mb-1">Deactivate Member</h2>
-                  <p class="text-[10px] font-mono text-zinc-400">
+                  <h2 class="text-xl font-black text-white mb-2 uppercase tracking-tight">
+                    Deactivate Member
+                  </h2>
+                  <p class="text-[10px] font-mono text-zinc-500 leading-relaxed uppercase tracking-widest">
                     This will immediately revoke access for <span class="text-white">{@confirm_deactivate.name}</span>.
-                    This action is logged and cannot be undone from this interface.
+                    This action is logged in the immutable audit trail.
                   </p>
                 </div>
-                <div class="flex gap-3">
-                  <button
-                    phx-click="cancel_deactivate"
-                    class="flex-1 py-3 border border-white/10 rounded-full text-[10px] font-mono text-zinc-400 uppercase tracking-widest hover:border-white/20 transition-colors"
-                  >
+                <div class="flex gap-4">
+                  <.eq_button phx-click="cancel_deactivate" variant="outline" class="flex-1">
                     Cancel
-                  </button>
-                  <button
+                  </.eq_button>
+                  <.eq_button
                     phx-click="confirm_deactivate"
                     phx-value-user_id={@confirm_deactivate.id}
-                    class="flex-1 py-3 bg-rose-500 rounded-full text-[10px] font-black text-white uppercase tracking-widest hover:bg-rose-400 transition-colors"
+                    variant="danger"
+                    class="flex-1"
                   >
                     Deactivate
-                  </button>
+                  </.eq_button>
                 </div>
-              </div>
+              </.prestige_card>
             </div>
           <% end %>
 
           <%!-- Role change modal --%>
           <%= if @role_change do %>
-            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <div class="w-full max-w-sm prestige-card rounded-[2rem] p-8">
-                <div class="mb-6">
-                  <div class="w-12 h-12 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center mb-4">
-                    <.icon name="hero-shield-check-mini" class="w-6 h-6 text-emerald-400" />
+            <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
+              <.prestige_card class="w-full max-w-md p-10 border-emerald-400/20 shadow-2xl">
+                <div class="mb-8">
+                  <div class="w-14 h-14 rounded-2xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(52,211,153,0.1)]">
+                    <.icon name="hero-shield-check-mini" class="w-7 h-7 text-emerald-400" />
                   </div>
-                  <h2 class="text-lg font-bold text-white mb-1">Change Role</h2>
-                  <p class="text-[10px] font-mono text-zinc-400">
-                    Updating role for <span class="text-white">{@role_change.name}</span>
+                  <h2 class="text-xl font-black text-white mb-2 uppercase tracking-tight">
+                    Modify Role
+                  </h2>
+                  <p class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+                    Updating privileges for <span class="text-white">{@role_change.name}</span>
                   </p>
                 </div>
 
-                <form phx-submit="confirm_role_change">
+                <.eq_form for={%{}} as={:role_update} phx-submit="confirm_role_change">
                   <input type="hidden" name="user_id" value={@role_change.id} />
-                  <div class="mb-4">
-                    <label class="text-[8px] font-mono text-zinc-600 uppercase tracking-widest block mb-1">
-                      New Role
-                    </label>
-                    <select
-                      name="new_role"
-                      class="w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2.5 text-[11px] font-mono text-white/90 focus:outline-none focus:border-emerald-400/40 appearance-none"
-                      phx-change="select_role"
-                    >
-                      <%= for role <- assignable_roles() do %>
-                        <option value={role} selected={role == @role_change.role}>
-                          {role}
-                        </option>
-                      <% end %>
-                    </select>
-                  </div>
-                  <div class="flex gap-3 mt-6">
-                    <button
-                      type="button"
-                      phx-click="cancel_role_change"
-                      class="flex-1 py-3 border border-white/10 rounded-full text-[10px] font-mono text-zinc-400 uppercase tracking-widest hover:border-white/20 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      class="flex-1 py-3 bg-emerald-400 rounded-full text-[10px] font-black text-black uppercase tracking-widest hover:bg-emerald-300 transition-colors"
-                    >
-                      Update Role
-                    </button>
-                  </div>
-                </form>
-              </div>
+                  <.eq_select
+                    name="new_role"
+                    label="Assigned Authorization Level"
+                    options={assignable_roles()}
+                    value={@role_change.role}
+                  />
+                  <:actions>
+                    <div class="flex gap-4 mt-8">
+                      <.eq_button
+                        type="button"
+                        phx-click="cancel_role_change"
+                        variant="outline"
+                        class="flex-1"
+                      >
+                        Cancel
+                      </.eq_button>
+                      <.eq_button type="submit" variant="primary" class="flex-1">
+                        Update Role
+                      </.eq_button>
+                    </div>
+                  </:actions>
+                </.eq_form>
+              </.prestige_card>
             </div>
           <% end %>
 
           <%!-- Member table --%>
-          <div class="prestige-card rounded-[2rem] overflow-hidden">
-            <%!-- Table header --%>
-            <div class="grid grid-cols-[1fr_120px_120px_100px] gap-4 px-6 py-3 border-b border-white/5 bg-white/[0.02]">
-              <span class="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.25em]">
-                Member
-              </span>
-              <span class="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.25em]">Role</span>
-              <span class="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.25em]">
-                Status
-              </span>
-              <span class="text-[8px] font-mono text-zinc-600 uppercase tracking-[0.25em]">
-                Actions
-              </span>
+          <div class="space-y-4 flex flex-col min-h-0">
+            <div class="flex items-center gap-4 px-2">
+              <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">
+                Identity · Roster
+              </h3>
+              <div class="h-px flex-1 bg-white/[0.03]"></div>
             </div>
 
-            <%= if @members == [] do %>
-              <div class="px-6 py-12 text-center">
-                <p class="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-                  No active team members
-                </p>
+            <div class="elite-border rounded-3xl bg-[#050508]/60 backdrop-blur-2xl overflow-hidden flex-1 flex flex-col min-h-0 border border-white/5 shadow-2xl">
+              <div class="overflow-auto flex-1 custom-scrollbar">
+                <%= if @total_count == 0 do %>
+                  <.ledger_empty_state
+                    title="No matching personnel found"
+                    subtitle="Try adjusting your search criteria"
+                    action_label={if @search_query != "", do: "Clear Search", else: nil}
+                    action_event={if @search_query != "", do: "clear_search", else: nil}
+                  />
+                <% else %>
+                  <.ledger_table id="members-roster" rows={@paginated_members}>
+                    <:col :let={member} label="Personnel Identity">
+                      <div class="flex items-center gap-6 relative">
+                        <div class="grid-guide-v -left-8"></div>
+                        <div class="grid-guide-h top-0"></div>
+                        <div class="grid-guide-h bottom-0"></div>
+                        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[11px] font-mono font-black text-emerald-400 shadow-inner">
+                          {member.name |> String.first() |> String.upcase()}
+                        </div>
+                        <div>
+                          <p class="text-sm font-black text-white tracking-tight">{member.name}</p>
+                          <p class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">
+                            {member.email}
+                          </p>
+                        </div>
+                      </div>
+                    </:col>
+
+                    <:col :let={member} label="Authorization Level">
+                      <div class="flex items-center gap-3">
+                        <.icon
+                          name={
+                            if(member.role in ~w(admin org_admin),
+                              do: "hero-shield-check-mini",
+                              else: "hero-user-mini"
+                            )
+                          }
+                          class={[
+                            "w-4 h-4",
+                            member.role in ~w(admin org_admin) && "text-emerald-400",
+                            member.role not in ~w(admin org_admin) && "text-zinc-600"
+                          ]}
+                        />
+                        <span class={[
+                          "text-[10px] font-mono font-bold uppercase tracking-widest",
+                          member.role in ~w(admin org_admin) && "text-white",
+                          member.role not in ~w(admin org_admin) && "text-zinc-500"
+                        ]}>
+                          {String.replace(member.role, "_", " ")}
+                        </span>
+                      </div>
+                    </:col>
+
+                    <:col :let={_member} label="Status">
+                      <.eq_badge status="active" />
+                    </:col>
+
+                    <:action :let={member}>
+                      <div class="flex items-center gap-2">
+                        <button
+                          phx-click="open_role_change"
+                          phx-value-user_id={member.id}
+                          class="p-2.5 rounded-lg bg-white/5 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-400/10 transition-all group"
+                          title="Modify Role"
+                        >
+                          <.icon
+                            name="hero-cog-6-tooth-mini"
+                            class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"
+                          />
+                        </button>
+                        <button
+                          :if={member.id != @current_user.id}
+                          phx-click="request_deactivate"
+                          phx-value-user_id={member.id}
+                          class="p-2.5 rounded-lg bg-white/5 text-zinc-500 hover:text-rose-400 hover:bg-rose-400/10 transition-all group"
+                          title="Deactivate Member"
+                        >
+                          <.icon name="hero-user-minus-mini" class="w-4 h-4" />
+                        </button>
+                      </div>
+                    </:action>
+                  </.ledger_table>
+                <% end %>
               </div>
-            <% end %>
-
-            <%= for member <- @members do %>
-              <div class="grid grid-cols-[1fr_120px_120px_100px] gap-4 px-6 py-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center group">
-                <%!-- Identity --%>
-                <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-8 h-8 rounded-full bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center flex-shrink-0">
-                    <span class="text-[10px] font-bold text-emerald-400">
-                      {member.name |> String.first() |> String.upcase()}
-                    </span>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-[11px] font-bold text-white truncate">{member.name}</p>
-                    <p class="text-[9px] font-mono text-zinc-500 truncate">{member.email}</p>
-                  </div>
-                </div>
-
-                <%!-- Role --%>
-                <div>
-                  <span class="text-[9px] font-mono text-zinc-300 uppercase">{member.role}</span>
-                </div>
-
-                <%!-- Status badge --%>
-                <div>
-                  <span class={[
-                    "text-[8px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full",
-                    member.status == "active" &&
-                      "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20",
-                    member.status in ~w(invited registered) &&
-                      "text-amber-400 bg-amber-400/10 border border-amber-400/20",
-                    member.status == "pending_kyb" &&
-                      "text-blue-400 bg-blue-400/10 border border-blue-400/20"
-                  ]}>
-                    {member.status}
-                  </span>
-                </div>
-
-                <%!-- Actions (hide for self) --%>
-                <div class="flex items-center gap-2">
-                  <%= if member.id != @current_user.id do %>
-                    <button
-                      phx-click="open_role_change"
-                      phx-value-user_id={member.id}
-                      title="Change role"
-                      class="p-1.5 rounded-lg text-zinc-600 hover:text-emerald-400 hover:bg-emerald-400/10 transition-all"
-                    >
-                      <.icon name="hero-pencil-mini" class="w-3.5 h-3.5" />
-                    </button>
-                    <%= if member.status not in ~w(deactivated) do %>
-                      <button
-                        phx-click="request_deactivate"
-                        phx-value-user_id={member.id}
-                        title="Deactivate"
-                        class="p-1.5 rounded-lg text-zinc-600 hover:text-rose-400 hover:bg-rose-400/10 transition-all"
-                      >
-                        <.icon name="hero-x-mark-mini" class="w-3.5 h-3.5" />
-                      </button>
-                    <% end %>
-                  <% else %>
-                    <span class="text-[8px] font-mono text-zinc-700 uppercase">You</span>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
+              <.ledger_pagination
+                page={@page}
+                per_page={@per_page}
+                total_count={@total_count}
+                total_pages={@total_pages}
+                extra_label="Admins"
+                extra_count={@admin_count}
+              />
+            </div>
           </div>
 
-          <%!-- Footer nav --%>
-          <div class="mt-6 flex justify-end">
+          <%!-- Footer HUD --%>
+          <div class="flex justify-between items-center pt-8 border-t border-white/[0.02]">
+            <div class="flex items-center gap-6">
+              <div class="flex flex-col">
+                <span class="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest mb-1">
+                  System Roster Count
+                </span>
+                <span class="text-xs font-mono font-bold text-zinc-400">{@total_count} ENTITIES</span>
+              </div>
+              <div class="w-px h-8 bg-white/5"></div>
+              <div class="flex flex-col">
+                <span class="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest mb-1">
+                  Audit Protocol
+                </span>
+                <span class="text-xs font-mono font-bold text-emerald-500/50">
+                  NON-REPUDIATION ACTIVE
+                </span>
+              </div>
+            </div>
             <.link
               navigate={~p"/vaults"}
-              class="text-[9px] font-mono text-zinc-600 hover:text-white transition-colors uppercase tracking-widest"
+              class="text-[9px] font-mono font-black text-zinc-500 hover:text-white transition-all uppercase tracking-[0.2em] flex items-center gap-2 group"
             >
-              ← Back to Command Center
+              <.icon
+                name="hero-arrow-left-mini"
+                class="w-4 h-4 group-hover:-translate-x-1 transition-transform"
+              /> Return to System Hub
             </.link>
           </div>
         </div>
@@ -255,6 +334,38 @@ defmodule NexusWeb.Identity.TeamManagementLive do
   end
 
   # ── Events ──────────────────────────────────────────────────────────────────
+
+  @impl true
+  def handle_event("search", %{"value" => query}, socket) do
+    {:noreply, assign(socket, search_query: query, page: 1)}
+  end
+
+  @impl true
+  def handle_event("clear_search", _params, socket) do
+    {:noreply, assign(socket, search_query: "", page: 1)}
+  end
+
+  @impl true
+  def handle_event("paginate", %{"page" => page}, socket) do
+    page =
+      case Integer.parse(to_string(page)) do
+        {p, _} -> max(1, p)
+        :error -> 1
+      end
+
+    {:noreply, assign(socket, :page, page)}
+  end
+
+  @impl true
+  def handle_event("change_page_size", %{"page_size" => size}, socket) do
+    per_page =
+      case Integer.parse(to_string(size)) do
+        {s, _} -> s
+        :error -> 10
+      end
+
+    {:noreply, assign(socket, per_page: per_page, page: 1)}
+  end
 
   @impl true
   def handle_event("request_deactivate", %{"user_id" => user_id}, socket) do
@@ -359,6 +470,17 @@ defmodule NexusWeb.Identity.TeamManagementLive do
   end
 
   # ── Private ─────────────────────────────────────────────────────────────────
+
+  defp filter_members(members, ""), do: members
+
+  defp filter_members(members, query) do
+    q = String.downcase(query)
+
+    Enum.filter(members, fn m ->
+      String.contains?(String.downcase(m.name), q) or
+        String.contains?(String.downcase(m.email), q)
+    end)
+  end
 
   defp assignable_roles do
     Roles.all_org() |> Enum.reject(&(&1 in ~w(org_admin group_treasurer)))

@@ -23,12 +23,19 @@ defmodule NexusWeb.Router do
     get "/", Marketing.PageController, :home
     get "/health", Marketing.PageController, :health
 
-    live_session :marketing, layout: {NexusWeb.Layouts, :marketing} do
+    live_session :marketing,
+      session: {NexusWeb.TracingHooks, :session_from_conn, []},
+      on_mount: [NexusWeb.TracingHooks],
+      layout: {NexusWeb.Layouts, :marketing} do
       live "/request-access", Marketing.RequestAccessLive, :new
     end
 
     live_session :public,
-      on_mount: [{NexusWeb.UserAuth, :fetch_current_user}] do
+      session: {NexusWeb.TracingHooks, :session_from_conn, []},
+      on_mount: [
+        {NexusWeb.UserAuth, :fetch_current_user},
+        NexusWeb.TracingHooks
+      ] do
       live "/login", Identity.LoginLive, :index
       live "/register", Identity.UserRegistrationLive, :new
       live "/onboarding/enroll", Identity.OnboardingLive, :enroll
@@ -44,7 +51,11 @@ defmodule NexusWeb.Router do
     # ── Protected LiveView routes (biometric session required) ─────────────
 
     live_session :authenticated,
-      on_mount: [{NexusWeb.UserAuth, :require_authenticated}] do
+      session: {NexusWeb.TracingHooks, :session_from_conn, []},
+      on_mount: [
+        {NexusWeb.UserAuth, :require_authenticated},
+        NexusWeb.TracingHooks
+      ] do
       live "/vaults", Treasury.VaultDashboardLive, :index
       live "/vaults/new", Treasury.VaultRegistrationLive, :new
       live "/admin/access-requests", Admin.RequestAccessAdminLive, :index

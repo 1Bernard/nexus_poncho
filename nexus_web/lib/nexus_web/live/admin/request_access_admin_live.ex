@@ -19,7 +19,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
   alias Nexus.Marketing.Projections.AccessRequest
   alias Nexus.Repo
-  alias Nexus.Shared.Tracing
+  alias NexusWeb.TracingHooks
   alias NexusShared.Identity.Roles
   alias NexusWeb.InvitationEmail
 
@@ -1070,7 +1070,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
         notes: socket.assigns.kyb_review_notes
       }
 
-      tracing_metadata = Tracing.inject_context(%{})
+      tracing_metadata = TracingHooks.session_metadata(socket)
 
       OpenTelemetry.Tracer.with_span "Admin.CompleteKYBReview" do
         case App.dispatch(command,
@@ -1136,7 +1136,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
               reviewed_by: socket.assigns.current_user.id
             }
 
-            tracing_metadata = Tracing.inject_context(%{})
+            tracing_metadata = TracingHooks.session_metadata(socket)
 
             OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
               App.dispatch(review_cmd,
@@ -1151,7 +1151,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
             reason: reason
           }
 
-          tracing_metadata = Tracing.inject_context(%{})
+          tracing_metadata = TracingHooks.session_metadata(socket)
 
           OpenTelemetry.Tracer.with_span "Admin.RejectAccessRequest" do
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
@@ -1209,7 +1209,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
           end
 
         if command do
-          tracing_metadata = Tracing.inject_context(%{})
+          tracing_metadata = TracingHooks.session_metadata(socket)
 
           OpenTelemetry.Tracer.with_span "Admin.TransitionAccessRequest" do
             # credo:disable-for-next-line Credo.Check.Refactor.Nesting
@@ -1274,7 +1274,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
                 reviewed_by: socket.assigns.current_user.id
               }
 
-              tracing_metadata = Tracing.inject_context(%{})
+              tracing_metadata = TracingHooks.session_metadata(socket)
 
               OpenTelemetry.Tracer.with_span "Admin.ReviewAccessRequest" do
                 App.dispatch(review_cmd,
@@ -1300,64 +1300,11 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     end
   end
 
-  defp dispatch_approval(id, role, socket) do
-    require OpenTelemetry.Tracer
-    require Logger
-
-    user_id = Uniq.UUID.uuid7()
-    org_id = Uniq.UUID.uuid7()
-
-    command = %ApproveAccessRequest{
-      request_id: id,
-      approved_by: socket.assigns.current_user.id,
-      role: role,
-      provisioned_user_id: user_id,
-      provisioned_org_id: org_id
-    }
-
-    OpenTelemetry.Tracer.with_span "Admin.ApproveAccessRequest" do
-      tracing_metadata = Tracing.inject_context(%{})
-
-      case App.dispatch(command,
-             metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
-           ) do
-        :ok ->
-          token = BiometricInvitation.generate_token(user_id)
-          link = BiometricInvitation.magic_link(token)
-          req = socket.assigns.drawer_request
-
-          Task.start(fn ->
-            InvitationEmail.send_biometric_invitation(req.name, req.email, role, link)
-          end)
-
-          Process.send_after(self(), :refresh_after_approval, 1_000)
-
-          {:noreply,
-           socket
-           |> assign(
-             approve_role: "",
-             invitation_link: link,
-             drawer_request:
-               socket.assigns.drawer_request &&
-                 %{socket.assigns.drawer_request | status: "approved"}
-           )
-           |> push_event("toast:show:success", %{
-             message: "Access approved — invitation link generated",
-             duration: 5_000
-           })}
-
-        {:error, reason} ->
-          Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
-          {:noreply, put_flash(socket, :error, "Approval failed: #{inspect(reason)}")}
-      end
-    end
-  end
-
   def handle_event("bulk_under_review", _, socket) do
     case Bodyguard.permit(Policy, :review_access_request, socket.assigns.current_user) do
       :ok ->
         require OpenTelemetry.Tracer
-        tracing_metadata = Tracing.inject_context(%{})
+        tracing_metadata = TracingHooks.session_metadata(socket)
 
         ids = MapSet.to_list(socket.assigns.selected_ids)
 
@@ -1405,7 +1352,7 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
            put_flash(socket, :error, "Please provide an audit reason for batch rejection.")}
         else
           require OpenTelemetry.Tracer
-          tracing_metadata = Tracing.inject_context(%{})
+          tracing_metadata = TracingHooks.session_metadata(socket)
 
           ids = MapSet.to_list(socket.assigns.selected_ids)
           reviewer_id = socket.assigns.current_user.id
@@ -1548,6 +1495,59 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
     end
   end
 
+  defp dispatch_approval(id, role, socket) do
+    require OpenTelemetry.Tracer
+    require Logger
+
+    user_id = Uniq.UUID.uuid7()
+    org_id = Uniq.UUID.uuid7()
+
+    command = %ApproveAccessRequest{
+      request_id: id,
+      approved_by: socket.assigns.current_user.id,
+      role: role,
+      provisioned_user_id: user_id,
+      provisioned_org_id: org_id
+    }
+
+    OpenTelemetry.Tracer.with_span "Admin.ApproveAccessRequest" do
+      tracing_metadata = TracingHooks.session_metadata(socket)
+
+      case App.dispatch(command,
+             metadata: Map.put(tracing_metadata, "idempotency_key", "#{id}:approve")
+           ) do
+        :ok ->
+          token = BiometricInvitation.generate_token(user_id)
+          link = BiometricInvitation.magic_link(token)
+          req = socket.assigns.drawer_request
+
+          Task.start(fn ->
+            InvitationEmail.send_biometric_invitation(req.name, req.email, role, link)
+          end)
+
+          Process.send_after(self(), :refresh_after_approval, 1_000)
+
+          {:noreply,
+           socket
+           |> assign(
+             approve_role: "",
+             invitation_link: link,
+             drawer_request:
+               socket.assigns.drawer_request &&
+                 %{socket.assigns.drawer_request | status: "approved"}
+           )
+           |> push_event("toast:show:success", %{
+             message: "Access approved — invitation link generated",
+             duration: 5_000
+           })}
+
+        {:error, reason} ->
+          Logger.error("[Admin] Approval dispatch failed: #{inspect(reason)}")
+          {:noreply, put_flash(socket, :error, "Approval failed: #{inspect(reason)}")}
+      end
+    end
+  end
+
   defp find_duplicate_warnings(request) do
     email_match =
       Repo.one(
@@ -1639,61 +1639,4 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
   defp format_volume("500m_1b"), do: "$500M – $1B"
   defp format_volume("gt_1b"), do: "> $1B"
   defp format_volume(v), do: v
-
-  defp ledger_pagination(assigns) do
-    ~H"""
-    <div class="flex-shrink-0 px-8 py-5 border-t border-white/10 bg-black/30 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-5">
-        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
-          Range:
-          <span class="text-white">
-            {(@page - 1) * @per_page + 1} - {min(@page * @per_page, @total_count)}
-          </span>
-        </span>
-        <div class="h-3 w-px bg-white/10"></div>
-        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider">
-          Total: <span class="text-white">{@total_count}</span>
-        </span>
-        <div class="h-3 w-px bg-white/10 hidden sm:block"></div>
-        <span class="text-[9px] font-mono text-zinc-500 uppercase tracking-wider hidden sm:inline">
-          Approved: <span class="text-emerald-400">{@approved_count}</span>
-        </span>
-      </div>
-      <div class="flex items-center gap-3">
-        <form phx-change="change_page_size">
-          <select
-            name="page_size"
-            class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-[9px] font-mono text-white focus:outline-none focus:border-emerald-400/40"
-          >
-            <%= for size <- [10, 25, 50, 100] do %>
-              <option value={size} selected={@per_page == size}>{size} / page</option>
-            <% end %>
-          </select>
-        </form>
-
-        <button
-          phx-click="paginate"
-          phx-value-page={@page - 1}
-          disabled={@page == 1}
-          class="flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:border-emerald-400/50 transition-all disabled:opacity-30"
-        >
-          <i data-lucide="chevron-left" class="w-3 h-3"></i> Prev
-        </button>
-
-        <span class="text-[9px] font-mono text-zinc-500">
-          Page {@page} of {@total_pages}
-        </span>
-
-        <button
-          phx-click="paginate"
-          phx-value-page={@page + 1}
-          disabled={@page >= @total_pages}
-          class="flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white hover:border-emerald-400/50 transition-all disabled:opacity-30"
-        >
-          Next <i data-lucide="chevron-right" class="w-3 h-3"></i>
-        </button>
-      </div>
-    </div>
-    """
-  end
 end

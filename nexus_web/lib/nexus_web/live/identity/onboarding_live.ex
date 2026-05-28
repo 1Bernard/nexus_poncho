@@ -517,7 +517,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
         </div>
 
         <div class="border-t border-white/5 px-7 py-5 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
-          <span>EQUINOX · INSTITUTIONAL KYB</span>
+          <span>{brand_name_upper()} · INSTITUTIONAL KYB</span>
           <span>REGULATED PLATFORM</span>
         </div>
       </div>
@@ -850,7 +850,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
       <div class="max-h-40 overflow-y-auto bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 text-[10px] text-zinc-400 font-mono space-y-2">
         <p>
           <strong class="text-white/80">1. Platform Access.</strong>
-          Access to the Equinox Treasury Platform is granted solely for institutional treasury management purposes as described in your executed master service agreement.
+          Access to the {brand_name()} Treasury Platform is granted solely for institutional treasury management purposes as described in your executed master service agreement.
         </p>
         <p>
           <strong class="text-white/80">2. Regulatory Compliance.</strong>
@@ -903,7 +903,7 @@ defmodule NexusWeb.Identity.OnboardingLive do
           <% end %>
         </button>
         <span class="text-[10px] font-mono text-zinc-400">
-          I, <strong class="text-white/80">{@user && @user.name}</strong>, have read and agree to the Equinox Platform Terms of Service v2026-01 and confirm all entity information provided is accurate.
+          I, <strong class="text-white/80">{@user && @user.name}</strong>, have read and agree to the {brand_name()} Platform Terms of Service v2026-01 and confirm all entity information provided is accurate.
         </span>
       </label>
 

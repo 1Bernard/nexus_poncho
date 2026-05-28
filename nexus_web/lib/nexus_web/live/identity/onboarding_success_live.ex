@@ -100,7 +100,7 @@ defmodule NexusWeb.Identity.OnboardingSuccessLive do
         </div>
 
         <div class="border-t border-white/5 px-7 py-5 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
-          <span>EQUINOX · ACCESS CONTROL</span>
+          <span>{brand_name_upper()} · ACCESS CONTROL</span>
           <span>BIOMETRIC SECURITY</span>
         </div>
       </div>

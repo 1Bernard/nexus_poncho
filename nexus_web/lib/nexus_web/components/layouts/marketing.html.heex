@@ -4,14 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <title>EQUINOX | The Definitive Treasury Operating System</title>
+    <title>{brand_name_upper()} | The Definitive Treasury Operating System</title>
     <meta
       name="description"
       content="Institutional-grade treasury operating system for multinationals. Real-time FX exposure, automated intercompany netting, and compliance by design."
     />
 
     <%!-- OpenGraph / Social --%>
-    <meta property="og:title" content="EQUINOX | Institutional Treasury Infrastructure" />
+    <meta
+      property="og:title"
+      content={"#{brand_name_upper()} | Institutional Treasury Infrastructure"}
+    />
     <meta
       property="og:description"
       content="The single source of truth for global treasury operations. Built for the modern treasurer."
@@ -69,7 +72,7 @@
           <div class="w-4 h-4 border-2 border-obsidian rotate-45"></div>
         </div>
         <span class="font-mono text-[11px] tracking-[0.3em] uppercase font-bold bg-gradient-to-r from-white to-emerald-400 bg-clip-text text-transparent">
-          Equinox
+          {brand_name()}
         </span>
       </.link>
 
@@ -141,7 +144,9 @@
             <div class="w-8 h-8 bg-emerald-400 rotate-45 flex items-center justify-center transition-all duration-300 hover:rotate-90">
               <div class="w-4 h-4 bg-obsidian rotate-45"></div>
             </div>
-            <span class="font-mono text-xs tracking-[0.3em] uppercase font-bold">Equinox</span>
+            <span class="font-mono text-xs tracking-[0.3em] uppercase font-bold">
+              {brand_name()}
+            </span>
           </div>
           <p class="text-zinc-500 text-sm leading-relaxed max-w-xs font-light">
             The definitive treasury operating system for global institutions. Single source of truth for multinational capital management.
@@ -209,7 +214,7 @@
       </div>
       <div class="max-w-7xl mx-auto pt-20 mt-20 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-white/5">
         <div class="text-zinc-600 font-mono text-[9px] tracking-widest uppercase italic">
-          © 2025 Equinox Infrastructure Ltd
+          © 2025 {brand_name()} Infrastructure Ltd
         </div>
         <div class="flex gap-8 text-[9px] font-mono tracking-widest uppercase text-zinc-600">
           <a href="#" class="hover:text-emerald-400 transition-colors">Privacy Policy</a>

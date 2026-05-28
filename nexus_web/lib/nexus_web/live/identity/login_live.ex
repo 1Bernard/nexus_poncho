@@ -4,7 +4,7 @@ defmodule NexusWeb.Identity.LoginLive do
   alias Nexus.Identity.Commands.StartSession
   alias Nexus.Identity.Queries.GetUserByCredentialId
   alias Nexus.Identity.WebAuthn
-  alias Nexus.Shared.Tracing
+  alias NexusWeb.TracingHooks
 
   require Logger
 
@@ -39,7 +39,7 @@ defmodule NexusWeb.Identity.LoginLive do
       phx-hook="LoginLive"
       class="min-h-screen flex items-center justify-center p-4 relative z-10"
     >
-      <div class="w-full max-w-[460px] prestige-card rounded-[2.5rem] relative overflow-hidden">
+      <.prestige_card class="w-full max-w-[460px]">
         <%!-- Step progress dots --%>
         <div class="pt-8 px-7 pb-3 flex justify-between items-center">
           <div class="flex gap-1.5">
@@ -85,23 +85,11 @@ defmodule NexusWeb.Identity.LoginLive do
             <span>ISO_27001:2022</span>
           </div>
           <div class="flex items-center gap-2">
-            <svg
-              class="w-3 h-3 text-zinc-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z"
-              />
-            </svg>
+            <.icon name="hero-cpu-chip" class="w-3 h-3 text-zinc-600" />
             <span>FIPS_140-3</span>
           </div>
         </div>
-      </div>
+      </.prestige_card>
     </div>
     """
   end
@@ -120,7 +108,7 @@ defmodule NexusWeb.Identity.LoginLive do
       </h1>
 
       <p class="text-zinc-400 text-sm leading-relaxed font-light">
-        Zero-knowledge biometric handshake required for Equinox access. Secure enclave encryption active.
+        Zero-knowledge biometric handshake required for {brand_name()} access. Secure enclave encryption active.
       </p>
 
       <div class="space-y-4 py-5 border-y border-white/5">
@@ -144,18 +132,13 @@ defmodule NexusWeb.Identity.LoginLive do
         </div>
       </div>
 
-      <button
+      <.eq_button
         phx-click="advance_step"
-        class="cta-primary w-full py-5 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
+        full_width
+        arrow
       >
-        <span class="relative z-10 flex items-center gap-3">
-          Authenticate session
-          <span class="arrow-wrap">
-            <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-icon" />
-            <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-clone" />
-          </span>
-        </span>
-      </button>
+        Authenticate session
+      </.eq_button>
     </div>
     """
   end
@@ -202,19 +185,15 @@ defmodule NexusWeb.Identity.LoginLive do
       </label>
 
       <div class="space-y-3 pt-4">
-        <button
+        <.eq_button
           phx-click="advance_step"
           disabled={not @consent_checked}
-          class={[
-            "w-full py-5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] transition-all",
-            @consent_checked &&
-              "cta-primary bg-emerald-400 text-black shadow-[0_10px_20px_rgba(16,185,129,0.08)]",
-            not @consent_checked &&
-              "bg-white/5 border border-white/10 text-white/30 cursor-not-allowed"
-          ]}
+          full_width
+          variant={if @consent_checked, do: "primary", else: "ghost"}
+          class={not @consent_checked && "opacity-20 cursor-not-allowed"}
         >
-          <span class="relative z-10">Confirm & Continue</span>
-        </button>
+          Confirm & Continue
+        </.eq_button>
         <button
           phx-click="back_step"
           class="w-full py-3 text-zinc-400 text-[10px] uppercase tracking-widest hover:text-white transition-colors"
@@ -257,10 +236,10 @@ defmodule NexusWeb.Identity.LoginLive do
     <% else %>
       <div class="flex flex-col items-center">
         <h2 class="text-2xl font-serif font-bold uppercase tracking-wide text-white">
-          Sensor Calibration
+          Biometric Authorization
         </h2>
         <p class="text-[9px] text-zinc-500 mt-2 font-mono uppercase tracking-[0.25em]">
-          Liveness 3.0 · Press & Hold
+          Secure Enclave · Hardware-Bound Authentication
         </p>
 
         <div class="relative my-12 flex justify-center items-center">
@@ -304,7 +283,7 @@ defmodule NexusWeb.Identity.LoginLive do
           <%= if @status == :error do %>
             <span class="text-rose-400">{@error}</span>
           <% else %>
-            ⬇ Press & hold sensor ⬇
+            ⬇ Place finger on sensor to authorize ⬇
           <% end %>
         </div>
 
@@ -337,14 +316,14 @@ defmodule NexusWeb.Identity.LoginLive do
       <p class="text-zinc-400 text-sm mt-3 mb-10 leading-relaxed">
         Identity authenticated ·<br />Institutional session active
       </p>
-      <div class="w-full bg-white/5 border border-white/10 p-6 rounded-3xl mb-10 text-left font-mono">
+      <div class="w-full bg-white/5 border border-white/10 p-6 rounded-xl mb-10 text-left font-mono">
         <div class="flex justify-between mb-2">
           <span class="text-[8px] text-zinc-500 uppercase tracking-wider">Status</span>
-          <span class="text-[10px] text-emerald-400">ACCESS CLEARANCE</span>
+          <.status_pill status="ACCESS CLEARANCE" />
         </div>
         <div class="flex justify-between">
           <span class="text-[8px] text-zinc-500 uppercase tracking-wider">Session</span>
-          <span class="text-[10px] text-white/60 animate-pulse">Redirecting...</span>
+          <span class="text-[10px] text-white/60 animate-pulse uppercase">Redirecting...</span>
         </div>
       </div>
     </div>
@@ -419,7 +398,7 @@ defmodule NexusWeb.Identity.LoginLive do
          {:ok, _auth} <-
            WebAuthn.verify_authentication(params, challenge_id, [{raw_id, cose_key}]),
          session_id <- Uniq.UUID.uuid7(),
-         :ok <- dispatch_start_session(session_id, user, params) do
+         :ok <- dispatch_start_session(session_id, user, params, socket) do
       auth_token = Phoenix.Token.sign(NexusWeb.Endpoint, "session_auth", session_id)
       redirect_url = "/auth/finalise?token=#{auth_token}"
 
@@ -494,7 +473,7 @@ defmodule NexusWeb.Identity.LoginLive do
     _ -> {:error, :invalid_cose_key}
   end
 
-  defp dispatch_start_session(session_id, user, params) do
+  defp dispatch_start_session(session_id, user, params, socket) do
     expires_at =
       DateTime.utc_now()
       |> DateTime.add(@session_ttl_hours * 3600, :second)
@@ -510,7 +489,7 @@ defmodule NexusWeb.Identity.LoginLive do
       user_agent: params["user_agent"]
     }
 
-    tracing_metadata = Tracing.inject_context(%{})
+    tracing_metadata = TracingHooks.session_metadata(socket)
 
     case Nexus.App.dispatch(command,
            metadata: Map.put(tracing_metadata, "idempotency_key", session_id)

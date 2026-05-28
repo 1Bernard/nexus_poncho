@@ -75,8 +75,20 @@ defmodule NexusWeb.UserAuth do
   # ── Private ──────────────────────────────────────────────────────────────
 
   defp mount_current_user(socket, session) do
+    # Plug.CSRFProtection.get_csrf_token/0 reads :plug_unmasked_csrf_token from
+    # the process dictionary. In an HTTP request, protect_from_forgery seeds
+    # this from the session. In a LiveView process, it is never seeded — so
+    # get_csrf_token/0 generates a fresh random token unrelated to the session,
+    # causing CSRF validation failures when the logout form is submitted.
+    if raw_csrf = Map.get(session, "_csrf_token") do
+      Process.put(:plug_unmasked_csrf_token, raw_csrf)
+    end
+
     user = resolve_user(session["session_id"])
-    Phoenix.Component.assign(socket, :current_user, user)
+
+    socket
+    |> Phoenix.Component.assign(:current_user, user)
+    |> Phoenix.Component.assign(:csrf_token, Plug.CSRFProtection.get_csrf_token())
   end
 
   defp resolve_user(nil), do: nil

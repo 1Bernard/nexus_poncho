@@ -41,7 +41,7 @@ defmodule NexusWeb.Treasury.VaultRegistrationLive do
               <.eq_input
                 field={@form[:bank_name]}
                 label="Partner Bank"
-                placeholder="e.g. Equinox Central Bank"
+                placeholder={"e.g. #{brand_name()} Central Bank"}
                 required
               />
               <.eq_input

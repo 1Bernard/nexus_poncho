@@ -30,7 +30,7 @@
           </div>
         </div>
         <span class="sidebar-text sidebar-header-text font-bold text-white tracking-tighter text-xl italic uppercase">
-          EQUINOX
+          {brand_name_upper()}
         </span>
       </div>
     </div>
@@ -149,7 +149,11 @@
         </div>
         <form action={~p"/auth/logout"} method="post" class="inline">
           <input type="hidden" name="_method" value="delete" />
-          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <input
+            type="hidden"
+            name="_csrf_token"
+            value={assigns[:csrf_token] || Plug.CSRFProtection.get_csrf_token()}
+          />
           <button
             type="submit"
             class="text-zinc-600 hover:text-red-400 transition-colors"
@@ -172,7 +176,7 @@
       <div class="grid grid-cols-[1fr_auto_1fr] items-center h-full px-8">
         <%!-- Left: Breadcrumb --%>
         <div class="flex justify-start items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em]">
-          <span class="text-zinc-500">{assigns[:breadcrumb_section] || "Equinox"}</span>
+          <span class="text-zinc-500">{assigns[:breadcrumb_section] || brand_name()}</span>
           <span class="text-zinc-700">›</span>
           <span class="text-white font-bold">{assigns[:page_title] || "Dashboard"}</span>
         </div>
@@ -330,7 +334,11 @@
         </a>
         <form action={~p"/auth/logout"} method="post">
           <input type="hidden" name="_method" value="delete" />
-          <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+          <input
+            type="hidden"
+            name="_csrf_token"
+            value={assigns[:csrf_token] || Plug.CSRFProtection.get_csrf_token()}
+          />
           <button
             type="submit"
             class="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 border border-transparent hover:border-red-500/20 transition-all text-xs font-bold uppercase tracking-widest"

@@ -10,8 +10,17 @@ defmodule NexusWeb.Application do
     # Elite Precision: Ensure the observability stack is live before any bridge setups.
     {:ok, _} = Application.ensure_all_started(:opentelemetry)
 
+    if Code.ensure_loaded?(OpentelemetryBandit) do
+      OpentelemetryBandit.setup()
+    end
+
     if Code.ensure_loaded?(OpentelemetryPhoenix) do
-      OpentelemetryPhoenix.setup()
+      # liveview: false — LiveView telemetry is handled by OpentelemetryLiveView below.
+      # With liveview: true, both phoenix and liveview handlers attach to the same
+      # [:phoenix, :live_view, :mount, *] events. The second handler's store_ctx call
+      # overwrites the first's {parent, child} entry under the shared telemetry_span_context
+      # key, so the parent span is never restored after mount — leaking the Bandit root span.
+      OpentelemetryPhoenix.setup(adapter: :bandit, liveview: false)
     end
 
     if Code.ensure_loaded?(OpentelemetryLiveView) do

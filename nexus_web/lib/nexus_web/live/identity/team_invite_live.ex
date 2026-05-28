@@ -150,7 +150,7 @@ defmodule NexusWeb.Identity.TeamInviteLive do
           </div>
 
           <div class="border-t border-white/5 px-8 py-4 flex items-center justify-between text-white/30 text-[8px] font-mono tracking-widest">
-            <span>EQUINOX · TEAM ACCESS</span>
+            <span>{brand_name_upper()} · TEAM ACCESS</span>
             <.link navigate={~p"/vaults"} class="hover:text-white/60 transition-colors">← Back</.link>
           </div>
         </div>
