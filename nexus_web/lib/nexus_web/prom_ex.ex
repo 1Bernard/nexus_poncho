@@ -60,7 +60,8 @@ defmodule NexusWeb.PromEx do
   def plugins do
     [
       # PromEx built in plugins
-      Plugins.Application,
+      {Plugins.Application,
+       git_sha_mfa: {__MODULE__, :git_sha, []}, git_author_mfa: {__MODULE__, :git_author, []}},
       Plugins.Beam,
       {Plugins.Phoenix, router: NexusWeb.Router, endpoint: NexusWeb.Endpoint},
       {Plugins.Ecto, repos: [Nexus.Repo]},
@@ -71,6 +72,20 @@ defmodule NexusWeb.PromEx do
       # Add your own PromEx metrics plugins
       # NexusWeb.Users.PromExPlugin
     ]
+  end
+
+  def git_sha do
+    case System.cmd("git", ["log", "-1", "--format=%H"], stderr_to_stdout: true, cd: "/app") do
+      {sha, 0} -> String.trim(sha)
+      _ -> System.get_env("GIT_SHA", "unavailable")
+    end
+  end
+
+  def git_author do
+    case System.cmd("git", ["log", "-1", "--format=%aN"], stderr_to_stdout: true, cd: "/app") do
+      {author, 0} -> String.trim(author)
+      _ -> System.get_env("GIT_AUTHOR", "unavailable")
+    end
   end
 
   @impl true
