@@ -88,6 +88,31 @@ defmodule Nexus.Shared.Tracing do
   end
 
   @doc """
+  Creates a named root span for a LiveView session, captures its traceparent,
+  ends the span immediately, and returns the traceparent string.
+
+  Store this in socket.assigns at mount time and re-attach it in handle_event
+  before dispatching commands. This bridges the Bandit WebSocket context gap
+  so all events within a session appear as children of a single session root.
+  """
+  def session_traceparent(span_name) when is_binary(span_name) do
+    if Code.ensure_loaded?(:otel_propagator_text_map) do
+      require OpenTelemetry.Tracer
+      span = OpenTelemetry.Tracer.start_span(span_name)
+      OpenTelemetry.Tracer.set_current_span(span)
+      traceparent = get_current_traceparent()
+      OpenTelemetry.Span.end_span(span)
+      traceparent
+    else
+      nil
+    end
+  rescue
+    e ->
+      Logger.error("[Tracing] session_traceparent failed: #{inspect(e)}")
+      nil
+  end
+
+  @doc """
   Returns the current traceparent string, if active.
   Ensures it captures the context even inside active spans.
   """

@@ -41,6 +41,7 @@ defmodule NexusWeb.Endpoint do
 
   plug Plug.RequestId
   plug PromEx.Plug, prom_ex_module: NexusWeb.PromEx
+  plug NexusWeb.Plugs.HealthCheck
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
