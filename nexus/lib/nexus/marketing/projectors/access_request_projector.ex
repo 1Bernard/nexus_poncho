@@ -23,60 +23,96 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
     SanctionsScreeningInitiated
   }
 
-  alias Nexus.Marketing.Idempotency.IdempotencyKey
+  alias Nexus.Marketing.Projections.IdempotencyKey
   alias Nexus.Marketing.Projections.AccessRequest
+  alias Nexus.Shared.Tracing
 
   require Logger
 
   project(%AccessRequestSubmitted{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "SubmitAccessRequest", %{request_id: event.request_id})
-    |> submit_request(event, metadata)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.AccessRequestSubmitted" do
+      multi
+      |> track_idempotency(metadata, "SubmitAccessRequest", %{request_id: event.request_id})
+      |> submit_request(event, metadata)
+    end
   end)
 
   project(%SanctionsScreeningInitiated{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "InitiateSanctionsScreening", %{request_id: event.request_id})
-    |> update_request(event.request_id, sanctions_screening: "pending")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.SanctionsScreeningInitiated" do
+      multi
+      |> track_idempotency(metadata, "InitiateSanctionsScreening", %{request_id: event.request_id})
+      |> update_request(event.request_id, sanctions_screening: "pending")
+    end
   end)
 
   project(%SanctionsScreeningCompleted{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "CompleteSanctionsScreening", %{request_id: event.request_id})
-    |> update_request(event.request_id, sanctions_screening: event.result)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.SanctionsScreeningCompleted" do
+      multi
+      |> track_idempotency(metadata, "CompleteSanctionsScreening", %{request_id: event.request_id})
+      |> update_request(event.request_id, sanctions_screening: event.result)
+    end
   end)
 
   project(%AccessRequestReviewed{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "ReviewAccessRequest", %{request_id: event.request_id})
-    |> update_request(event.request_id, reviewed_by: event.reviewed_by, status: "under_review")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.AccessRequestReviewed" do
+      multi
+      |> track_idempotency(metadata, "ReviewAccessRequest", %{request_id: event.request_id})
+      |> update_request(event.request_id, reviewed_by: event.reviewed_by, status: "under_review")
+    end
   end)
 
   project(%AccessRequestApproved{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "ApproveAccessRequest", %{request_id: event.request_id})
-    |> update_request(event.request_id,
-      status: "approved",
-      approved_by: event.approved_by,
-      provisioned_user_id: event.provisioned_user_id,
-      provisioned_org_id: event.provisioned_org_id
-    )
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.AccessRequestApproved" do
+      multi
+      |> track_idempotency(metadata, "ApproveAccessRequest", %{request_id: event.request_id})
+      |> update_request(event.request_id,
+        status: "approved",
+        approved_by: event.approved_by,
+        provisioned_user_id: event.provisioned_user_id,
+        provisioned_org_id: event.provisioned_org_id
+      )
+    end
   end)
 
   project(%AccessRequestRejected{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "RejectAccessRequest", %{request_id: event.request_id})
-    |> update_request(event.request_id,
-      status: "rejected",
-      rejected_by: event.rejected_by,
-      rejection_reason: event.reason
-    )
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.AccessRequestRejected" do
+      multi
+      |> track_idempotency(metadata, "RejectAccessRequest", %{request_id: event.request_id})
+      |> update_request(event.request_id,
+        status: "rejected",
+        rejected_by: event.rejected_by,
+        rejection_reason: event.reason
+      )
+    end
   end)
 
   project(%AccessRequestArchived{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "ArchiveAccessRequest", %{request_id: event.request_id})
-    |> update_request(event.request_id, status: "archived")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.AccessRequestArchived" do
+      multi
+      |> track_idempotency(metadata, "ArchiveAccessRequest", %{request_id: event.request_id})
+      |> update_request(event.request_id, status: "archived")
+    end
   end)
 
   # ── Private ───────────────────────────────────────────────────────────────

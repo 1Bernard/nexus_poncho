@@ -14,7 +14,7 @@ defmodule Nexus.Treasury.Projectors.VaultProjector do
   alias Nexus.Shared.Tracing
   alias Nexus.Treasury.Audit.AuditLog
   alias Nexus.Treasury.Events.{VaultCredited, VaultRegistered}
-  alias Nexus.Treasury.Idempotency.IdempotencyKey
+  alias Nexus.Treasury.Projections.IdempotencyKey
   alias Nexus.Treasury.Projections.Vault
 
   project(%VaultRegistered{} = event, metadata, fn multi ->

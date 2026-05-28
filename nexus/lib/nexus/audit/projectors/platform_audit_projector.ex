@@ -16,6 +16,7 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
 
   alias Ecto.Multi
   alias Nexus.Audit.Projections.PlatformAuditLog
+  alias Nexus.Shared.Tracing
 
   # ── Identity ──────────────────────────────────────────────────────────────
 
@@ -30,31 +31,66 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
   }
 
   project(%UserRegistered{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "user_registered", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.UserRegistered" do
+      insert(multi, e, meta, "identity", "user_registered", e.user_id)
+    end
   end)
 
   project(%BiometricEnrolled{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "biometric_enrolled", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.BiometricEnrolled" do
+      insert(multi, e, meta, "identity", "biometric_enrolled", e.user_id)
+    end
   end)
 
   project(%UserActivated{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "user_activated", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.UserActivated" do
+      insert(multi, e, meta, "identity", "user_activated", e.user_id)
+    end
   end)
 
   project(%UserDeactivated{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "user_deactivated", e.deactivated_by || e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.UserDeactivated" do
+      insert(multi, e, meta, "identity", "user_deactivated", e.deactivated_by || e.user_id)
+    end
   end)
 
   project(%UserRoleChanged{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "user_role_changed", e.changed_by)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.UserRoleChanged" do
+      insert(multi, e, meta, "identity", "user_role_changed", e.changed_by)
+    end
   end)
 
   project(%SessionStarted{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "session_started", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.SessionStarted" do
+      insert(multi, e, meta, "identity", "session_started", e.user_id)
+    end
   end)
 
   project(%SessionExpired{} = e, meta, fn multi ->
-    insert(multi, e, meta, "identity", "session_expired", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.SessionExpired" do
+      insert(multi, e, meta, "identity", "session_expired", e.user_id)
+    end
   end)
 
   # ── Organization ──────────────────────────────────────────────────────────
@@ -62,7 +98,12 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
   alias Nexus.Organization.Events.TenantProvisioned
 
   project(%TenantProvisioned{} = e, meta, fn multi ->
-    insert(multi, e, meta, "organization", "tenant_provisioned", e.provisioned_by)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.TenantProvisioned" do
+      insert(multi, e, meta, "organization", "tenant_provisioned", e.provisioned_by)
+    end
   end)
 
   # ── Accounting ────────────────────────────────────────────────────────────
@@ -70,7 +111,12 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
   alias Nexus.Accounting.Events.AccountOpened
 
   project(%AccountOpened{} = e, meta, fn multi ->
-    insert(multi, e, meta, "accounting", "account_opened", nil)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.AccountOpened" do
+      insert(multi, e, meta, "accounting", "account_opened", nil)
+    end
   end)
 
   # ── Treasury ──────────────────────────────────────────────────────────────
@@ -78,11 +124,21 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
   alias Nexus.Treasury.Events.{VaultCredited, VaultRegistered}
 
   project(%VaultRegistered{} = e, meta, fn multi ->
-    insert(multi, e, meta, "treasury", "vault_registered", nil)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.VaultRegistered" do
+      insert(multi, e, meta, "treasury", "vault_registered", nil)
+    end
   end)
 
   project(%VaultCredited{} = e, meta, fn multi ->
-    insert(multi, e, meta, "treasury", "vault_credited", nil)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.VaultCredited" do
+      insert(multi, e, meta, "treasury", "vault_credited", nil)
+    end
   end)
 
   # ── Compliance ────────────────────────────────────────────────────────────
@@ -90,11 +146,21 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
   alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
 
   project(%PEPCheckInitiated{} = e, meta, fn multi ->
-    insert(multi, e, meta, "compliance", "pep_check_initiated", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.PEPCheckInitiated" do
+      insert(multi, e, meta, "compliance", "pep_check_initiated", e.user_id)
+    end
   end)
 
   project(%PEPCheckCompleted{} = e, meta, fn multi ->
-    insert(multi, e, meta, "compliance", "pep_check_completed", e.user_id)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.PEPCheckCompleted" do
+      insert(multi, e, meta, "compliance", "pep_check_completed", e.user_id)
+    end
   end)
 
   # ── Marketing ─────────────────────────────────────────────────────────────
@@ -108,23 +174,48 @@ defmodule Nexus.Audit.Projectors.PlatformAuditProjector do
   }
 
   project(%AccessRequestSubmitted{} = e, meta, fn multi ->
-    insert(multi, e, meta, "marketing", "access_request_submitted", nil)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.AccessRequestSubmitted" do
+      insert(multi, e, meta, "marketing", "access_request_submitted", nil)
+    end
   end)
 
   project(%AccessRequestReviewed{} = e, meta, fn multi ->
-    insert(multi, e, meta, "marketing", "access_request_reviewed", e.reviewed_by)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.AccessRequestReviewed" do
+      insert(multi, e, meta, "marketing", "access_request_reviewed", e.reviewed_by)
+    end
   end)
 
   project(%AccessRequestApproved{} = e, meta, fn multi ->
-    insert(multi, e, meta, "marketing", "access_request_approved", e.approved_by)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.AccessRequestApproved" do
+      insert(multi, e, meta, "marketing", "access_request_approved", e.approved_by)
+    end
   end)
 
   project(%AccessRequestRejected{} = e, meta, fn multi ->
-    insert(multi, e, meta, "marketing", "access_request_rejected", e.rejected_by)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.AccessRequestRejected" do
+      insert(multi, e, meta, "marketing", "access_request_rejected", e.rejected_by)
+    end
   end)
 
   project(%AccessRequestArchived{} = e, meta, fn multi ->
-    insert(multi, e, meta, "marketing", "access_request_archived", e.archived_by)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(meta)
+
+    OpenTelemetry.Tracer.with_span "Projector.PlatformAudit.AccessRequestArchived" do
+      insert(multi, e, meta, "marketing", "access_request_archived", e.archived_by)
+    end
   end)
 
   # ── Private ───────────────────────────────────────────────────────────────

@@ -53,14 +53,15 @@ if config_env() != :test do
   node_name = System.get_env("NODE_NAME") || "web"
 
   config :opentelemetry,
-    span_processor: :batch,
+    processors: [{Nexus.Telemetry.SpanSanitizer, %{}}, :batch],
     text_map_propagators: [:trace_context, :baggage],
     traces_exporter: :otlp,
+    resource_detectors: [:otel_resource_env_var, :otel_resource_app_env],
     resource: [{"service.name", node_name}]
 
   config :opentelemetry_exporter,
     otlp_protocol: :http_protobuf,
-    otlp_endpoint: "http://jaeger:4318"
+    otlp_endpoint: System.get_env("OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4318")
 end
 
 # PromEx: web node runs on port 4003 to avoid conflict with Phoenix on 4000

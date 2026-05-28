@@ -20,6 +20,7 @@ defmodule Nexus.Identity.Projectors.AuditLogProjector do
 
   alias Ecto.Multi
   alias Nexus.Identity.Projections.AuditLog
+  alias Nexus.Shared.Tracing
 
   alias Nexus.Identity.Events.{
     BiometricEnrolled,
@@ -32,32 +33,67 @@ defmodule Nexus.Identity.Projectors.AuditLogProjector do
   }
 
   project(%UserRegistered{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "user_registered")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.UserRegistered" do
+      insert_audit(multi, event, metadata, event.user_id, "user_registered")
+    end
   end)
 
   project(%BiometricEnrolled{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "biometric_enrolled")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.BiometricEnrolled" do
+      insert_audit(multi, event, metadata, event.user_id, "biometric_enrolled")
+    end
   end)
 
   project(%UserActivated{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "user_activated")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.UserActivated" do
+      insert_audit(multi, event, metadata, event.user_id, "user_activated")
+    end
   end)
 
   project(%UserDeactivated{} = event, metadata, fn multi ->
-    actor = event.deactivated_by || event.user_id
-    insert_audit(multi, event, metadata, actor, "user_deactivated")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.UserDeactivated" do
+      actor = event.deactivated_by || event.user_id
+      insert_audit(multi, event, metadata, actor, "user_deactivated")
+    end
   end)
 
   project(%UserRoleChanged{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.changed_by, "user_role_changed")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.UserRoleChanged" do
+      insert_audit(multi, event, metadata, event.changed_by, "user_role_changed")
+    end
   end)
 
   project(%SessionStarted{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "session_started")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.SessionStarted" do
+      insert_audit(multi, event, metadata, event.user_id, "session_started")
+    end
   end)
 
   project(%SessionExpired{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "session_expired")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.Audit.SessionExpired" do
+      insert_audit(multi, event, metadata, event.user_id, "session_expired")
+    end
   end)
 
   # ── Private ───────────────────────────────────────────────────────────────

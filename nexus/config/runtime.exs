@@ -50,16 +50,20 @@ if config_env() != :test do
 
   node_name = System.get_env("NODE_NAME") || "nexus"
 
-  # OpenTelemetry: W3C trace context propagation for distributed mesh
+  # OpenTelemetry: W3C trace context propagation for distributed mesh.
+  # SpanSanitizer runs first: redacts sensitive url.query params, strips nil
+  # attributes from opentelemetry_ecto, and drops disconnect-close error spans.
+  # The batch processor exports everything that passes through.
   config :opentelemetry,
-    span_processor: :batch,
+    processors: [{Nexus.Telemetry.SpanSanitizer, %{}}, :batch],
     text_map_propagators: [:trace_context, :baggage],
     traces_exporter: :otlp,
+    resource_detectors: [:otel_resource_env_var, :otel_resource_app_env],
     resource: [{"service.name", node_name}]
 
   config :opentelemetry_exporter,
     otlp_protocol: :http_protobuf,
-    otlp_endpoint: "http://jaeger:4318"
+    otlp_endpoint: System.get_env("OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4318")
 
   # AMQP: named connections for visibility in RabbitMQ management UI.
   # 'email_dispatcher' is the producer (EmailDispatcher event handler).

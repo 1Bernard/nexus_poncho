@@ -45,7 +45,7 @@ defmodule Nexus.MixProject do
       {:opentelemetry_api, "~> 1.2"},
       {:opentelemetry_exporter, "~> 1.6"},
       {:opentelemetry_process_propagator, "~> 0.2"},
-      {:opentelemetry_phoenix, "~> 1.2"},
+      {:opentelemetry_phoenix, "~> 2.0"},
       {:opentelemetry_ecto, "~> 1.2"},
       {:prom_ex, "~> 1.11"},
       {:bandit, "~> 1.6"},

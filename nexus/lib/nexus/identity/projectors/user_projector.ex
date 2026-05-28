@@ -33,68 +33,106 @@ defmodule Nexus.Identity.Projectors.UserProjector do
     UserRoleChanged
   }
 
-  alias Nexus.Identity.Idempotency.IdempotencyKey
+  alias Nexus.Identity.Projections.IdempotencyKey
   alias Nexus.Identity.Projections.User
   alias Nexus.Onboarding.Events.TermsAccepted
+  alias Nexus.Shared.Tracing
 
   require Logger
 
   project(%UserRegistered{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "RegisterUser", %{user_id: event.user_id, status: event.status})
-    |> create_user(event, metadata)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.UserRegistered" do
+      multi
+      |> track_idempotency(metadata, "RegisterUser", %{
+        user_id: event.user_id,
+        status: event.status
+      })
+      |> create_user(event, metadata)
+    end
   end)
 
   project(%BiometricEnrolled{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "EnrollBiometric", %{
-      user_id: event.user_id,
-      status: "registered"
-    })
-    |> enroll_biometric(event, metadata)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.BiometricEnrolled" do
+      multi
+      |> track_idempotency(metadata, "EnrollBiometric", %{
+        user_id: event.user_id,
+        status: "registered"
+      })
+      |> enroll_biometric(event, metadata)
+    end
   end)
 
   project(%UserActivated{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "ActivateUser", %{user_id: event.user_id, status: "active"})
-    |> activate_user(event, metadata)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.UserActivated" do
+      multi
+      |> track_idempotency(metadata, "ActivateUser", %{user_id: event.user_id, status: "active"})
+      |> activate_user(event, metadata)
+    end
   end)
 
   project(%UserDeactivated{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "DeactivateUser", %{
-      user_id: event.user_id,
-      status: "deactivated"
-    })
-    |> deactivate_user(event)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.UserDeactivated" do
+      multi
+      |> track_idempotency(metadata, "DeactivateUser", %{
+        user_id: event.user_id,
+        status: "deactivated"
+      })
+      |> deactivate_user(event)
+    end
   end)
 
   project(%TeamMemberInvited{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "InviteTeamMember", %{
-      user_id: event.user_id,
-      status: "invited"
-    })
-    |> create_user_from_invitation(event, metadata)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.TeamMemberInvited" do
+      multi
+      |> track_idempotency(metadata, "InviteTeamMember", %{
+        user_id: event.user_id,
+        status: "invited"
+      })
+      |> create_user_from_invitation(event, metadata)
+    end
   end)
 
   project(%TermsAccepted{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "AcceptTerms", %{user_id: event.user_id})
-    |> record_terms_accepted(event)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.TermsAccepted" do
+      multi
+      |> track_idempotency(metadata, "AcceptTerms", %{user_id: event.user_id})
+      |> record_terms_accepted(event)
+    end
   end)
 
   project(%UserRoleChanged{} = event, metadata, fn multi ->
-    multi
-    |> track_idempotency(metadata, "UpdateUserRole", %{
-      user_id: event.user_id,
-      new_role: event.new_role
-    })
-    |> update_user_role(event)
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Identity.UserRoleChanged" do
+      multi
+      |> track_idempotency(metadata, "UpdateUserRole", %{
+        user_id: event.user_id,
+        new_role: event.new_role
+      })
+      |> update_user_role(event)
+    end
   end)
 
   defp track_idempotency(multi, metadata, command_name, result) do
-    # Extract the deterministic key assigned by the Idempotency Middleware
     id_key =
       Map.get(metadata, "idempotency_key") || Map.get(metadata, :idempotency_key) ||
         metadata.causation_id || metadata.event_id
@@ -138,8 +176,6 @@ defmodule Nexus.Identity.Projectors.UserProjector do
           {:ok, user}
 
         {:error, %Ecto.Changeset{} = cs} ->
-          # A unique constraint other than :id fired (email or credential_id already exists
-          # under a different user). Log for investigation — do not crash the projector.
           Logger.warning("[Identity] UserRegistered skipped: #{inspect(cs.errors)}")
           {:ok, :constraint_conflict}
       end
@@ -147,8 +183,6 @@ defmodule Nexus.Identity.Projectors.UserProjector do
   end
 
   defp enroll_biometric(multi, event, _metadata) do
-    # Use update_all for a robust, non-poisoning update if the user exists.
-    # This avoids the get-then-update pattern which can hit race conditions.
     query = from(u in User, where: u.id == ^event.user_id)
 
     Multi.update_all(multi, :enroll_biometric, query,

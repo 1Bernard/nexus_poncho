@@ -11,6 +11,7 @@ defmodule Nexus.Identity.Projectors.SessionProjector do
   alias Ecto.Multi
   alias Nexus.Identity.Events.{SessionExpired, SessionStarted}
   alias Nexus.Identity.Projections.Session
+  alias Nexus.Shared.Tracing
   alias NexusShared.Identity.Statuses
 
   import Ecto.Query
@@ -18,35 +19,45 @@ defmodule Nexus.Identity.Projectors.SessionProjector do
   require Logger
 
   project(%SessionStarted{} = event, metadata, fn multi ->
-    attrs = %{
-      id: event.session_id,
-      user_id: event.user_id,
-      org_id: event.org_id,
-      credential_id: event.credential_id,
-      status: Statuses.session_active(),
-      ip_address: event.ip_address,
-      user_agent: event.user_agent,
-      expires_at: event.expires_at,
-      started_at: metadata.created_at,
-      created_at: metadata.created_at
-    }
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
 
-    changeset = Session.changeset(%Session{}, attrs)
+    OpenTelemetry.Tracer.with_span "Projector.Identity.SessionStarted" do
+      attrs = %{
+        id: event.session_id,
+        user_id: event.user_id,
+        org_id: event.org_id,
+        credential_id: event.credential_id,
+        status: Statuses.session_active(),
+        ip_address: event.ip_address,
+        user_agent: event.user_agent,
+        expires_at: event.expires_at,
+        started_at: metadata.created_at,
+        created_at: metadata.created_at
+      }
 
-    Multi.insert(multi, :start_session, changeset,
-      on_conflict: :nothing,
-      conflict_target: :id
-    )
+      changeset = Session.changeset(%Session{}, attrs)
+
+      Multi.insert(multi, :start_session, changeset,
+        on_conflict: :nothing,
+        conflict_target: :id
+      )
+    end
   end)
 
-  project(%SessionExpired{} = event, _metadata, fn multi ->
-    query = from(s in Session, where: s.id == ^event.session_id)
+  project(%SessionExpired{} = event, metadata, fn multi ->
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
 
-    Multi.update_all(multi, :expire_session, query,
-      set: [
-        status: Statuses.session_expired(),
-        expired_at: DateTime.utc_now()
-      ]
-    )
+    OpenTelemetry.Tracer.with_span "Projector.Identity.SessionExpired" do
+      query = from(s in Session, where: s.id == ^event.session_id)
+
+      Multi.update_all(multi, :expire_session, query,
+        set: [
+          status: Statuses.session_expired(),
+          expired_at: DateTime.utc_now()
+        ]
+      )
+    end
   end)
 end

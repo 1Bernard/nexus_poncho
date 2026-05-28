@@ -20,6 +20,7 @@ defmodule Nexus.Marketing.Projectors.AuditLogProjector do
 
   alias Ecto.Multi
   alias Nexus.Marketing.Projections.AuditLog
+  alias Nexus.Shared.Tracing
 
   alias Nexus.Marketing.Events.{
     AccessRequestApproved,
@@ -30,23 +31,48 @@ defmodule Nexus.Marketing.Projectors.AuditLogProjector do
   }
 
   project(%AccessRequestSubmitted{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, nil, "access_request_submitted")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.Audit.AccessRequestSubmitted" do
+      insert_audit(multi, event, metadata, nil, "access_request_submitted")
+    end
   end)
 
   project(%AccessRequestReviewed{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.reviewed_by, "access_request_reviewed")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.Audit.AccessRequestReviewed" do
+      insert_audit(multi, event, metadata, event.reviewed_by, "access_request_reviewed")
+    end
   end)
 
   project(%AccessRequestApproved{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.approved_by, "access_request_approved")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.Audit.AccessRequestApproved" do
+      insert_audit(multi, event, metadata, event.approved_by, "access_request_approved")
+    end
   end)
 
   project(%AccessRequestRejected{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.rejected_by, "access_request_rejected")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.Audit.AccessRequestRejected" do
+      insert_audit(multi, event, metadata, event.rejected_by, "access_request_rejected")
+    end
   end)
 
   project(%AccessRequestArchived{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.archived_by, "access_request_archived")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Marketing.Audit.AccessRequestArchived" do
+      insert_audit(multi, event, metadata, event.archived_by, "access_request_archived")
+    end
   end)
 
   # ── Private ───────────────────────────────────────────────────────────────
