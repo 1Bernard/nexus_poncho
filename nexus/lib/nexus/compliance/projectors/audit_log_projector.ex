@@ -21,13 +21,24 @@ defmodule Nexus.Compliance.Projectors.AuditLogProjector do
   alias Ecto.Multi
   alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
   alias Nexus.Compliance.Projections.AuditLog
+  alias Nexus.Shared.Tracing
 
   project(%PEPCheckInitiated{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "pep_check_initiated")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Compliance.Audit.PEPCheckInitiated" do
+      insert_audit(multi, event, metadata, event.user_id, "pep_check_initiated")
+    end
   end)
 
   project(%PEPCheckCompleted{} = event, metadata, fn multi ->
-    insert_audit(multi, event, metadata, event.user_id, "pep_check_completed")
+    require OpenTelemetry.Tracer
+    Tracing.extract_and_set_context(metadata)
+
+    OpenTelemetry.Tracer.with_span "Projector.Compliance.Audit.PEPCheckCompleted" do
+      insert_audit(multi, event, metadata, event.user_id, "pep_check_completed")
+    end
   end)
 
   # ── Private ───────────────────────────────────────────────────────────────

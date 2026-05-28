@@ -67,14 +67,14 @@ defmodule Nexus.Application do
       {:start_compliance_projections,
        [
          Nexus.Compliance.Projectors.ScreeningProjector,
-         Nexus.Compliance.Workers.PEPWorker,
-         Nexus.Compliance.Workers.SanctionsWorker,
+         Nexus.Compliance.Handlers.PEPHandler,
+         Nexus.Compliance.Handlers.SanctionsHandler,
          Nexus.Compliance.Projectors.AuditLogProjector
        ]},
       {:start_accounting_projections, [Nexus.Accounting.Projectors.AccountProjector]},
       {:start_treasury_projections, [Nexus.Treasury.Projectors.VaultProjector]},
       {:start_messaging_projections,
-       [Nexus.Messaging.Producers.EmailDispatcher, Nexus.Messaging.Workers.EmailWorker]},
+       [Nexus.Messaging.Handlers.EmailHandler, Nexus.Messaging.Workers.EmailWorker]},
       {:start_onboarding_pm, [Nexus.Onboarding.ProcessManagers.OnboardingProcessManager]},
       {:start_onboarding_kyb_projections, [Nexus.Onboarding.Projectors.EntityKybProjector]},
       {:start_platform_audit, [Nexus.Audit.Projectors.PlatformAuditProjector]},
@@ -109,7 +109,10 @@ defmodule Nexus.Application do
   end
 
   defp ensure_mnesia_setup do
-    # Ensure Mnesia is stopped to create schema if needed
+    # Use /tmp so Mnesia disk I/O stays on fast container-local storage.
+    # Auth challenges are ephemeral — disk persistence has no value, and
+    # writing through virtiofs (macOS dev mount) causes multi-minute shutdown hangs.
+    Application.put_env(:mnesia, :dir, ~c"/tmp/mnesia")
     :mnesia.stop()
     :mnesia.create_schema([node()])
     :mnesia.start()

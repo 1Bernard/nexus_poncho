@@ -1,17 +1,17 @@
-defmodule Nexus.Compliance.Workers.SanctionsWorker do
+defmodule Nexus.Compliance.Handlers.SanctionsHandler do
   @moduledoc """
   Event handler for sanctions screening of institutional access requests.
-
   Listens for SanctionsScreeningInitiated, calls the external screening API
   (simulated), then dispatches CompleteSanctionsScreening back to the
   AccessRequest aggregate with the result.
 
-  Follows the same ACL pattern as PEPWorker — isolation from external APIs,
-  OTel span per screening, idempotency key set to request_id:sanctions_screen.
+  Follows the same ACL pattern as PEPHandler — isolation from external APIs,
+  OTel span per screening, idempotency key set to request_id:sanctions_complete.
   """
   use Commanded.Event.Handler,
     application: Nexus.App,
-    name: __MODULE__,
+    # Explicit name preserves the EventStore subscription checkpoint when the module was renamed.
+    name: "Nexus.Compliance.Workers.SanctionsWorker",
     consistency: :eventual
 
   require Logger
@@ -24,7 +24,7 @@ defmodule Nexus.Compliance.Workers.SanctionsWorker do
   def handle(%SanctionsScreeningInitiated{} = event, metadata) do
     Tracing.extract_and_set_context(metadata)
 
-    OpenTelemetry.Tracer.with_span "Worker.Compliance.SanctionsWorker" do
+    OpenTelemetry.Tracer.with_span "Handler.Compliance.SanctionsHandler" do
       Logger.info(
         "[Compliance] Sanctions screening for request #{event.request_id} (#{event.name}, #{event.organization})"
       )
@@ -52,7 +52,7 @@ defmodule Nexus.Compliance.Workers.SanctionsWorker do
 
         {:error, reason} ->
           Logger.error(
-            "[Compliance] SanctionsWorker dispatch failed for #{event.request_id}: #{inspect(reason)}"
+            "[Compliance] Sanctions handler dispatch failed for #{event.request_id}: #{inspect(reason)}"
           )
 
           {:error, reason}
@@ -60,7 +60,7 @@ defmodule Nexus.Compliance.Workers.SanctionsWorker do
     end
   end
 
-  # Simulate screening: flag names/orgs containing "Sanctioned" for test determinism.
+  # Flags names/orgs containing "Sanctioned" for test determinism.
   defp simulate_screening(name, organization) do
     if String.contains?(name, "Sanctioned") or String.contains?(organization, "Sanctioned") do
       "flagged"
