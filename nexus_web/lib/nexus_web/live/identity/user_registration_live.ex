@@ -4,8 +4,8 @@ defmodule NexusWeb.Identity.UserRegistrationLive do
   alias Nexus.App
   alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Identity.WebAuthn.BiometricInvitation
-  alias NexusWeb.TracingHooks
   alias NexusShared.Identity.Roles
+  alias NexusWeb.TracingHooks
 
   @impl true
   def render(assigns) do

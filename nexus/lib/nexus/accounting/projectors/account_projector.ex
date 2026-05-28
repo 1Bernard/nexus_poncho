@@ -12,8 +12,8 @@ defmodule Nexus.Accounting.Projectors.AccountProjector do
   alias Ecto.Multi
   alias Nexus.Accounting.Audit.AuditLog
   alias Nexus.Accounting.Events.AccountOpened
-  alias Nexus.Accounting.Projections.IdempotencyKey
   alias Nexus.Accounting.Projections.Account
+  alias Nexus.Accounting.Projections.IdempotencyKey
   alias Nexus.Shared.Tracing
 
   project(%AccountOpened{} = event, metadata, fn multi ->

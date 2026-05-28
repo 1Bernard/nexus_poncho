@@ -23,8 +23,8 @@ defmodule Nexus.Marketing.Projectors.AccessRequestProjector do
     SanctionsScreeningInitiated
   }
 
-  alias Nexus.Marketing.Projections.IdempotencyKey
   alias Nexus.Marketing.Projections.AccessRequest
+  alias Nexus.Marketing.Projections.IdempotencyKey
   alias Nexus.Shared.Tracing
 
   require Logger

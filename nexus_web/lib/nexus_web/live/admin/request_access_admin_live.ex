@@ -19,9 +19,9 @@ defmodule NexusWeb.Admin.RequestAccessAdminLive do
 
   alias Nexus.Marketing.Projections.AccessRequest
   alias Nexus.Repo
-  alias NexusWeb.TracingHooks
   alias NexusShared.Identity.Roles
   alias NexusWeb.InvitationEmail
+  alias NexusWeb.TracingHooks
 
   @per_page 20
   @statuses ~w(pending under_review approved rejected archived)
