@@ -1,5 +1,9 @@
 apiVersion: 1
 
+deleteDatasources:
+  - name: jaeger
+    orgId: 1
+
 datasources:
   - name: prometheus
     uid: prometheus
@@ -17,12 +21,44 @@ datasources:
     url: http://loki:3100
     jsonData:
       maxLines: 1000
+      # Click any trace_id value in a Loki log line to jump straight to the
+      # span in Tempo. Matches both "trace_id":"<hex>" and trace_id=<hex>.
+      derivedFields:
+        - name: TraceID
+          matcherRegex: '(?:trace_id[=:"][ ]?)([a-f0-9]{16,32})'
+          url: '${__value.raw}'
+          datasourceUid: tempo
+          urlDisplayLabel: View in Tempo
 
-  - name: jaeger
-    uid: jaeger
-    type: jaeger
+  - name: tempo
+    uid: tempo
+    type: tempo
     access: proxy
-    url: http://jaeger:16686
+    url: http://tempo:3200
     jsonData:
+      httpMethod: GET
+      # Jump from a Tempo trace to the matching Loki logs for that trace_id.
       tracesToLogsV2:
+        datasourceUid: loki
+        filterByTraceID: true
+        filterBySpanID: false
+        customQuery: false
+      # Jump from a Tempo span to the Prometheus RED metrics Tempo generated
+      # for that service via the metrics generator.
+      tracesToMetrics:
+        datasourceUid: prometheus
+        queries:
+          - name: Request rate
+            query: 'rate(traces_spanmetrics_calls_total{service="$__tags_service"}[5m])'
+          - name: P99 latency
+            query: 'histogram_quantile(0.99, sum(rate(traces_spanmetrics_duration_seconds_bucket{service="$__tags_service"}[5m])) by (le))'
+      # Service dependency graph — powered by Tempo metrics generator
+      # writing service-graphs metrics to Prometheus.
+      serviceMap:
+        datasourceUid: prometheus
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      lokiSearch:
         datasourceUid: loki

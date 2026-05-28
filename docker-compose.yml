@@ -49,6 +49,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-remote-write-receiver'
     ports:
       - "9090:9090"
     networks:
@@ -74,21 +75,20 @@ services:
     depends_on:
       - prometheus
 
-  jaeger:
-    image: jaegertracing/all-in-one:latest
+  tempo:
+    image: grafana/tempo:2.10.5
+    command: ["-config.file=/etc/tempo/tempo-config.yml"]
+    volumes:
+      - ./infra/tempo/tempo-config.yml:/etc/tempo/tempo-config.yml
+      - ./data/tempo:/var/tempo
     ports:
-      - "16686:16686" # UI
+      - "3200:3200"   # Tempo query API (Grafana data source)
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP HTTP
-    environment:
-      # Allow up to 2 seconds of clock skew between distributed nodes.
-      # This prevents "Invalid Parent" warnings when async worker spans
-      # arrive slightly before Jaeger has indexed the parent span.
-      QUERY_MAX_CLOCK_SKEW_ADJUSTMENT: 2s
-    command:
-      - "--query.max-clock-skew-adjustment=2s"
     networks:
       - mid_net
+    depends_on:
+      - prometheus
 
   loki:
     image: grafana/loki:latest
@@ -169,28 +169,25 @@ services:
       start_period: 60s
 
   # 4. Networking & Resilience
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nexus_web/priv/static:/var/www/static:ro
-    ports:
-      - "80:80"
-    networks:
-      - front_net
-    depends_on:
-      - haproxy
+  # NGINX removed: Phoenix/Bandit serves static assets via Plug.Static with identical
+  # cache headers (public, max-age=31536000, immutable for fingerprinted assets).
+  # HAProxy is the public entry point — it handles WebSocket tunnel timeouts, active
+  # health checks, and X-Forwarded-For. When scaling to multiple web nodes, add them
+  # to haproxy.cfg backend; HAProxy's round-robin balancing activates automatically.
 
   haproxy:
     image: haproxy:latest
     volumes:
       - ./infra/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
-      - "8404:8404" # Stats
-      - "4000:80" # Load Balanced Apps
+      - "80:80"     # Public app traffic (was behind NGINX)
+      - "8404:8404" # Stats dashboard
     networks:
       - front_net
 
+  # toxiproxy: optional chaos testing proxy. Not wired by default — app nodes connect
+  # directly to postgres. To enable: change DB_HOSTNAME to a toxiproxy proxy address
+  # configured via its API (port 8474), then restart the target node.
   toxiproxy:
     image: ghcr.io/shopify/toxiproxy:latest
     ports:
@@ -210,7 +207,7 @@ services:
       NODE_NAME: node1
       NODE_BASENAME: nexus
       START_METRICS_SERVER: "true"
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
       OTEL_SERVICE_NAME: node1
       WEB_HOST: "http://localhost:4000"
 
@@ -250,7 +247,7 @@ services:
     tty: true
     stdin_open: true
     networks:
-      mid_net:    # rabbitmq, jaeger, observability
+      mid_net:    # rabbitmq, tempo, observability
       back_net:   # postgres + node1↔node2 Erlang clustering
     depends_on:
       postgres:
@@ -259,6 +256,8 @@ services:
         condition: service_healthy
       vault-init:
         condition: service_completed_successfully
+      loki:
+        condition: service_started
     command: ["sh", "-c", "cd nexus && mix ecto.migrate && mix run priv/repo/seeds.exs && elixir --name nexus@node1.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
 
   node2:
@@ -272,7 +271,7 @@ services:
       NODE_NAME: node2
       NODE_BASENAME: nexus
       START_METRICS_SERVER: "true"
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
       OTEL_SERVICE_NAME: node2
       WEB_HOST: "http://localhost:4000"
 
@@ -300,7 +299,7 @@ services:
       START_TREASURY_PROJECTIONS: "true"
       START_MESSAGING_PROJECTIONS: "true"
       START_ONBOARDING_PM: "false"
-      START_ONBOARDING_KYB_PROJECTIONS: "true"
+      START_ONBOARDING_KYB_PROJECTIONS: "false"
       START_MARKETING_PROJECTIONS: "false"
       START_MARKETING_PM: "false"
       START_PLATFORM_AUDIT: "false"
@@ -321,7 +320,9 @@ services:
         condition: service_started
       vault-init:
         condition: service_completed_successfully
-    command: ["sh", "-c", "cd nexus && mix ecto.migrate && elixir --name nexus@node2.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
+      loki:
+        condition: service_started
+    command: ["sh", "-c", "cd nexus && elixir --name nexus@node2.nexus --cookie ${ERL_COOKIE} -S mix run --no-halt"]
 
   web:
     build:
@@ -350,7 +351,7 @@ services:
       START_MARKETING_PROJECTIONS: "false"
       START_MARKETING_PM: "false"
       START_PLATFORM_AUDIT: "false"
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
       OTEL_SERVICE_NAME: web
       MIX_BUILD_PATH: /app/_build_docker
 
@@ -375,8 +376,8 @@ services:
     ports:
       - "4001:4000"
     networks:
-      front_net:  # nginx/haproxy public facing
-      mid_net:    # rabbitmq, jaeger, observability
+      front_net:  # haproxy public facing
+      mid_net:    # rabbitmq, tempo, observability
       db_net:     # postgres access (command dispatch + projection reads)
     depends_on:
       node1:
@@ -385,11 +386,13 @@ services:
         condition: service_started
       vault-init:
         condition: service_completed_successfully
+      loki:
+        condition: service_started
     command: ["sh", "-c", "cd nexus_web && elixir --name nexus@web.nexus --cookie ${WEB_ERL_COOKIE} -S mix phx.server"]
 
 networks:
-  front_net:  # Public-facing tier (nginx, haproxy, web)
-  mid_net:    # Observability + messaging (jaeger, grafana, rabbitmq)
+  front_net:  # Public-facing tier (haproxy, web)
+  mid_net:    # Observability + messaging (tempo, grafana, rabbitmq)
   back_net:   # Worker cluster tier (node1, node2, postgres)
   db_net:     # Database access for web gateway (postgres only)
 
