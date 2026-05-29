@@ -1,6 +1,6 @@
 defmodule Nexus.Telemetry.Pulse do
   @moduledoc """
-  Generates a heartbeat span to verify Jaeger connectivity.
+  Generates a heartbeat span to verify Tempo connectivity.
   """
   require OpenTelemetry.Tracer, as: Tracer
 

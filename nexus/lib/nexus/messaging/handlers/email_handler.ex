@@ -58,15 +58,22 @@ defmodule Nexus.Messaging.Handlers.EmailHandler do
   def handle(_event, _metadata), do: :ok
 
   defp publish_to_queue(queue, payload) do
-    case AMQP.Application.get_channel(:email_dispatcher) do
-      {:ok, chan} ->
-        headers = :otel_propagator_text_map.inject([])
-        AMQP.Basic.publish(chan, "", queue, Jason.encode!(payload), headers: headers)
-        :ok
+    amqp_connections = Application.get_env(:amqp, :connections, [])
 
-      {:error, reason} ->
-        Logger.error("[Messaging] Failed to acquire RabbitMQ channel: #{inspect(reason)}")
-        {:error, reason}
+    if Keyword.has_key?(amqp_connections, :email_dispatcher) do
+      case AMQP.Application.get_channel(:email_dispatcher) do
+        {:ok, chan} ->
+          headers = :otel_propagator_text_map.inject([])
+          AMQP.Basic.publish(chan, "", queue, Jason.encode!(payload), headers: headers)
+          :ok
+
+        {:error, reason} ->
+          Logger.error("[Messaging] Failed to acquire RabbitMQ channel: #{inspect(reason)}")
+          {:error, reason}
+      end
+    else
+      Logger.debug("[Messaging] AMQP not configured, skipping publish to #{queue}")
+      :ok
     end
   end
 end

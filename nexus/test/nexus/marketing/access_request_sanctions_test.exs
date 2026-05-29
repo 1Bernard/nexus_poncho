@@ -2,7 +2,7 @@ defmodule Nexus.Marketing.AccessRequestSanctionsTest do
   @moduledoc """
   Integration tests for the sanctions screening lifecycle in the AccessRequest aggregate.
 
-  The SanctionsWorker runs automatically and completes screening within milliseconds.
+  The SanctionsHandler runs automatically and completes screening within milliseconds.
   These tests wait for the FINAL projection state ("clean" or "flagged") rather than
   the transient "pending" state, which is too brief to catch reliably via polling.
 

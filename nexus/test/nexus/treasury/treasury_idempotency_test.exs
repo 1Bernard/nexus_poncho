@@ -8,7 +8,7 @@ defmodule Nexus.Treasury.TreasuryIdempotencyTest do
   @moduletag :no_sandbox
 
   alias Nexus.Treasury.Commands.RegisterVault
-  alias Nexus.Treasury.Idempotency.IdempotencyKey
+  alias Nexus.Treasury.Projections.IdempotencyKey
   alias Nexus.Treasury.Projections.Vault
 
   @tag :idempotency

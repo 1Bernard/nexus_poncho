@@ -67,7 +67,7 @@ defmodule NexusWeb.TracingHooks do
   Replaces the plain `Tracing.inject_context(%{})` call at command dispatch sites.
 
   The re-attach makes the session traceparent the parent span, so the resulting
-  Command.Dispatch.* span appears as a child of the session span in Jaeger.
+  Command.Dispatch.* span appears as a child of the session span in Tempo.
   """
   def session_metadata(%Phoenix.LiveView.Socket{} = socket) do
     ctx = Map.get(socket.assigns, @assigns_key, %{})

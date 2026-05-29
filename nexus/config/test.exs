@@ -25,20 +25,9 @@ config :commanded,
   assert_receive_event_timeout: 5000,
   refute_receive_event_timeout: 1000
 
-# Enable metrics server and automatic projections during tests when needed for integration
 config :nexus,
-  start_metrics_server: false,
-  start_projections: false,
-  start_identity_projections: false,
-  start_organization_projections: false,
-  start_compliance_projections: false,
-  start_accounting_projections: false,
-  start_treasury_projections: false,
-  start_messaging_projections: false,
-  start_onboarding_pm: false,
-  start_marketing_projections: false,
-  start_marketing_pm: false,
-  start_platform_audit: false
+  web_host: "http://localhost:4000",
+  token_secret_key_base: "test-only-secret-key-base-not-used-in-production"
 
 # Decrease Logger noise for clean audit output
 config :logger, level: :info

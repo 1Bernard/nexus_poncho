@@ -1,9 +1,9 @@
 defmodule Nexus.Telemetry.Heartbeat do
   @moduledoc """
-  A periodic GenServer that ensures idle distributed nodes stay visible in Jaeger.
+  A periodic GenServer that ensures idle distributed nodes stay visible in Tempo.
 
   In a distributed telemetry stack, services that do not process active commands/events
-  may disappear from the Jaeger "Service" list. This module emits a lightweight
+  may disappear from the Tempo "Service" list. This module emits a lightweight
   'heartbeat' span every 30 seconds to maintain a continuous telemetric presence,
   ensuring that the cluster topology is always accurately reflected in the UI.
   """
