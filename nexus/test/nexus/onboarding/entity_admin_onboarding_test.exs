@@ -384,8 +384,8 @@ defmodule Nexus.Onboarding.EntityAdminOnboardingTest do
 
   # ── Helpers ────────────────────────────────────────────────────────────────
 
-  defp table_to_map(table) do
-    Enum.reduce(table, %{}, fn [field, value], acc -> Map.put(acc, field, value) end)
+  defp table_to_map(%{table: rows}) do
+    Map.new(rows, fn %{field: field, value: value} -> {field, value} end)
   end
 
   defp wait_until(fun, retries \\ 10) do

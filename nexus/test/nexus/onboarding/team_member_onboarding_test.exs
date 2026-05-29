@@ -10,6 +10,7 @@ defmodule Nexus.Onboarding.TeamMemberOnboardingTest do
   @moduletag :feature
   @moduletag :no_sandbox
 
+  alias Nexus.Compliance.Projections.Screening
   alias Nexus.Identity.Commands.{EnrollBiometric, InviteTeamMember}
   alias Nexus.Identity.Events.{TeamMemberInvited, UserActivated}
   alias Nexus.Identity.Projections.User
@@ -81,6 +82,19 @@ defmodule Nexus.Onboarding.TeamMemberOnboardingTest do
           u -> {:ok, u}
         end
       end)
+
+    # Wait for PEP screening to be initiated — ensures the PM has received
+    # UserRegistered (dispatched async by the PM after TeamMemberInvited) and
+    # kicked off PerformPEPCheck before the test proceeds to accept terms/bio.
+    wait_until(
+      fn ->
+        case Repo.get_by(Screening, user_id: state.invitee_id) do
+          nil -> {:error, "PEP screening not yet initiated"}
+          _ -> {:ok, :ready}
+        end
+      end,
+      20
+    )
 
     assert user.org_id == state.org_id
     {:ok, state}
@@ -172,7 +186,7 @@ defmodule Nexus.Onboarding.TeamMemberOnboardingTest do
             {:error, "Waiting for #{expected_status}, got #{u && u.status}"}
           end
         end,
-        15
+        30
       )
 
     assert user.status == expected_status

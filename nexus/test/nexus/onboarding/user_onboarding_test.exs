@@ -289,7 +289,7 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
               {:error, "expected #{expected}, got #{u.status}"}
           end
         end,
-        15
+        30
       )
 
     assert user.status in [expected, "registered"]
