@@ -210,6 +210,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
       OTEL_SERVICE_NAME: node1
       WEB_HOST: "http://localhost:4000"
+      ERL_FLAGS: "-kernel net_ticktime 15"
 
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
@@ -227,18 +228,6 @@ services:
       VAULT_TOKEN: ${VAULT_TOKEN}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       LOKI_URL: "http://loki:3100"
-      START_PROJECTIONS: "true"
-      START_IDENTITY_PROJECTIONS: "true"
-      START_ORGANIZATION_PROJECTIONS: "true"
-      START_COMPLIANCE_PROJECTIONS: "false"
-      START_ACCOUNTING_PROJECTIONS: "false"
-      START_TREASURY_PROJECTIONS: "false"
-      START_MESSAGING_PROJECTIONS: "false"
-      START_ONBOARDING_PM: "true"
-      START_ONBOARDING_KYB_PROJECTIONS: "true"
-      START_MARKETING_PROJECTIONS: "true"
-      START_MARKETING_PM: "true"
-      START_PLATFORM_AUDIT: "true"
       ERL_COOKIE: ${ERL_COOKIE}
       AWS_ACCESS_KEY_ID: "ministack"
       AWS_SECRET_ACCESS_KEY: "ministack"
@@ -274,6 +263,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
       OTEL_SERVICE_NAME: node2
       WEB_HOST: "http://localhost:4000"
+      ERL_FLAGS: "-kernel net_ticktime 15"
 
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
@@ -291,18 +281,6 @@ services:
       VAULT_TOKEN: ${VAULT_TOKEN}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       LOKI_URL: "http://loki:3100"
-      START_PROJECTIONS: "true"
-      START_IDENTITY_PROJECTIONS: "false"
-      START_ORGANIZATION_PROJECTIONS: "false"
-      START_COMPLIANCE_PROJECTIONS: "true"
-      START_ACCOUNTING_PROJECTIONS: "true"
-      START_TREASURY_PROJECTIONS: "true"
-      START_MESSAGING_PROJECTIONS: "true"
-      START_ONBOARDING_PM: "false"
-      START_ONBOARDING_KYB_PROJECTIONS: "false"
-      START_MARKETING_PROJECTIONS: "false"
-      START_MARKETING_PM: "false"
-      START_PLATFORM_AUDIT: "false"
       ERL_COOKIE: ${ERL_COOKIE}
       AWS_ACCESS_KEY_ID: "ministack"
       AWS_SECRET_ACCESS_KEY: "ministack"
@@ -339,18 +317,6 @@ services:
       ERL_COOKIE: ${WEB_ERL_COOKIE}
       STANDALONE_GATEWAY: "true"
       START_METRICS_SERVER: "false"
-      START_PROJECTIONS: "false"
-      START_IDENTITY_PROJECTIONS: "false"
-      START_ORGANIZATION_PROJECTIONS: "false"
-      START_COMPLIANCE_PROJECTIONS: "false"
-      START_ACCOUNTING_PROJECTIONS: "false"
-      START_TREASURY_PROJECTIONS: "false"
-      START_MESSAGING_PROJECTIONS: "false"
-      START_ONBOARDING_PM: "false"
-      START_ONBOARDING_KYB_PROJECTIONS: "false"
-      START_MARKETING_PROJECTIONS: "false"
-      START_MARKETING_PM: "false"
-      START_PLATFORM_AUDIT: "false"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
       OTEL_SERVICE_NAME: web
       MIX_BUILD_PATH: /app/_build_docker

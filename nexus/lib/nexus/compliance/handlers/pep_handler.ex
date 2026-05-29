@@ -7,8 +7,7 @@ defmodule Nexus.Compliance.Handlers.PEPHandler do
   """
   use Commanded.Event.Handler,
     application: Nexus.App,
-    # Explicit name preserves the EventStore subscription checkpoint when the module was renamed.
-    name: "Nexus.Compliance.Workers.PEPWorker",
+    name: "Compliance.PEPHandler",
     consistency: :strong
 
   require Logger
@@ -61,6 +60,15 @@ defmodule Nexus.Compliance.Handlers.PEPHandler do
       case Nexus.dispatch(cmd, metadata: metadata) do
         {:ok, _} ->
           Logger.info("[Compliance] PEP check dispatched for #{event.user_id}")
+          :ok
+
+        {:error, "invalid screening state"} ->
+          # Idempotency: PEP check already completed for this screening.
+          # Safe to skip — occurs during event replay after a checkpoint reset.
+          Logger.warning(
+            "[Compliance] PEP check already completed for #{event.user_id}, skipping replay"
+          )
+
           :ok
 
         {:error, reason} ->

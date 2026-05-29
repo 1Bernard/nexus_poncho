@@ -100,20 +100,6 @@ if config_env() != :test do
     metrics_server: metrics_server_config,
     grafana: [host: "http://grafana:3000", upload_dashboards: true, datasource_id: "prometheus"]
 
-  # Functional Partitioning: controls which domain handlers start on this node.
-  # These are driven by environment variables in docker-compose.yml per-node.
-  get_bool = fn env_var, default ->
-    case System.get_env(env_var) do
-      "true" -> true
-      "false" -> false
-      _ -> default
-    end
-  end
-
-  # Gateway Mode: when the web node runs as a standalone gateway (no Erlang distribution
-  # to worker nodes), Commanded must use :local registry. This prevents the :global
-  # registry from trying to synchronise across a cluster that web is not part of.
-  # Also clear the libcluster topology so web doesn't repeatedly attempt connections.
   # Gateway Mode: Commanded must use :local registry so it doesn't attempt
   # :global sync across a cluster the web node is not part of.
   # libcluster isolation is handled in NexusWeb.Application — Cluster.Supervisor
@@ -132,18 +118,6 @@ if config_env() != :test do
     end
 
   config :nexus,
-    start_projections: get_bool.("START_PROJECTIONS", true),
-    start_identity_projections: get_bool.("START_IDENTITY_PROJECTIONS", true),
-    start_organization_projections: get_bool.("START_ORGANIZATION_PROJECTIONS", true),
-    start_compliance_projections: get_bool.("START_COMPLIANCE_PROJECTIONS", true),
-    start_accounting_projections: get_bool.("START_ACCOUNTING_PROJECTIONS", true),
-    start_treasury_projections: get_bool.("START_TREASURY_PROJECTIONS", true),
-    start_messaging_projections: get_bool.("START_MESSAGING_PROJECTIONS", true),
-    start_onboarding_pm: get_bool.("START_ONBOARDING_PM", true),
-    start_onboarding_kyb_projections: get_bool.("START_ONBOARDING_KYB_PROJECTIONS", true),
-    start_platform_audit: get_bool.("START_PLATFORM_AUDIT", true),
-    start_marketing_projections: get_bool.("START_MARKETING_PROJECTIONS", true),
-    start_marketing_pm: get_bool.("START_MARKETING_PM", true),
     web_host: System.get_env("WEB_HOST") || "http://localhost:4000",
     token_secret_key_base: token_secret_key_base,
     loki_url: System.get_env("LOKI_URL")

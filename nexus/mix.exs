@@ -9,7 +9,8 @@ defmodule Nexus.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -65,6 +66,15 @@ defmodule Nexus.MixProject do
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:sweet_xml, "~> 0.7"}
+    ]
+  end
+
+  defp releases do
+    [
+      nexus: [
+        include_executables_for: [:unix],
+        vm_args: "rel/vm.args.eex"
+      ]
     ]
   end
 

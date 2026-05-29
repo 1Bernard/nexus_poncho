@@ -6,8 +6,7 @@ defmodule Nexus.Messaging.Handlers.EmailHandler do
   """
   use Commanded.Event.Handler,
     application: Nexus.App,
-    # Explicit name preserves the EventStore subscription checkpoint across module renames.
-    name: "Nexus.Messaging.Producers.EmailDispatcher",
+    name: "Messaging.EmailHandler",
     consistency: :eventual
 
   require Logger

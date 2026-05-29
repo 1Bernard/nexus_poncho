@@ -10,8 +10,7 @@ defmodule Nexus.Compliance.Handlers.SanctionsHandler do
   """
   use Commanded.Event.Handler,
     application: Nexus.App,
-    # Explicit name preserves the EventStore subscription checkpoint when the module was renamed.
-    name: "Nexus.Compliance.Workers.SanctionsWorker",
+    name: "Compliance.SanctionsHandler",
     consistency: :eventual
 
   require Logger
@@ -48,6 +47,16 @@ defmodule Nexus.Compliance.Handlers.SanctionsHandler do
 
       case Nexus.dispatch(cmd, metadata: metadata) do
         {:ok, _} ->
+          :ok
+
+        {:error, :screening_not_in_progress} ->
+          # Idempotency: sanctions screening already completed for this request.
+          # Safe to skip — occurs during event replay when the handler checkpoint
+          # is reset (e.g. subscription rename, node recovery from clean state).
+          Logger.warning(
+            "[Compliance] Sanctions screening already completed for #{event.request_id}, skipping replay"
+          )
+
           :ok
 
         {:error, reason} ->

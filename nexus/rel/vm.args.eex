@@ -1,0 +1,46 @@
+## Erlang VM arguments for the Nexus production release.
+## This file is an EEx template — <%= ... %> expressions are evaluated at
+## release build time by `mix release`.
+
+## -----------------------------------------------------------------------
+## Distributed Erlang
+## -----------------------------------------------------------------------
+
+## Erlang cluster cookie — must match across all worker nodes (node1, node2).
+## Set via environment variable; never hardcode in source control.
+-setcookie <%= System.fetch_env!("ERL_COOKIE") %>
+
+## Node failure detection heartbeat.
+## A node that misses all ticks for net_ticktime seconds is declared dead.
+## 15s: fast enough for production failover, tolerant of transient network
+## hiccups and short GC pauses. Default is 60s.
+-kernel net_ticktime 15
+
+## -----------------------------------------------------------------------
+## Scheduler / SMP
+## -----------------------------------------------------------------------
+
+## Enable kernel polling for efficient I/O. Required for high-throughput
+## event processing under the Commanded EventStore workload.
++K true
+
+## One scheduler thread per CPU core. BEAM auto-detects the correct count
+## from the runtime environment (ECS task CPU units, EC2 vCPUs, etc).
++S <%= System.schedulers_online() %>:<%= System.schedulers_online() %>
+
+## -----------------------------------------------------------------------
+## Memory
+## -----------------------------------------------------------------------
+
+## Limit the maximum size of a single binary on the binary heap before it
+## is moved to the global binary heap. Keeps per-process memory bounded
+## when large event payloads (KYB documents, COSE keys) are processed.
++hmax 134217728
+
+## -----------------------------------------------------------------------
+## Crash dumps
+## -----------------------------------------------------------------------
+
+## Write crash dumps to /tmp so they land on fast ephemeral container
+## storage rather than the virtiofs-mounted source volume.
+-env ERL_CRASH_DUMP /tmp/erl_crash.dump

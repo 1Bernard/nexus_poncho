@@ -42,11 +42,20 @@ defmodule Nexus.Application do
           {Cluster.Supervisor, [topologies, [name: Nexus.ClusterSupervisor]]},
           {Horde.Registry, [name: Nexus.HordeRegistry, keys: :unique, members: :auto]},
           {Horde.DynamicSupervisor,
-           [name: Nexus.HordeSupervisor, strategy: :one_for_one, members: :auto]},
+           [
+             name: Nexus.HordeSupervisor,
+             strategy: :one_for_one,
+             members: :auto,
+             delta_crdt_options: [sync_interval: 200]
+           ]},
           Nexus.HordeCluster,
           Nexus.App,
+          # Broadway RabbitMQ consumer — intentionally NOT in Horde.
+          # Multiple instances across nodes increases email throughput.
+          Nexus.Messaging.Workers.EmailWorker,
+          # All other projectors/handlers/process managers — one per module globally.
+          Nexus.ProjectionCoordinator,
           Nexus.Telemetry.Heartbeat,
-          # Periodically prune expired challenges
           {Task,
            fn ->
              Stream.interval(:timer.minutes(5))
@@ -55,43 +64,7 @@ defmodule Nexus.Application do
         ]
       end
 
-    # Functional Partitioning: each entry is {app_config_key, [modules_to_start]}.
-    domain_partitions = [
-      {:start_identity_projections,
-       [
-         Nexus.Identity.Projectors.UserProjector,
-         Nexus.Identity.Projectors.SessionProjector,
-         Nexus.Identity.Projectors.AuditLogProjector
-       ]},
-      {:start_organization_projections, [Nexus.Organization.Projectors.TenantProjector]},
-      {:start_compliance_projections,
-       [
-         Nexus.Compliance.Projectors.ScreeningProjector,
-         Nexus.Compliance.Handlers.PEPHandler,
-         Nexus.Compliance.Handlers.SanctionsHandler,
-         Nexus.Compliance.Projectors.AuditLogProjector
-       ]},
-      {:start_accounting_projections, [Nexus.Accounting.Projectors.AccountProjector]},
-      {:start_treasury_projections, [Nexus.Treasury.Projectors.VaultProjector]},
-      {:start_messaging_projections,
-       [Nexus.Messaging.Handlers.EmailHandler, Nexus.Messaging.Workers.EmailWorker]},
-      {:start_onboarding_pm, [Nexus.Onboarding.ProcessManagers.OnboardingProcessManager]},
-      {:start_onboarding_kyb_projections, [Nexus.Onboarding.Projectors.EntityKybProjector]},
-      {:start_platform_audit, [Nexus.Audit.Projectors.PlatformAuditProjector]},
-      {:start_marketing_projections,
-       [
-         Nexus.Marketing.Projectors.AccessRequestProjector,
-         Nexus.Marketing.Projectors.AuditLogProjector
-       ]},
-      {:start_marketing_pm, [Nexus.Marketing.ProcessManagers.AccessRequestProcessManager]}
-    ]
-
-    domain_children =
-      domain_partitions
-      |> Enum.filter(fn {key, _} -> Application.get_env(:nexus, key, true) end)
-      |> Enum.flat_map(fn {_, modules} -> modules end)
-
-    all_children = children ++ domain_children
+    all_children = children
 
     # LokiLogger: only started when LOKI_URL is set.
     # Absent in test (no env var) so tests never make outbound HTTP calls.
