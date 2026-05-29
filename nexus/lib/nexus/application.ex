@@ -52,16 +52,22 @@ defmodule Nexus.Application do
           Nexus.App,
           # Broadway RabbitMQ consumer — intentionally NOT in Horde.
           # Multiple instances across nodes increases email throughput.
-          Nexus.Messaging.Workers.EmailWorker,
-          # All other projectors/handlers/process managers — one per module globally.
-          Nexus.ProjectionCoordinator,
-          Nexus.Telemetry.Heartbeat,
-          {Task,
-           fn ->
-             Stream.interval(:timer.minutes(5))
-             |> Enum.each(fn _ -> AuthChallengeStore.prune_expired() end)
-           end}
-        ]
+          Nexus.Messaging.Workers.EmailWorker
+        ] ++
+          if Application.get_env(:nexus, :start_projection_coordinator, true) do
+            # All projectors/handlers/process managers — one per module globally.
+            [Nexus.ProjectionCoordinator]
+          else
+            []
+          end ++
+          [
+            Nexus.Telemetry.Heartbeat,
+            {Task,
+             fn ->
+               Stream.interval(:timer.minutes(5))
+               |> Enum.each(fn _ -> AuthChallengeStore.prune_expired() end)
+             end}
+          ]
       end
 
     all_children = children

@@ -37,6 +37,7 @@ end
   Nexus.Marketing.Projectors.AuditLogProjector,
   Nexus.Marketing.ProcessManagers.AccessRequestProcessManager,
   Nexus.Onboarding.ProcessManagers.OnboardingProcessManager,
+  Nexus.Onboarding.Projectors.EntityKybProjector,
   Nexus.Audit.Projectors.PlatformAuditProjector
 ]
 |> Enum.each(fn module ->
@@ -124,6 +125,7 @@ IO.puts("==> [Nexus] Starting Domain Projections and Side-Effects...")
   Nexus.Marketing.Projectors.AuditLogProjector,
   Nexus.Marketing.ProcessManagers.AccessRequestProcessManager,
   Nexus.Onboarding.ProcessManagers.OnboardingProcessManager,
+  Nexus.Onboarding.Projectors.EntityKybProjector,
   Nexus.Audit.Projectors.PlatformAuditProjector
 ]
 |> Enum.each(fn module ->

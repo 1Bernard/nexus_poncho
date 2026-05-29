@@ -27,7 +27,12 @@ config :commanded,
 
 config :nexus,
   web_host: "http://localhost:4000",
-  token_secret_key_base: "test-only-secret-key-base-not-used-in-production"
+  token_secret_key_base: "test-only-secret-key-base-not-used-in-production",
+  # ProjectionCoordinator uses Horde to start all projectors at boot, which
+  # races against test_helper's EventStore/DB reset and Horde auto-restart
+  # fights test_helper's stop→reset→restart lifecycle. Disable it here and
+  # let test_helper manage projectors directly as it always has.
+  start_projection_coordinator: false
 
 # Decrease Logger noise for clean audit output
 config :logger, level: :info

@@ -11,7 +11,14 @@ defmodule Cabbage.Feature.Loader do
     string
     |> Gherkin.parse()
     |> Gherkin.flatten()
+    |> prepend_background_steps()
     |> fix_step_types()
+  end
+
+  defp prepend_background_steps(%{background_steps: [], scenarios: _} = feature), do: feature
+
+  defp prepend_background_steps(%{background_steps: bg, scenarios: scenarios} = feature) do
+    %{feature | scenarios: Enum.map(scenarios, &%{&1 | steps: bg ++ &1.steps})}
   end
 
   defp fix_step_types(%Feature{scenarios: scenarios} = feature) do
