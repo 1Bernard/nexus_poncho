@@ -246,7 +246,7 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
     user_id = state.user_id
 
     assert_receive_event(Nexus.App, PEPCheckInitiated, fn event ->
-      event.user_id == user_id
+      assert event.user_id == user_id
     end)
 
     {:ok, state}
@@ -304,7 +304,7 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
     user_id = state.user_id
 
     assert_receive_event(Nexus.App, UserActivated, fn event ->
-      event.user_id == user_id
+      assert event.user_id == user_id
     end)
 
     {:ok, state}
