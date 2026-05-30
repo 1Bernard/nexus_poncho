@@ -5,15 +5,12 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
   """
   use Cabbage.Feature, file: "onboarding/user_onboarding.feature"
   use Nexus.DataCase
-  import Commanded.Assertions.EventAssertions
 
   @moduletag :feature
   @moduletag :no_sandbox
 
-  alias Nexus.Compliance.Events.PEPCheckInitiated
   alias Nexus.Compliance.Projections.Screening
   alias Nexus.Identity.Commands.{EnrollBiometric, RegisterUser}
-  alias Nexus.Identity.Events.UserActivated
   alias Nexus.Identity.Projections.User
 
   alias Nexus.Onboarding.Commands.{
@@ -245,8 +242,11 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
   defthen ~r/^the OnboardingProcessManager intercepts the UserRegistered event$/, _, state do
     user_id = state.user_id
 
-    assert_receive_event(Nexus.App, PEPCheckInitiated, fn event ->
-      assert event.user_id == user_id
+    wait_until(fn ->
+      case Repo.get_by(Screening, user_id: user_id) do
+        nil -> {:error, "PEP screening not yet initiated for #{user_id}"}
+        _ -> {:ok, :done}
+      end
     end)
 
     {:ok, state}
@@ -303,9 +303,18 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
   defthen ~r/^the OnboardingProcessManager dispatches ActivateUser$/, _, state do
     user_id = state.user_id
 
-    assert_receive_event(Nexus.App, UserActivated, fn event ->
-      assert event.user_id == user_id
-    end)
+    wait_until(
+      fn ->
+        u = Repo.get(User, user_id)
+
+        if u && u.status == "active" do
+          {:ok, u}
+        else
+          {:error, "Waiting for UserActivated, user status: #{u && u.status}"}
+        end
+      end,
+      30
+    )
 
     {:ok, state}
   end
