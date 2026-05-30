@@ -267,7 +267,7 @@ defmodule Nexus.Onboarding.EntityAdminOnboardingTest do
     }
 
     assert :ok =
-             Nexus.App.dispatch(cmd, metadata: %{"idempotency_key" => state.user_id})
+             Nexus.App.dispatch(cmd, metadata: %{"idempotency_key" => "bio:#{state.user_id}"})
 
     {:ok, state}
   end
