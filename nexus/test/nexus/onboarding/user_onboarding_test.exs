@@ -119,6 +119,22 @@ defmodule Nexus.Onboarding.UserOnboardingTest do
 
     assert :ok =
              Nexus.App.dispatch(
+               %UploadKYBDocument{
+                 document_id: Uniq.UUID.uuid7(),
+                 org_id: org_id,
+                 uploaded_by: user_id,
+                 document_type: "proof_of_address",
+                 file_key: "kyb/#{org_id}/poa.pdf",
+                 file_name: "poa.pdf",
+                 file_size: 1024,
+                 content_type: "application/pdf",
+                 storage_bucket: "nexus-kyb-documents"
+               },
+               metadata: %{"idempotency_key" => "doc:#{org_id}:poa"}
+             )
+
+    assert :ok =
+             Nexus.App.dispatch(
                %AcceptTerms{
                  user_id: user_id,
                  org_id: org_id,
