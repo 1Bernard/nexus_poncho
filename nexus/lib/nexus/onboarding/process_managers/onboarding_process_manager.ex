@@ -23,7 +23,7 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
 
   alias Nexus.Compliance.Commands.PerformPEPCheck
   alias Nexus.Compliance.Events.PEPCheckCompleted
-  alias Nexus.Identity.Commands.{ActivateUser, RegisterUser}
+  alias Nexus.Identity.Commands.ActivateUser
   alias Nexus.Identity.Events.{BiometricEnrolled, TeamMemberInvited, UserRegistered}
   alias Nexus.Onboarding.Events.{KYBReviewCompleted, TermsAccepted}
   alias Nexus.Shared.Tracing
@@ -79,13 +79,14 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
     OpenTelemetry.Tracer.with_span "ProcessManager.TeamMemberInvited" do
       Logger.info("[OnboardingPM] Team member invited: #{event.user_id}")
 
-      # Provision the user record and trigger the short onboarding path
-      %RegisterUser{
+      # InviteTeamMember already created the user record (TeamMemberInvited event
+      # → UserProjector, status "invited"). Dispatching RegisterUser here would hit
+      # the Identity aggregate's :user_already_exists guard. Go straight to PEP.
+      %PerformPEPCheck{
+        screening_id: Uniq.UUID.uuid7(),
         user_id: event.user_id,
         org_id: event.org_id,
-        email: event.email,
         name: event.name,
-        role: event.role,
         credential_id: nil,
         cose_key: nil
       }
