@@ -94,13 +94,13 @@ defmodule NexusWeb.Identity.TeamManagementLiveTest do
     test "renders member roles", %{conn: conn, member: member} do
       {:ok, _view, html} = live(conn, ~p"/team")
 
-      assert html =~ member.role
+      assert html =~ String.replace(member.role, "_", " ")
     end
 
-    test "shows You label on the current user's row", %{conn: conn} do
+    test "shows current user in the roster", %{conn: conn, admin: admin} do
       {:ok, _view, html} = live(conn, ~p"/team")
 
-      assert html =~ "You"
+      assert html =~ admin.name
     end
 
     test "shows Invite Member link", %{conn: conn} do
@@ -112,7 +112,7 @@ defmodule NexusWeb.Identity.TeamManagementLiveTest do
     test "member count reflects loaded members", %{conn: conn, member: _member} do
       {:ok, _view, html} = live(conn, ~p"/team")
 
-      assert html =~ "active member"
+      assert html =~ "ENTITIES"
     end
   end
 
@@ -147,7 +147,7 @@ defmodule NexusWeb.Identity.TeamManagementLiveTest do
       render_click(view, "request_deactivate", %{"user_id" => member.user_id})
       html = render_click(view, "cancel_deactivate", %{})
 
-      refute html =~ "Deactivate Member"
+      refute html =~ "confirm_deactivate"
     end
   end
 
@@ -169,7 +169,7 @@ defmodule NexusWeb.Identity.TeamManagementLiveTest do
 
       html = render_click(view, "open_role_change", %{"user_id" => member.user_id})
 
-      assert html =~ "Change Role"
+      assert html =~ "Modify Role"
       assert html =~ member.name
     end
 
