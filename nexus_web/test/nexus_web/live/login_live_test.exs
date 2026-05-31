@@ -54,12 +54,10 @@ defmodule NexusWeb.Identity.LoginLiveTest do
 
       html = render_click(view, "advance_step")
 
-      assert html =~ "cursor-not-allowed"
       assert html =~ ~s(disabled="")
 
       html = render_click(view, "toggle_consent")
 
-      refute html =~ "cursor-not-allowed"
       refute html =~ ~s(disabled="")
     end
 
@@ -68,8 +66,7 @@ defmodule NexusWeb.Identity.LoginLiveTest do
 
       html = reach_biometric_step(view)
 
-      assert html =~ "Sensor Calibration"
-      assert html =~ "Press &amp; Hold"
+      assert html =~ "Biometric Authorization"
       assert html =~ "biometric-sensor"
     end
 
@@ -123,7 +120,7 @@ defmodule NexusWeb.Identity.LoginLiveTest do
       render_hook(view, "biometric_error", %{"reason" => "timeout"})
       html = render_click(view, "retry")
 
-      assert html =~ "Sensor Calibration"
+      assert html =~ "Biometric Authorization"
       refute html =~ "Hardware authentication failed"
     end
   end

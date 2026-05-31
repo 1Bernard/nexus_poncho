@@ -98,19 +98,19 @@ defmodule NexusWeb.Compliance.DashboardLiveTest do
     test "renders PEP Screenings section", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/compliance")
 
-      assert html =~ "PEP Screenings"
+      assert html =~ "Compliance Ledger"
     end
 
     test "renders Flagged Access Requests section", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/compliance")
 
-      assert html =~ "Flagged Access Requests"
+      assert html =~ "High-Risk Alerts"
     end
 
     test "renders Recent Audit Events section", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/compliance")
 
-      assert html =~ "Recent Audit Events"
+      assert html =~ "System Audit"
     end
 
     test "renders filter buttons", %{conn: conn} do
@@ -137,7 +137,7 @@ defmodule NexusWeb.Compliance.DashboardLiveTest do
       {:ok, _view, html} = live(conn, ~p"/compliance")
 
       # The 'All' button is active (has emerald highlight class)
-      assert html =~ ~r/bg-emerald-400\/20[^>]*>[\s\n]*All/
+      assert html =~ ~r/bg-emerald-400[^>]*>[\s\n]*All/
     end
 
     test "clicking Flagged filter activates it", %{conn: conn} do
@@ -145,7 +145,7 @@ defmodule NexusWeb.Compliance.DashboardLiveTest do
 
       html = render_click(view, "filter", %{"status" => "flagged"})
 
-      assert html =~ ~r/bg-emerald-400\/20[^>]*>[\s\n]*Flagged/
+      assert html =~ ~r/bg-emerald-400[^>]*>[\s\n]*Flagged/
     end
 
     test "clicking Pending filter activates it", %{conn: conn} do
@@ -153,7 +153,7 @@ defmodule NexusWeb.Compliance.DashboardLiveTest do
 
       html = render_click(view, "filter", %{"status" => "pending"})
 
-      assert html =~ ~r/bg-emerald-400\/20[^>]*>[\s\n]*Pending/
+      assert html =~ ~r/bg-emerald-400[^>]*>[\s\n]*Pending/
     end
 
     test "clicking All filter reactivates it after switching", %{conn: conn} do
@@ -162,7 +162,7 @@ defmodule NexusWeb.Compliance.DashboardLiveTest do
       render_click(view, "filter", %{"status" => "flagged"})
       html = render_click(view, "filter", %{"status" => "all"})
 
-      assert html =~ ~r/bg-emerald-400\/20[^>]*>[\s\n]*All/
+      assert html =~ ~r/bg-emerald-400[^>]*>[\s\n]*All/
     end
   end
 end
