@@ -240,11 +240,7 @@ defmodule NexusWeb.Identity.TeamManagementLive do
                               else: "hero-user-mini"
                             )
                           }
-                          class={[
-                            "w-4 h-4",
-                            member.role in ~w(admin org_admin) && "text-emerald-400",
-                            member.role not in ~w(admin org_admin) && "text-zinc-600"
-                          ]}
+                          class={"w-4 h-4 #{if member.role in ~w(admin org_admin), do: "text-emerald-400", else: "text-zinc-600"}"}
                         />
                         <span class={[
                           "text-[10px] font-mono font-bold uppercase tracking-widest",
