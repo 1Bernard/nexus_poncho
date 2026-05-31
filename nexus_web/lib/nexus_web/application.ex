@@ -38,17 +38,24 @@ defmodule NexusWeb.Application do
         [{Cluster.Supervisor, [topologies, [name: NexusWeb.ClusterSupervisor]]}]
       end
 
+    notification_handlers =
+      if Application.get_env(:nexus_web, :start_notification_handlers, true) do
+        [
+          NexusWeb.Notifications.UserActivationHandler,
+          NexusWeb.Notifications.AccessRequestRejectedHandler
+        ]
+      else
+        []
+      end
+
     children =
       cluster_children ++
         [
           NexusWeb.PromEx,
           NexusWeb.Telemetry,
           {Phoenix.PubSub, name: NexusWeb.PubSub},
-          {Finch, name: NexusWeb.Finch},
-          NexusWeb.Notifications.UserActivationHandler,
-          NexusWeb.Notifications.AccessRequestRejectedHandler,
-          NexusWeb.Endpoint
-        ]
+          {Finch, name: NexusWeb.Finch}
+        ] ++ notification_handlers ++ [NexusWeb.Endpoint]
 
     # LokiLogger is started by Nexus.Application (a dependency of nexus_web).
     # It registers a global OTP logger handler that captures logs from all apps

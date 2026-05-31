@@ -27,3 +27,9 @@ config :nexus, start_platform_audit: false
 config :nexus, start_marketing_projections: false
 config :nexus, start_marketing_pm: false
 config :nexus, start_onboarding_kyb_projections: false
+
+# Notification handlers query the DB via the Ecto sandbox. In test mode
+# the handlers run in spawned processes that don't own a sandbox connection,
+# causing DBConnection.OwnershipError crashes that exhaust the supervisor's
+# max_restart budget and take down NexusWeb.Endpoint before web tests run.
+config :nexus_web, start_notification_handlers: false
