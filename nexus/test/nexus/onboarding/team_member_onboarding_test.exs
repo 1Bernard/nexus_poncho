@@ -12,7 +12,6 @@ defmodule Nexus.Onboarding.TeamMemberOnboardingTest do
 
   alias Nexus.Compliance.Projections.Screening
   alias Nexus.Identity.Commands.{EnrollBiometric, InviteTeamMember}
-  alias Nexus.Identity.Events.{TeamMemberInvited, UserActivated}
   alias Nexus.Identity.Projections.User
   alias Nexus.Onboarding.Commands.AcceptTerms
   alias Nexus.Onboarding.Events.TermsAccepted

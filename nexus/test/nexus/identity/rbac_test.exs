@@ -10,7 +10,7 @@ defmodule Nexus.RBACTest do
   alias Nexus.Identity.Projections.User
   alias Nexus.RBAC
 
-  defp build_user(attrs \\ %{}) do
+  defp build_user(attrs) do
     struct(User, Map.merge(%{id: Uniq.UUID.uuid7(), status: "active"}, attrs))
   end
 

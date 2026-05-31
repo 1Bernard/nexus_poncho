@@ -10,7 +10,7 @@ defmodule Nexus.Marketing.AccessRequestAggregateTest do
   alias Nexus.Marketing.Aggregates.AccessRequest
   alias Nexus.Marketing.Commands.ReviewAccessRequest
 
-  defp pending_request(overrides \\ %{}) do
+  defp pending_request(overrides) do
     struct(
       AccessRequest,
       Map.merge(%{request_id: Uniq.UUID.uuid7(), status: "pending"}, overrides)

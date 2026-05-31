@@ -12,7 +12,7 @@ defmodule Nexus.Onboarding.KYBReviewTest do
 
   import Ecto.Query
 
-  alias Nexus.Identity.Commands.{EnrollBiometric, RegisterUser}
+  alias Nexus.Identity.Commands.RegisterUser
   alias Nexus.Onboarding.Commands.{CompleteKYBReview, SubmitEntityProfile, UploadKYBDocument}
   alias Nexus.Onboarding.Events.KYBReviewCompleted
   alias Nexus.Onboarding.Projections.KYBDocument

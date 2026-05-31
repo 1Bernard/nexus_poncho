@@ -27,7 +27,6 @@ defmodule Nexus.Onboarding.EntityAdminOnboardingTest do
     UBOsDeclared
   }
 
-  alias Nexus.Onboarding.Projections.EntityProfile
   alias Nexus.Repo
 
   # ── Background ─────────────────────────────────────────────────────────────
