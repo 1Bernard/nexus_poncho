@@ -9,13 +9,6 @@ defmodule Nexus.Router do
   middleware(Nexus.Shared.Middleware.Idempotency)
   middleware(Nexus.Shared.Middleware.TenantGate)
 
-  @doc """
-  Ensure all events carry the traceparent from the command metadata.
-  """
-  def event_metadata(%{metadata: metadata}) do
-    Map.take(metadata, ["traceparent"])
-  end
-
   alias Nexus.Accounting.Aggregates.Account
   alias Nexus.Accounting.Commands.OpenAccount
 

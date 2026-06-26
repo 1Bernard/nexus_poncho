@@ -142,6 +142,8 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
     end
   end
 
+  def handle(%__MODULE__{}, _event, _metadata), do: []
+
   # ── State Mutators ─────────────────────────────────────────────────────────
 
   def apply(%__MODULE__{} = state, %UserRegistered{} = event) do
@@ -189,6 +191,8 @@ defmodule Nexus.Onboarding.ProcessManagers.OnboardingProcessManager do
   def apply(%__MODULE__{} = state, %KYBReviewCompleted{}) do
     state
   end
+
+  def apply(%__MODULE__{} = state, _event), do: state
 
   # ── Private ────────────────────────────────────────────────────────────────
 

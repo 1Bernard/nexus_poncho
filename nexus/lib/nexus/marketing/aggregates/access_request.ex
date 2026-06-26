@@ -166,4 +166,6 @@ defmodule Nexus.Marketing.Aggregates.AccessRequest do
   def apply(%AccessRequest{} = state, %AccessRequestArchived{}) do
     %AccessRequest{state | status: "archived"}
   end
+
+  def apply(%AccessRequest{} = state, _event), do: state
 end

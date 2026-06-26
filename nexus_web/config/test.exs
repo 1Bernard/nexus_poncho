@@ -21,15 +21,12 @@ config :phoenix_live_view,
 config :libcluster, topologies: []
 config :nexus, Nexus.App, registry: :local
 
-# Projectors use pooled DB connections; nexus_web tests run with manual sandbox.
-# Disable the audit projector here — it is covered by the nexus Soul Audit suite.
-config :nexus, start_platform_audit: false
-config :nexus, start_marketing_projections: false
-config :nexus, start_marketing_pm: false
-config :nexus, start_onboarding_kyb_projections: false
-
 # Notification handlers query the DB via the Ecto sandbox. In test mode
 # the handlers run in spawned processes that don't own a sandbox connection,
 # causing DBConnection.OwnershipError crashes that exhaust the supervisor's
 # max_restart budget and take down NexusWeb.Endpoint before web tests run.
 config :nexus_web, start_notification_handlers: false
+
+# Use a mock WebAuthn adapter in tests — the real WaxAdapter requires Mnesia
+# (initialized only by Nexus.Application, not NexusWeb.Application).
+config :nexus, webauthn_adapter: Nexus.Identity.WebAuthn.MockAdapter

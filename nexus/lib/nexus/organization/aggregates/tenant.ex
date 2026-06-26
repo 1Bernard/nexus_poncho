@@ -12,6 +12,8 @@ defmodule Nexus.Organization.Aggregates.Tenant do
 
   require Logger
 
+  @tenant_active "active"
+
   # ── Command Handlers ──────────────────────────────────────────────────────
 
   def execute(%Tenant{org_id: nil}, %ProvisionTenant{} = cmd) do
@@ -28,9 +30,19 @@ defmodule Nexus.Organization.Aggregates.Tenant do
     {:error, :tenant_already_exists}
   end
 
+  def execute(%Tenant{} = state, command) do
+    Logger.warning(
+      "[TenantAggregate] Unhandled command #{inspect(command.__struct__)} in status #{inspect(state.status)}"
+    )
+
+    {:error, :invalid_command_for_current_state}
+  end
+
   # ── State Transitions ─────────────────────────────────────────────────────
 
   def apply(%Tenant{} = state, %TenantProvisioned{} = event) do
-    %Tenant{state | org_id: event.org_id, name: event.name, status: "active"}
+    %Tenant{state | org_id: event.org_id, name: event.name, status: @tenant_active}
   end
+
+  def apply(%Tenant{} = state, _event), do: state
 end

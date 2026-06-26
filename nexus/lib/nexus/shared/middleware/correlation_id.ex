@@ -22,8 +22,6 @@ defmodule Nexus.Shared.Middleware.CorrelationId do
       metadata
       |> Map.put("correlation_id", correlation_id)
       |> Map.put("causation_id", causation_id)
-      |> Map.put(:correlation_id, correlation_id)
-      |> Map.put(:causation_id, causation_id)
 
     %{pipeline | metadata: updated_metadata}
   end

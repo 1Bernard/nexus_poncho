@@ -72,4 +72,6 @@ defmodule Nexus.Identity.Aggregates.Session do
   def apply(%Session{} = state, %SessionExpired{}) do
     %Session{state | status: @session_expired}
   end
+
+  def apply(%Session{} = state, _event), do: state
 end

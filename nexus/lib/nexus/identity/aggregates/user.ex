@@ -216,4 +216,6 @@ defmodule Nexus.Identity.Aggregates.User do
   def apply(%User{} = state, %UserRoleChanged{} = event) do
     %User{state | role: event.new_role}
   end
+
+  def apply(%User{} = state, _event), do: state
 end

@@ -112,7 +112,7 @@ defmodule NexusWeb.Identity.TeamManagementLiveTest do
     test "member count reflects loaded members", %{conn: conn, member: _member} do
       {:ok, _view, html} = live(conn, ~p"/team")
 
-      assert html =~ "ENTITIES"
+      assert html =~ "Total Members"
     end
   end
 

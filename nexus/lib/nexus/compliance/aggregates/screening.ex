@@ -18,6 +18,9 @@ defmodule Nexus.Compliance.Aggregates.Screening do
   alias Nexus.Compliance.Commands.{CompletePEPCheck, PerformPEPCheck}
   alias Nexus.Compliance.Events.{PEPCheckCompleted, PEPCheckInitiated}
 
+  @pending "pending"
+  @clean "clean"
+
   # --- Command Handlers ---
 
   def execute(%Screening{id: nil}, %PerformPEPCheck{} = cmd) do
@@ -35,9 +38,9 @@ defmodule Nexus.Compliance.Aggregates.Screening do
 
   def execute(%Screening{status: status}, %CompletePEPCheck{status: status}), do: []
 
-  def execute(%Screening{status: "pending"}, %CompletePEPCheck{} = cmd) do
+  def execute(%Screening{status: @pending}, %CompletePEPCheck{} = cmd) do
     # Elite Logic: We require a biometric proof signature to finalize a clean screening.
-    if cmd.status == "clean" and
+    if cmd.status == @clean and
          (is_nil(cmd.biometric_proof) or String.trim(cmd.biometric_proof) == "") do
       {:error, "Biometric proof is required for clean PEP completion"}
     else
@@ -55,6 +58,14 @@ defmodule Nexus.Compliance.Aggregates.Screening do
     {:error, "invalid screening state"}
   end
 
+  def execute(%Screening{} = state, command) do
+    Logger.warning(
+      "[ScreeningAggregate] Unhandled command #{inspect(command.__struct__)} in status #{inspect(state.status)}"
+    )
+
+    {:error, :invalid_command_for_current_state}
+  end
+
   # --- State Transitions ---
 
   def apply(%Screening{} = state, %PEPCheckInitiated{} = event) do
@@ -63,7 +74,7 @@ defmodule Nexus.Compliance.Aggregates.Screening do
       | id: event.screening_id,
         user_id: event.user_id,
         org_id: event.org_id,
-        status: "pending"
+        status: @pending
     }
   end
 
@@ -74,4 +85,6 @@ defmodule Nexus.Compliance.Aggregates.Screening do
         biometric_proof: event.biometric_proof
     }
   end
+
+  def apply(%Screening{} = state, _event), do: state
 end

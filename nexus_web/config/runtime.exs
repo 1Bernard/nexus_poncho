@@ -92,16 +92,6 @@ if System.get_env("STANDALONE_GATEWAY") == "true" do
   config :nexus, Nexus.App, registry: :local
 end
 
-# Functional Partitioning: controls which domain handlers start on this node.
-# The web node has all of these set to false in docker-compose.yml (pure gateway mode).
-get_bool = fn env_var, default ->
-  case System.get_env(env_var) do
-    "true" -> true
-    "false" -> false
-    _ -> default
-  end
-end
-
 token_secret_key_base =
   if config_env() == :prod do
     System.get_env("SECRET_KEY_BASE") ||
@@ -112,17 +102,6 @@ token_secret_key_base =
   end
 
 config :nexus,
-  start_projections: get_bool.("START_PROJECTIONS", true),
-  start_identity_projections: get_bool.("START_IDENTITY_PROJECTIONS", true),
-  start_organization_projections: get_bool.("START_ORGANIZATION_PROJECTIONS", true),
-  start_compliance_projections: get_bool.("START_COMPLIANCE_PROJECTIONS", true),
-  start_accounting_projections: get_bool.("START_ACCOUNTING_PROJECTIONS", true),
-  start_treasury_projections: get_bool.("START_TREASURY_PROJECTIONS", true),
-  start_messaging_projections: get_bool.("START_MESSAGING_PROJECTIONS", true),
-  start_onboarding_pm: get_bool.("START_ONBOARDING_PM", true),
-  start_platform_audit: get_bool.("START_PLATFORM_AUDIT", true),
-  start_marketing_projections: get_bool.("START_MARKETING_PROJECTIONS", true),
-  start_marketing_pm: get_bool.("START_MARKETING_PM", true),
   web_host: System.get_env("WEB_HOST") || "http://localhost:4000",
   token_secret_key_base: token_secret_key_base,
   loki_url: System.get_env("LOKI_URL")

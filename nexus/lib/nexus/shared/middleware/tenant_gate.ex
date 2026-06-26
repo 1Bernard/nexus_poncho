@@ -14,8 +14,7 @@ defmodule Nexus.Shared.Middleware.TenantGate do
   # We allow system/genesis commands to bypass the gate.
   @spec before_dispatch(Pipeline.t()) :: Pipeline.t()
   def before_dispatch(%Pipeline{command: cmd} = pipeline)
-      when is_struct(cmd, Nexus.Organization.Commands.ProvisionTenant) or
-             is_struct(cmd, Nexus.Treasury.Commands.RecordMarketTick) do
+      when is_struct(cmd, Nexus.Organization.Commands.ProvisionTenant) do
     pipeline
   end
 

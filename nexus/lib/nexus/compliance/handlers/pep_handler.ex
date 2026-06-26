@@ -77,4 +77,6 @@ defmodule Nexus.Compliance.Handlers.PEPHandler do
       end
     end
   end
+
+  def handle(_event, _metadata), do: :ok
 end

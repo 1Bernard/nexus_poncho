@@ -69,6 +69,8 @@ defmodule Nexus.Compliance.Handlers.SanctionsHandler do
     end
   end
 
+  def handle(_event, _metadata), do: :ok
+
   # Flags names/orgs containing "Sanctioned" for test determinism.
   defp simulate_screening(name, organization) do
     if String.contains?(name, "Sanctioned") or String.contains?(organization, "Sanctioned") do

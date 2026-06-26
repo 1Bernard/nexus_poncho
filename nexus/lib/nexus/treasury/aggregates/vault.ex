@@ -24,6 +24,10 @@ defmodule Nexus.Treasury.Aggregates.Vault do
   alias Nexus.Treasury.Commands.{CreditVault, RegisterVault}
   alias Nexus.Treasury.Events.{VaultCredited, VaultRegistered}
 
+  require Logger
+
+  @vault_active "active"
+
   # --- Command Handlers ---
 
   def execute(%Vault{vault_id: existing}, %RegisterVault{}) when not is_nil(existing) do
@@ -45,17 +49,25 @@ defmodule Nexus.Treasury.Aggregates.Vault do
     }
   end
 
-  def execute(%Vault{} = state, %CreditVault{} = command) do
-    if state.status == "active" do
-      %VaultCredited{
-        vault_id: state.vault_id,
-        org_id: command.org_id,
-        amount: command.amount,
-        transfer_id: command.transfer_id
-      }
-    else
-      {:error, "vault is not active"}
-    end
+  def execute(%Vault{status: @vault_active} = state, %CreditVault{} = command) do
+    %VaultCredited{
+      vault_id: state.vault_id,
+      org_id: command.org_id,
+      amount: command.amount,
+      transfer_id: command.transfer_id
+    }
+  end
+
+  def execute(%Vault{}, %CreditVault{}) do
+    {:error, :vault_not_active}
+  end
+
+  def execute(%Vault{} = state, command) do
+    Logger.warning(
+      "[VaultAggregate] Unhandled command #{inspect(command.__struct__)} in status #{inspect(state.status)}"
+    )
+
+    {:error, :invalid_command_for_current_state}
   end
 
   # --- State Transitions ---
@@ -68,7 +80,7 @@ defmodule Nexus.Treasury.Aggregates.Vault do
         name: event.name,
         currency: event.currency,
         balance: Decimal.new(0),
-        status: "active",
+        status: @vault_active,
         bank_name: event.bank_name,
         account_number: event.account_number,
         iban: event.iban,
@@ -84,4 +96,6 @@ defmodule Nexus.Treasury.Aggregates.Vault do
       | balance: Decimal.add(state.balance || Decimal.new(0), event.amount)
     }
   end
+
+  def apply(%Vault{} = state, _event), do: state
 end

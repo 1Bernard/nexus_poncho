@@ -119,6 +119,8 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
     end
   end
 
+  def handle(%__MODULE__{}, _event, _metadata), do: []
+
   # ── State Mutators ───────────────────────────────────────────────────────
 
   def apply(%__MODULE__{} = state, %AccessRequestSubmitted{} = event) do
@@ -128,4 +130,6 @@ defmodule Nexus.Marketing.ProcessManagers.AccessRequestProcessManager do
   def apply(%__MODULE__{} = state, %AccessRequestApproved{} = event) do
     %__MODULE__{state | request_id: event.request_id}
   end
+
+  def apply(%__MODULE__{} = state, _event), do: state
 end
