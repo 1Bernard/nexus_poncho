@@ -58,54 +58,37 @@ defmodule NexusWeb.Identity.TeamManagementLive do
       <div class="p-8 bg-[#010101] min-h-full relative overflow-hidden">
         <div class="bg-grid-elite"></div>
 
-        <div class="max-w-7xl mx-auto space-y-10 relative z-10">
-          <.eq_control_bar>
-            <.eq_control_cluster>
-              <div class="flex items-center pl-4">
-                <.icon name="hero-magnifying-glass-mini" class="w-4 h-4 text-emerald-400/50" />
-                <input
-                  type="text"
-                  placeholder="SEARCH ROSTER..."
-                  value={@search_query}
-                  phx-input="search"
-                  phx-debounce="300"
-                  class="search-input py-2.5 px-4 text-[10px] font-mono font-bold text-white placeholder:text-zinc-700 focus:outline-none uppercase tracking-widest"
-                />
-              </div>
-            </.eq_control_cluster>
+        <div class="max-w-7xl mx-auto space-y-8 relative z-10">
+          <%!-- Page header --%>
+          <div>
+            <p class="text-[9px] font-mono font-bold text-emerald-400/60 uppercase tracking-[0.3em] mb-2">
+              Identity · Team
+            </p>
+            <h1 class="text-2xl font-black text-white tracking-tight">Team Management</h1>
+            <p class="text-sm text-zinc-500 mt-1">
+              Manage access, roles, and onboarding for your organisation.
+            </p>
+          </div>
 
-            <.eq_control_cluster>
-              <.eq_button navigate={~p"/team/invite"} variant="primary" class="!px-6 !py-3" arrow>
-                Invite Member
-              </.eq_button>
-            </.eq_control_cluster>
-          </.eq_control_bar>
-
-          <%!-- HUD Stats Ribbon --%>
-          <div class="grid grid-cols-4 gap-6">
+          <%!-- KPI Cards --%>
+          <div class="grid grid-cols-3 gap-5">
             <.hud_metric_card
-              label="Total Personnel"
+              label="Total Members"
               value={@total_members}
               color="emerald"
-              status="VERIFIED"
+              status="ACTIVE"
             />
             <.hud_metric_card
-              label="Active Admins"
+              label="Admins"
               value={@admin_count}
               color="sky"
               status="PRIVILEGED"
             />
             <.hud_metric_card
-              label="Invite Slots"
-              value="UNLIMITED"
+              label="Viewing"
+              value={length(@paginated_members)}
               color="zinc"
-              status="ELITE"
-            />
-            <.hud_metric_card
-              label="Audit Integrity"
-              value="100%"
-              color="emerald"
-              status="IMMUTABLE"
+              status="THIS PAGE"
             />
           </div>
 
@@ -125,15 +108,15 @@ defmodule NexusWeb.Identity.TeamManagementLive do
                   <div class="w-14 h-14 rounded-2xl bg-rose-400/10 border border-rose-400/20 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(244,63,94,0.1)]">
                     <.icon name="hero-exclamation-triangle-mini" class="w-7 h-7 text-rose-400" />
                   </div>
-                  <h2 class="text-xl font-black text-white mb-2 uppercase tracking-tight">
+                  <h2 class="text-xl font-black text-white mb-3 tracking-tight">
                     Deactivate Member
                   </h2>
-                  <p class="text-[10px] font-mono text-zinc-500 leading-relaxed uppercase tracking-widest">
-                    This will immediately revoke access for <span class="text-white">{@confirm_deactivate.name}</span>.
-                    This action is logged in the immutable audit trail.
+                  <p class="text-sm text-zinc-400 leading-relaxed">
+                    This will immediately revoke access for <span class="text-white font-semibold">{@confirm_deactivate.name}</span>.
+                    This action is recorded in the audit trail.
                   </p>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex gap-3">
                   <.eq_button phx-click="cancel_deactivate" variant="outline" class="flex-1">
                     Cancel
                   </.eq_button>
@@ -158,24 +141,24 @@ defmodule NexusWeb.Identity.TeamManagementLive do
                   <div class="w-14 h-14 rounded-2xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(52,211,153,0.1)]">
                     <.icon name="hero-shield-check-mini" class="w-7 h-7 text-emerald-400" />
                   </div>
-                  <h2 class="text-xl font-black text-white mb-2 uppercase tracking-tight">
+                  <h2 class="text-xl font-black text-white mb-2 tracking-tight">
                     Modify Role
                   </h2>
-                  <p class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-                    Updating privileges for <span class="text-white">{@role_change.name}</span>
+                  <p class="text-sm text-zinc-400">
+                    Updating privileges for
+                    <span class="text-white font-semibold">{@role_change.name}</span>
                   </p>
                 </div>
-
                 <.eq_form for={%{}} as={:role_update} phx-submit="confirm_role_change">
                   <input type="hidden" name="user_id" value={@role_change.id} />
                   <.eq_select
                     name="new_role"
-                    label="Assigned Authorization Level"
+                    label="Assigned Role"
                     options={assignable_roles()}
                     value={@role_change.role}
                   />
                   <:actions>
-                    <div class="flex gap-4 mt-8">
+                    <div class="flex gap-3 mt-8">
                       <.eq_button
                         type="button"
                         phx-click="cancel_role_change"
@@ -194,134 +177,105 @@ defmodule NexusWeb.Identity.TeamManagementLive do
             </div>
           <% end %>
 
+          <%!-- Member table toolbar --%>
+          <.eq_table_toolbar
+            search_value={@search_query}
+            search_event="search"
+            search_name="query"
+            search_placeholder="Search members..."
+          >
+            <:actions>
+              <.eq_button navigate={~p"/team/invite"} variant="primary" class="!px-7">
+                Invite Member
+              </.eq_button>
+            </:actions>
+          </.eq_table_toolbar>
+
           <%!-- Member table --%>
-          <div class="space-y-4 flex flex-col min-h-0">
-            <div class="flex items-center gap-4 px-2">
-              <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">
-                Identity · Roster
-              </h3>
-              <div class="h-px flex-1 bg-white/[0.03]"></div>
-            </div>
-
-            <div class="elite-border rounded-3xl bg-[#050508]/60 backdrop-blur-2xl overflow-hidden flex-1 flex flex-col min-h-0 border border-white/5 shadow-2xl">
-              <div class="overflow-auto flex-1 custom-scrollbar">
-                <%= if @total_count == 0 do %>
-                  <.ledger_empty_state
-                    title="No matching personnel found"
-                    subtitle="Try adjusting your search criteria"
-                    action_label={if @search_query != "", do: "Clear Search", else: nil}
-                    action_event={if @search_query != "", do: "clear_search", else: nil}
-                  />
-                <% else %>
-                  <.ledger_table id="members-roster" rows={@paginated_members}>
-                    <:col :let={member} label="Personnel Identity">
-                      <div class="flex items-center gap-6 relative">
-                        <div class="grid-guide-v -left-8"></div>
-                        <div class="grid-guide-h top-0"></div>
-                        <div class="grid-guide-h bottom-0"></div>
-                        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[11px] font-mono font-black text-emerald-400 shadow-inner">
-                          {member.name |> String.first() |> String.upcase()}
-                        </div>
-                        <div>
-                          <p class="text-sm font-black text-white tracking-tight">{member.name}</p>
-                          <p class="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">
-                            {member.email}
-                          </p>
-                        </div>
+          <div class="elite-border rounded-2xl bg-[#050508]/60 backdrop-blur-2xl overflow-hidden border border-white/5 shadow-2xl">
+            <div class="overflow-auto custom-scrollbar">
+              <%= if @total_count == 0 do %>
+                <.ledger_empty_state
+                  title="No matching members found"
+                  subtitle="Try adjusting your search"
+                  action_label={if @search_query != "", do: "Clear Search", else: nil}
+                  action_event={if @search_query != "", do: "clear_search", else: nil}
+                />
+              <% else %>
+                <.ledger_table id="members-roster" rows={@paginated_members} grid_guides={true}>
+                  <:col :let={member} label="Member">
+                    <div class="flex items-center gap-4">
+                      <div class="w-9 h-9 rounded-xl bg-white/5 border border-white/[0.08] flex items-center justify-center text-[11px] font-mono font-black text-emerald-400">
+                        {member.name |> String.first() |> String.upcase()}
                       </div>
-                    </:col>
+                      <div>
+                        <p class="text-sm font-semibold text-white">{member.name}</p>
+                        <p class="text-[10px] font-mono text-zinc-500 mt-0.5">{member.email}</p>
+                      </div>
+                    </div>
+                  </:col>
 
-                    <:col :let={member} label="Authorization Level">
-                      <div class="flex items-center gap-3">
+                  <:col :let={member} label="Role">
+                    <div class="flex items-center gap-2.5">
+                      <.icon
+                        name={
+                          if(member.role in ~w(admin org_admin),
+                            do: "hero-shield-check-mini",
+                            else: "hero-user-mini"
+                          )
+                        }
+                        class={"w-3.5 h-3.5 " <> if(member.role in ~w(admin org_admin), do: "text-emerald-400", else: "text-zinc-600")}
+                      />
+                      <span class={[
+                        "text-[10px] font-mono font-bold uppercase tracking-widest",
+                        member.role in ~w(admin org_admin) && "text-white",
+                        member.role not in ~w(admin org_admin) && "text-zinc-500"
+                      ]}>
+                        {String.replace(member.role, "_", " ")}
+                      </span>
+                    </div>
+                  </:col>
+
+                  <:col :let={_member} label="Status">
+                    <.eq_badge status="active" />
+                  </:col>
+
+                  <:action :let={member}>
+                    <div class="flex items-center gap-2">
+                      <button
+                        phx-click="open_role_change"
+                        phx-value-user_id={member.id}
+                        class="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-400/10 transition-all group"
+                        title="Edit Role"
+                      >
                         <.icon
-                          name={
-                            if(member.role in ~w(admin org_admin),
-                              do: "hero-shield-check-mini",
-                              else: "hero-user-mini"
-                            )
-                          }
-                          class={"w-4 h-4 #{if member.role in ~w(admin org_admin), do: "text-emerald-400", else: "text-zinc-600"}"}
+                          name="hero-cog-6-tooth-mini"
+                          class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"
                         />
-                        <span class={[
-                          "text-[10px] font-mono font-bold uppercase tracking-widest",
-                          member.role in ~w(admin org_admin) && "text-white",
-                          member.role not in ~w(admin org_admin) && "text-zinc-500"
-                        ]}>
-                          {String.replace(member.role, "_", " ")}
-                        </span>
-                      </div>
-                    </:col>
-
-                    <:col :let={_member} label="Status">
-                      <.eq_badge status="active" />
-                    </:col>
-
-                    <:action :let={member}>
-                      <div class="flex items-center gap-2">
-                        <button
-                          phx-click="open_role_change"
-                          phx-value-user_id={member.id}
-                          class="p-2.5 rounded-lg bg-white/5 text-zinc-500 hover:text-emerald-400 hover:bg-emerald-400/10 transition-all group"
-                          title="Modify Role"
-                        >
-                          <.icon
-                            name="hero-cog-6-tooth-mini"
-                            class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500"
-                          />
-                        </button>
-                        <button
-                          :if={member.id != @current_user.id}
-                          phx-click="request_deactivate"
-                          phx-value-user_id={member.id}
-                          class="p-2.5 rounded-lg bg-white/5 text-zinc-500 hover:text-rose-400 hover:bg-rose-400/10 transition-all group"
-                          title="Deactivate Member"
-                        >
-                          <.icon name="hero-user-minus-mini" class="w-4 h-4" />
-                        </button>
-                      </div>
-                    </:action>
-                  </.ledger_table>
-                <% end %>
-              </div>
-              <.ledger_pagination
-                page={@page}
-                per_page={@per_page}
-                total_count={@total_count}
-                total_pages={@total_pages}
-                extra_label="Admins"
-                extra_count={@admin_count}
-              />
+                      </button>
+                      <button
+                        :if={member.id != @current_user.id}
+                        phx-click="request_deactivate"
+                        phx-value-user_id={member.id}
+                        class="p-2 rounded-lg bg-white/5 text-zinc-500 hover:text-rose-400 hover:bg-rose-400/10 transition-all"
+                        title="Deactivate"
+                      >
+                        <.icon name="hero-user-minus-mini" class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </:action>
+                </.ledger_table>
+              <% end %>
             </div>
-          </div>
 
-          <%!-- Footer HUD --%>
-          <div class="flex justify-between items-center pt-8 border-t border-white/[0.02]">
-            <div class="flex items-center gap-6">
-              <div class="flex flex-col">
-                <span class="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest mb-1">
-                  System Roster Count
-                </span>
-                <span class="text-xs font-mono font-bold text-zinc-400">{@total_count} ENTITIES</span>
-              </div>
-              <div class="w-px h-8 bg-white/5"></div>
-              <div class="flex flex-col">
-                <span class="text-[8px] font-mono font-black text-zinc-600 uppercase tracking-widest mb-1">
-                  Audit Protocol
-                </span>
-                <span class="text-xs font-mono font-bold text-emerald-500/50">
-                  NON-REPUDIATION ACTIVE
-                </span>
-              </div>
-            </div>
-            <.link
-              navigate={~p"/vaults"}
-              class="text-[9px] font-mono font-black text-zinc-500 hover:text-white transition-all uppercase tracking-[0.2em] flex items-center gap-2 group"
-            >
-              <.icon
-                name="hero-arrow-left-mini"
-                class="w-4 h-4 group-hover:-translate-x-1 transition-transform"
-              /> Return to System Hub
-            </.link>
+            <.ledger_pagination
+              page={@page}
+              per_page={@per_page}
+              total_count={@total_count}
+              total_pages={@total_pages}
+              extra_label="Admins"
+              extra_count={@admin_count}
+            />
           </div>
         </div>
       </div>
@@ -332,7 +286,7 @@ defmodule NexusWeb.Identity.TeamManagementLive do
   # ── Events ──────────────────────────────────────────────────────────────────
 
   @impl true
-  def handle_event("search", %{"value" => query}, socket) do
+  def handle_event("search", %{"query" => query}, socket) do
     {:noreply, assign(socket, search_query: query, page: 1)}
   end
 

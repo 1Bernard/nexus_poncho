@@ -47,6 +47,7 @@ defmodule NexusWeb.Router do
     # The :browser pipeline above sets current_user via UserAuth.
 
     get "/admin/access-requests/export", Admin.ExportController, :export
+    get "/compliance/screenings/export", Compliance.ExportController, :export
 
     # ── Protected LiveView routes (biometric session required) ─────────────
 

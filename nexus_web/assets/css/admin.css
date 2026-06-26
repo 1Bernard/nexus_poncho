@@ -218,8 +218,8 @@
     color: #34d399;
 }
 
-tbody#requests { counter-reset: row-num; }
-tbody#requests .ledger-row { counter-increment: row-num; }
+tbody.ledger-tbody { counter-reset: row-num; }
+tbody.ledger-tbody .ledger-row { counter-increment: row-num; }
 .row-num::before {
     content: "#" counter(row-num);
     font-family: 'JetBrains Mono', monospace;

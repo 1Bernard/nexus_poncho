@@ -136,16 +136,9 @@ defmodule NexusWeb.Identity.TeamInviteLive do
                 <% end %>
               </div>
 
-              <button
-                type="submit"
-                class="cta-primary w-full mt-2 py-4 bg-emerald-400 text-black rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(52,211,153,0.1)]"
-              >
-                Send Invitation
-                <span class="arrow-wrap">
-                  <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-icon" />
-                  <.icon name="hero-arrow-up-right" class="w-4 h-4 arrow-clone" />
-                </span>
-              </button>
+              <.eq_button type="submit" variant="primary" full_width class="!py-4 mt-2">
+                Invite Member
+              </.eq_button>
             </form>
           </div>
 
